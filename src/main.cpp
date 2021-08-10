@@ -44,7 +44,7 @@ int main() {
     std::cout << "account info: " << account.v << std::endl << std::endl;
 
     auto resp = api.new_order("BTCUSDT",binapi::e_side::buy,binapi::e_type::market,binapi::e_time::FOK,binapi::e_trade_resp_type::FULL
-                             ,"20",nullptr,"myid",nullptr,nullptr);
+                             ,"0.001",nullptr,"myid",nullptr,nullptr);
 
     std::cout << "new order err " << resp.errmsg << std::endl;
     std::cout << "new order " << resp.reply << std::endl;
@@ -62,6 +62,5 @@ int main() {
         }
     }
     
-
     return EXIT_SUCCESS;
 }
