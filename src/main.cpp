@@ -43,11 +43,11 @@ int main() {
 
     std::cout << "account info: " << account.v << std::endl << std::endl;
 
-    auto resp = api.new_order("BTCUSDT",binapi::e_side::buy,binapi::e_type::market,binapi::e_time::FOK,binapi::e_trade_resp_type::FULL
-                             ,"0.001",nullptr,"myid",nullptr,nullptr);
+    // auto resp = api.new_order("BTCUSDT",binapi::e_side::buy,binapi::e_type::market,binapi::e_time::FOK,binapi::e_trade_resp_type::FULL
+    //                          ,"0.001",nullptr,"myid",nullptr,nullptr);
 
-    std::cout << "new order err " << resp.errmsg << std::endl;
-    std::cout << "new order " << resp.reply << std::endl;
+    // std::cout << "new order err " << resp.errmsg << std::endl;
+    // std::cout << "new order " << resp.reply << std::endl;
 
     auto orders = api.all_orders("BTCUSDT");
     std::cout << "order error" << orders.errmsg << std::endl;
