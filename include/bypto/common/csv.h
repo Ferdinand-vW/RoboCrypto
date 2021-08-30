@@ -10,11 +10,14 @@
 #include "utils.h"
 namespace bypto::common::csv {
 
+    // Separates the input string by comma
+    std::deque<std::string> tokenize(const std::string &s);
+
     template <typename T>
     T parseWord(std::string s) {
         std::stringstream word(s);
         T t;
-        word >> t;
+        word >> t; // convert to type T
 
         return t;
     }
@@ -35,18 +38,6 @@ namespace bypto::common::csv {
         auto tpl = parseLine<K,Ts...>(ss);
 
         return std::tuple_cat(std::make_tuple(t),tpl);
-    }
-
-    std::deque<std::string> tokenize(const std::string &s) {
-        std::stringstream ss(s);
-
-        std::deque<std::string> tokens;
-        std::string token;
-        while(std::getline(ss,token,',')) {
-            tokens.push_back(token);
-        }
-
-        return tokens;
     }
 
     template<typename ...Ts>

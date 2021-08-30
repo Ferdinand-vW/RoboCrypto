@@ -1,4 +1,7 @@
-set(SOURCES bypto/robo_crypto.cpp)
+set(SOURCES bypto/robo_crypto.cpp
+            bypto/common/csv.cpp
+            bypto/common/utils.cpp
+            bypto/data/binance/klines.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})
 

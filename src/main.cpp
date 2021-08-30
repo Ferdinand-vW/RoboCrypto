@@ -2,6 +2,7 @@
 //
 
 #include "binapi/enums.hpp"
+#include "bypto/data/binance/klines.h"
 #include "bypto/robo_crypto.h"
 #include "bypto/common/csv.h"
 
@@ -18,10 +19,9 @@ int main() {
     std::cout << fs.is_open() << std::endl;
     typedef std::string str_t;
 
-    auto klines = bypto::common::csv::parse<str_t,str_t,str_t,str_t,str_t,str_t,str_t,str_t,str_t,str_t,str_t,str_t>(fs);
-    auto t = klines.front();
+    auto klines = bypto::data::binance::klines::parseCSV(fs);
     for(auto i = 0; i < 2; i++) {
-        std::cout << std::get<0>(klines[i]) << std::endl;
+        std::cout << klines[i] << std::endl;
     }
 
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
