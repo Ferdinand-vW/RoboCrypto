@@ -30,6 +30,16 @@ find_package(Boost 1.76.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
 find_package(OpenSSL REQUIRED)
+set(PostgreSQL_ADDITIONAL_VERSIONS "12.8")
+find_package(PostgreSQL REQUIRED)
+
+FetchContent_Declare(
+   taocpp-taopq
+   GIT_REPOSITORY https://github.com/taocpp/taopq
+   GIT_TAG main
+)
+FetchContent_MakeAvailable(taocpp-taopq)
+
 
 # Add source to this project's executable.
 add_executable (bypto main.cpp ${SOURCES} ${BINAPI_SOURCES})
@@ -41,6 +51,7 @@ target_link_libraries(bypto OpenSSL::SSL)
 target_link_libraries(bypto pthread)
 target_link_libraries(bypto z)
 target_link_libraries(bypto crypto)
+target_link_libraries(bypto taocpp::taopq)
 
 set_property(TARGET bypto PROPERTY CXX_STANDARD 17)
 set_property(TARGET bypto PROPERTY CXX_STANDARD_REQUIRED ON)
