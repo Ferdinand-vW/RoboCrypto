@@ -1,0 +1,48 @@
+Which time frame are you trading -- 15min
+How much are you risking on each trade -- 1%
+Which markets are you trading -- BTCUSDT
+What are the conditions of your trading strategy -- ?
+Where will you enter -- ?
+Where will you exit if you’re wrong -- ? exit if losses >= 1%
+Where will you exit if you’re right -- ?
+
+
+Go long when the price closes the highest over the last 200 days
+Go short when the price closes the lowest over the last 200 days
+Have a trailing stop loss of 6 ATR
+Risk 1% of your capital on each trade
+
+(source https://analyzingalpha.com/trend-following#the-key-components-of-trend-following)
+* Trend following indicators:
+
+** moving average. Average price of asset for a period. Long-term trend followers use 
+moving averages of 50,100 or even 200days Short term trend followers use days,hours or even minutes.
+MA can help traders tell difference between a ranging and trending security. Ranging is when
+the range between asset high and low prices for a period may vary considerably, but overall 
+average is fairly consistent. If MA is mostly a horizontal line then asset is ranging. 
+Alternatively, if moving average is rising, this signifies uptrend and if moving average is falling
+this indicates downtrend.
+
+*** Crossover strategy. Use two different moving averages, for example, 100 days and 25 days. When 
+the smaller moving average cross above the larger moving average, then buy. When shorter moving average
+crosses below the larger moving average then sell. Can also use price but if price is volate then shorter
+duration crossovers using price can cause whipsaws (when price is moving in one direction but at some points
+quickly pivots into the opposite direction).
+
+** Moving average convergence divergence (MACD). Uses two moving averages and looks a the relationship between them.
+MACD Line: 12-day EMA (Exponential Moving Average) - 26 day EMA
+Signal Line: 9-day EMA of MACD Line
+MACD Histogram: MACD Line - Signal Line
+The histogram grow larger as the speed of movement accelerates
+
+** Relative Strength Index (RSI). Goal is to predict if asset is currently overbought or oversold.
+RSI is a number between 0 and 100 which measures the magnitude of recent changes in a security price.
+If RSI >= 70 then security is overbought. If RSI drops to <=30 then it is deemed oversold.
+Convention is 14-period RSI. The periods can be long or short (monthly or 5minute periods). 4 steps for calculating:
+1. bar-to-bar change of each close. Change = close_n - close_(n-1)
+2. Smooth price changes using MA, SMA or EMA. If 14 periods, where 8 are 2% up and 6 are 1% down then
+AvgUp = (2*8)/14 and AvgDown=(6*1)/14
+3. Calculate relative strength (RS). RS = AvgUp/AvgDown
+4. Compute RSI. RSI = 100 - (100/(1+RS))
+
+** Chart Patterns. 
