@@ -5,9 +5,11 @@
 #include "bypto/data/binance/klines.h"
 #include "bypto/robo_crypto.h"
 #include "bypto/common/csv.h"
+#include "tao/pq/connection.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <binapi/api.hpp>
+#include <tao/pq.hpp>
 
 #include <cstdlib>
 #include <fstream>
@@ -23,6 +25,9 @@ int main() {
     for(auto i = 0; i < 2; i++) {
         std::cout << klines[i] << std::endl;
     }
+
+    const auto conn = tao::pq::connection::create("dbname=historical");
+    
 
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");

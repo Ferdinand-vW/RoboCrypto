@@ -36,7 +36,7 @@ find_package(PostgreSQL REQUIRED)
 FetchContent_Declare(
    taocpp-taopq
    GIT_REPOSITORY https://github.com/taocpp/taopq
-   GIT_TAG main
+   GIT_TAG dee2c272de16286534cbc00919b34407198777d7
 )
 FetchContent_MakeAvailable(taocpp-taopq)
 
