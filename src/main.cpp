@@ -19,7 +19,7 @@ int main() {
     std::fstream fs;
     fs.open("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
     std::cout << fs.is_open() << std::endl;
-    typedef std::string str_t;
+    using str_t = std::string;
 
     auto klines = bypto::data::binance::klines::parseCSV(fs);
     for(auto i = 0; i < 2; i++) {
