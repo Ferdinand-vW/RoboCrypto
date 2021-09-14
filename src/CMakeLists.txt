@@ -4,6 +4,7 @@ set(SOURCES bypto/robo_crypto.cpp
             bypto/data/binance/klines.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})
+include_directories(${BINAPI_INCLUDE_DIR})
 
 add_library(byptoLib ${SOURCES})
 
