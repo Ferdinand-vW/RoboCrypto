@@ -1,5 +1,9 @@
 #include "bypto/data/binance/klines.h"
 #include "bypto/common/csv.h"
+#include "bypto/common/types.h"
+#include "bypto/common/utils.h"
+#include "tao/pq/connection.hpp"
+
 #include <algorithm>
 #include <iomanip>
 #include <iterator>
@@ -54,6 +58,56 @@ namespace bypto::data::binance::klines {
         os << ",m_taker_buy_quote_asset_volume=" << kl.m_taker_buy_quote_asset_volume;
         os << ",m_ignore }";
         return os;
+    }
+
+    void prepareTable(common::types::pgconn_t &conn) {
+        using namespace std::string_literals;
+        std::vector<std::string> parts = 
+            {"CREATE TABLE IF NOT EXISTS klines ("s
+            ,"kline_id SERIAL NOT NULL PRIMARY KEY,"
+            ,"open_time BIGINT NOT NULL,"
+            ,"open DOUBLE PRECISION NOT NULL,"
+            ,"high DOUBLE PRECISION NOT NULL,"
+            ,"low DOUBLE PRECISION NOT NULL,"
+            ,"close DOUBLE PRECISION NOT NULL,"
+            ,"volume DOUBLE PRECISION NOT NULL,"
+            ,"close_time BIGINT NOT NULL,"
+            ,"quote_asset_volume DOUBLE PRECISION NOT NULL,"
+            ,"number_of_trades INTEGER NOT NULL,"
+            ,"taker_buy_base_asset_volume DOUBLE PRECISION NOT NULL,"
+            ,"taker_buy_quote_asset_volume DOUBLE PRECISION NOT NULL,"
+            ,"ignore DOUBLE PRECISION);"
+            };
+        
+        auto create_query = bypto::common::utils::intercalate(" ",parts);
+        conn->execute(create_query);
+    }
+
+    void storeKlines(common::types::pgconn_t &conn, std::vector<Kline> &klines) {
+        std::vector<std::string> field_list = 
+            {"open_time","open","high"
+            ,"low","close","volume"
+            ,"close_time","quote_asset_volume","number_of_trades"
+            ,"taker_buy_base_asset_volume","taker_buy_quote_asset_volume","ignore"
+            };
+        auto fields = common::utils::intercalate(",",field_list);
+        std::vector<std::string> value_list =
+            {"$1","$2","$3"
+            ,"$4","$5","$6"
+            ,"$7","$8","$9"
+            ,"$10","$11","$12"
+            };
+
+        auto values = common::utils::intercalate(",",value_list);
+        conn->prepare( "insert_kline", "INSERT INTO klines ("+fields+") VALUES ("+values+")");
+        for(auto &kl : klines) {
+            conn->execute("insert_kline"
+                        ,kl.m_open_time,kl.m_open,kl.m_high
+                        ,kl.m_low,kl.m_close,kl.m_volume
+                        ,kl.m_close_time,kl.m_quote_asset_volume,kl.m_number_of_trades
+                        ,kl.m_taker_buy_base_asset_volume,kl.m_taker_buy_quote_asset_volume,kl.m_ignore
+                        );
+        }
     }
 
 }

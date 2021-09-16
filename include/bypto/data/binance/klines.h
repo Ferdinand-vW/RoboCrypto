@@ -1,8 +1,13 @@
 #pragma once
 
+#include "bypto/common/types.h"
+
+#include "tao/pq/connection.hpp"
+
+#include <bits/types/time_t.h>
+#include <ctime>
 #include <istream>
 #include <vector>
-#include <bits/types/time_t.h>
 
 namespace bypto::data::binance::klines {
 
@@ -26,4 +31,7 @@ namespace bypto::data::binance::klines {
 
     std::vector<Kline> parseCSV(std::istream &is);
 
+    void prepareTable(common::types::pgconn_t &conn);
+    void storeKlines(common::types::pgconn_t &conn,std::vector<Kline> &klines);
+    std::vector<Kline> loadKlines(common::types::pgconn_t &conn,std::time_t start_time,std::time_t end_time);
 }

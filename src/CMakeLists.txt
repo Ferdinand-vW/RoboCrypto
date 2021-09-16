@@ -44,7 +44,7 @@ FetchContent_MakeAvailable(taocpp-taopq)
 
 # Add source to this project's executable.
 add_executable (bypto main.cpp ${SOURCES} ${BINAPI_SOURCES})
-
+target_link_libraries(byptoLib taocpp::taopq)
 target_include_directories(bypto PUBLIC ${BINAPI_INCLUDE_DIR})
 target_link_libraries(bypto byptoLib)
 target_link_libraries(bypto ${BOOST_LIBRARIES})

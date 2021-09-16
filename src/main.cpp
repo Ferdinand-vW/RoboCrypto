@@ -2,6 +2,7 @@
 //
 
 #include "binapi/enums.hpp"
+#include "bypto/common/utils.h"
 #include "bypto/data/binance/klines.h"
 #include "bypto/robo_crypto.h"
 #include "bypto/common/csv.h"
@@ -14,6 +15,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 int main() {
     std::fstream fs;
@@ -26,9 +28,11 @@ int main() {
         std::cout << klines[i] << std::endl;
     }
 
-    const auto conn = tao::pq::connection::create("dbname=historical");
+    auto conn = tao::pq::connection::create("dbname=historical");
     
-
+    using namespace bypto::data::binance;
+    klines::prepareTable(conn);
+    klines::storeKlines(conn,klines);
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");
 
