@@ -110,4 +110,29 @@ namespace bypto::data::binance::klines {
         }
     }
 
+    std::vector<Kline> loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time) {
+        auto results = conn->execute("select kline"
+                            ,"SELECT * FROM klines WHERE open_time >= $1 AND close_time <= $2"
+                            ,open_time,close_time);
+        std::vector<Kline> klines;
+        for(auto &row : results) {
+            Kline kl = { row["open_time"].as<time_t>()
+                       , row["open"].as<long double>()
+                       , row["high"].as<long double>()
+                       , row["low"].as<long double>()
+                       , row["close"].as<long double>()
+                       , row["volume"].as<long double>()
+                       , row["close_time"].as<time_t>()
+                       , row["quote_asset_volume"].as<long double>()
+                       , row["number_of_trades"].as<int>()
+                       , row["taker_buy_base_asset_volume"].as<long double>()
+                       , row["taker_buy_quote_asset_volume"].as<long double>()
+                       , row["ignore"].as<long double>()
+                       };
+            klines.push_back(kl);
+        }
+
+        return klines;
+    }
+
 }

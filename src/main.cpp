@@ -33,6 +33,8 @@ int main() {
     using namespace bypto::data::binance;
     klines::prepareTable(conn);
     klines::storeKlines(conn,klines);
+
+    // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");
 
