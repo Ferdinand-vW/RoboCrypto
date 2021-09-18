@@ -111,8 +111,8 @@ namespace bypto::data::binance::klines {
     }
 
     std::vector<Kline> loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time) {
-        auto results = conn->execute("select kline"
-                            ,"SELECT * FROM klines WHERE open_time >= $1 AND close_time <= $2"
+        auto results = conn->execute(
+                             "SELECT * FROM klines WHERE open_time >= $1 AND close_time <= $2"
                             ,open_time,close_time);
         std::vector<Kline> klines;
         for(auto &row : results) {

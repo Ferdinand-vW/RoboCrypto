@@ -34,6 +34,13 @@ int main() {
     klines::prepareTable(conn);
     klines::storeKlines(conn,klines);
 
+    using namespace bypto::common;
+    auto t = utils::createTime_t(2021, 07, 01);
+    auto open_time = utils::createTime_t(2021,07,06);
+    auto close_time = utils::createTime_t(2021,07,20);
+
+    auto klines2 = klines::loadKlines(conn, open_time, close_time);
+    std::cout << klines2.front() << std::endl;
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");

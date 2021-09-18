@@ -33,5 +33,5 @@ namespace bypto::data::binance::klines {
 
     void prepareTable(common::types::pgconn_t &conn);
     void storeKlines(common::types::pgconn_t &conn,std::vector<Kline> &klines);
-    std::vector<Kline> loadKlines(common::types::pgconn_t &conn,time_t start_time,time_t end_time);
+    std::vector<Kline> loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time);
 }
