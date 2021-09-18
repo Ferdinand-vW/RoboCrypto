@@ -1,0 +1,25 @@
+- define order_type which can be one of:
+    Market Order - quantity/quoteOrderQty
+    Limit - timeInForce, quantity, price
+    Stop Loss - quantity, stopPrice
+    Stop Loss Limit - timeInfForce,quantity,price,stopPrice
+    Take Profit - quantity,stopPrice
+    Take Profit Limit - timeInForce,quantity,price,stopPrice
+    Limit Maker - quantity,price
+
+- define order with following fields:
+
+    asset :: String
+    position :: enum (buy or sell)
+    type :: order_type
+    timeInForce :: TimeInForce
+    quantity :: Maybe Double
+    price :: Maybe Double
+    stopPrice :: Maybe Double
+
+- Write function to execute order
+- Write function to fetch price
+- Write function to cancel order
+- Write function to fetch outstanding trades & sync with trades in database
+
+- Write function to compute MA for a given vector of klines and a time interval.
