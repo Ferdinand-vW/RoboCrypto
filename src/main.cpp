@@ -1,16 +1,19 @@
 ﻿// RoboCrypto.cpp : Defines the entry point for the application.
 //
 
-#include "binapi/enums.hpp"
+
 #include "bypto/common/utils.h"
 #include "bypto/data/binance/klines.h"
 #include "bypto/robo_crypto.h"
 #include "bypto/common/csv.h"
-#include "tao/pq/connection.hpp"
+#include "bypto/order.h"
 
 #include <boost/asio/io_context.hpp>
+
 #include <binapi/api.hpp>
+#include <binapi/enums.hpp>
 #include <tao/pq.hpp>
+#include <tao/pq/connection.hpp>
 
 #include <cstdlib>
 #include <fstream>
@@ -41,6 +44,9 @@ int main() {
 
     auto klines2 = klines::loadKlines(conn, open_time, close_time);
     std::cout << klines2.front() << std::endl;
+    using namespace bypto::order;
+    using namespace bypto::order_type;
+    Order<Market> order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");
