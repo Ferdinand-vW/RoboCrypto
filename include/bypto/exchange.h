@@ -9,5 +9,6 @@ namespace bypto::exchange {
             virtual int execute_order(order::GenericOrder go) = 0;
             virtual long double fetch_price() = 0;
             virtual void cancel_order(int o_id) = 0;
+            virtual bool tick_once() = 0;
     };
 }
