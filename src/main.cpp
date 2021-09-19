@@ -47,6 +47,8 @@ int main() {
     using namespace bypto::order;
     using namespace bypto::order_type;
     Order<Market> order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
+
+    std::cout << order;
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");

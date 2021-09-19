@@ -1,5 +1,6 @@
 set(SOURCES bypto/robo_crypto.cpp
             bypto/order.cpp
+            bypto/order_type.cpp
             bypto/common/csv.cpp
             bypto/common/utils.cpp
             bypto/data/binance/klines.cpp)

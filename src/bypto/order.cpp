@@ -1,7 +1,17 @@
 #include "bypto/order.h"
 #include "bypto/order_type.h"
+#include <ostream>
 
 namespace bypto::order {
+
+    std::ostream& operator<<(std::ostream &os,const Position &p) {
+        switch(p) {
+            case Buy: os << "Buy"; break;
+            case Sell: os << "Sell"; break;
+        }
+
+        return os;
+    }
 
     GenericOrderInfo GenericOrderInfo::from_order_type(order_type::Market m) {
         return GenericOrderInfo{{},m.m_quantity,{},{},m.m_boq};
@@ -16,7 +26,7 @@ namespace bypto::order {
     }
 
     GenericOrderInfo GenericOrderInfo::from_order_type(order_type::StopLossLimit sll) {
-        return GenericOrderInfo{sll.m_time_in_force,sll.m_quantity,sll.m_price,sll.m_stopPrice,{}};
+        return GenericOrderInfo{sll.m_time_in_force,sll.m_quantity,sll.m_price,sll.m_stop_price,{}};
     }
 
     GenericOrderInfo GenericOrderInfo::from_order_type(order_type::TakeProfit tp) {

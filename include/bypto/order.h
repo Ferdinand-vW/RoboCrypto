@@ -1,13 +1,17 @@
 #pragma once
 
+#include "bypto/common/utils.h"
 #include "bypto/order_type.h"
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace bypto::order {
 
     enum Position    { Buy ,Sell     };
+
+    std::ostream& operator<<(std::ostream &os,const Position &p);
 
     template <class OrderType>
     struct Order {
@@ -15,6 +19,15 @@ namespace bypto::order {
         Position m_position;
         OrderType m_order_type;
     };
+
+    template <class T>
+    std::ostream& operator<<(std::ostream &os,const Order<T> &o) {
+        os << "Order {";
+        os << "m_symbol="     << o.m_symbol     << ",";
+        os << "m_position="   << o.m_position   << ",";
+        os << "m_order_type=" << o.m_order_type << "}";
+        return os;
+    }
 
     struct GenericOrderInfo {
         std::optional<order_type::TimeInForce> m_time_in_force;
