@@ -18,6 +18,7 @@ namespace bypto::order {
         std::string m_symbol;
         Position m_position;
         OrderType m_order_type;
+
     };
 
     template <class T>
@@ -36,21 +37,22 @@ namespace bypto::order {
         std::optional<long double> m_stop_price;
         std::optional<order_type::BaseOrQuote> m_base_or_quote;
 
-        static GenericOrderInfo from_order_type(order_type::Market m);
-        static GenericOrderInfo from_order_type(order_type::Limit m);
-        static GenericOrderInfo from_order_type(order_type::StopLoss m);
-        static GenericOrderInfo from_order_type(order_type::StopLossLimit m);
-        static GenericOrderInfo from_order_type(order_type::TakeProfit m);
-        static GenericOrderInfo from_order_type(order_type::TakeProfitLimit m);
-        static GenericOrderInfo from_order_type(order_type::LimitMaker m);
-    };
+        GenericOrderInfo(order_type::Market m);
+        GenericOrderInfo(order_type::Limit l);
+        GenericOrderInfo(order_type::StopLoss sl);
+        GenericOrderInfo(order_type::StopLossLimit sll);
+        GenericOrderInfo(order_type::TakeProfit tp);
+        GenericOrderInfo(order_type::TakeProfitLimit tpl);
+        GenericOrderInfo(order_type::LimitMaker lm);
 
-    
+    };
 
     struct GenericOrder {
         std::string m_symbol;
         Position m_position;
         GenericOrderInfo m_order_info;
+
+        GenericOrder(Order<GenericOrderInfo> o);
     };
 
     template <class T>
