@@ -4,6 +4,14 @@
 
 namespace bypto::order {
 
+    std::ostream& operator<<(std::ostream &os,const Order &o) {
+        os << "Order {";
+        os << "m_symbol="     << o.m_symbol     << ",";
+        os << "m_position="   << o.m_position   << ",";
+        os << "m_order_type=" << o.m_order_type << "}";
+        return os;
+    }
+
     GenericOrderInfo::GenericOrderInfo(order_type::Market m)
                                       : m_quantity(m.m_quantity)
                                       , m_base_or_quote(m.m_boq) {};
@@ -35,7 +43,19 @@ namespace bypto::order {
 
     GenericOrderInfo::GenericOrderInfo(order_type::LimitMaker lm)
                                       : m_quantity(lm.m_quantity)
-                                      , m_price(lm.m_price) {};                                                                                                                                                  
+                                      , m_price(lm.m_price) {};
+
+    GenericOrderInfo GenericOrderInfo::fromOrderType(order_type::OrderType ot) {
+        return std::visit(common::utils::overload{
+            [](order_type::Market m) { return GenericOrderInfo(m); },
+            [](order_type::Limit l) { return GenericOrderInfo(l);},
+            [](order_type::StopLoss sl) { return GenericOrderInfo(sl); },
+            [](order_type::StopLossLimit sll) { return GenericOrderInfo(sll); },
+            [](order_type::TakeProfit tp) { return GenericOrderInfo(tp); },
+            [](order_type::TakeProfitLimit tpl) { return GenericOrderInfo(tpl); },
+            [](order_type::LimitMaker lm) { return GenericOrderInfo(lm); }
+        },ot);
+    }                                                                                                                                                  
 
     std::ostream& operator<<(std::ostream &os,const Position &p) {
         switch(p) {
@@ -45,5 +65,10 @@ namespace bypto::order {
 
         return os;
     }
+
+    GenericOrder::GenericOrder(Order order) : m_symbol(order.m_symbol)
+                                            , m_position(order.m_position)
+                                            , m_order_info(GenericOrderInfo::fromOrderType(order.m_order_type)) 
+                                            {};
 
 }

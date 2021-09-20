@@ -41,7 +41,11 @@ namespace bypto::exchange::back_testing {
             else { kline = m_klines.front(); }
         }
 
-        //TODO: logic to see if any GenericOrders can be fulfilled
+        //TODO: logic to see if any outstanding orders can be filled
+        for(auto &o : m_outstanding) {
+            // o.second.m_order_info.
+        }
+
 
         return true;
 

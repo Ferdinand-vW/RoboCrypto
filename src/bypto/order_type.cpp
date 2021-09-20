@@ -1,4 +1,6 @@
 #include "bypto/order_type.h"
+#include "bypto/common/utils.h"
+
 #include <ostream>
 
 namespace bypto::order_type {
@@ -79,6 +81,20 @@ namespace bypto::order_type {
         os << "LimitMaker {";
         os << "m_quantity=" << lm.m_quantity << ",";
         os << "m_price="    << lm.m_price << "}";
+
+        return os;
+    }
+
+    std::ostream& operator<<(std::ostream &os,const OrderType &ot) {
+        std::visit(common::utils::overload{
+            [&os](Market m) { os << m;},
+            [&os](Limit l) { os << l; },
+            [&os](StopLoss sl) { os << sl;},
+            [&os](StopLossLimit sll) { os << sll; },
+            [&os](TakeProfit tp) { os << tp; },
+            [&os](TakeProfitLimit tpl) { os << tpl;},
+            [&os](LimitMaker lm) { os << lm; }
+        },ot);
 
         return os;
     }

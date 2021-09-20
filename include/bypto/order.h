@@ -13,22 +13,14 @@ namespace bypto::order {
 
     std::ostream& operator<<(std::ostream &os,const Position &p);
 
-    template <class OrderType>
     struct Order {
         std::string m_symbol;
         Position m_position;
-        OrderType m_order_type;
+        order_type::OrderType m_order_type;
 
     };
 
-    template <class T>
-    std::ostream& operator<<(std::ostream &os,const Order<T> &o) {
-        os << "Order {";
-        os << "m_symbol="     << o.m_symbol     << ",";
-        os << "m_position="   << o.m_position   << ",";
-        os << "m_order_type=" << o.m_order_type << "}";
-        return os;
-    }
+    std::ostream& operator<<(std::ostream &os,const Order &o);
 
     struct GenericOrderInfo {
         std::optional<order_type::TimeInForce> m_time_in_force;
@@ -44,7 +36,8 @@ namespace bypto::order {
         GenericOrderInfo(order_type::TakeProfit tp);
         GenericOrderInfo(order_type::TakeProfitLimit tpl);
         GenericOrderInfo(order_type::LimitMaker lm);
-
+        
+        static GenericOrderInfo fromOrderType(order_type::OrderType ot);
     };
 
     struct GenericOrder {
@@ -52,17 +45,7 @@ namespace bypto::order {
         Position m_position;
         GenericOrderInfo m_order_info;
 
-        GenericOrder(Order<GenericOrderInfo> o);
+        GenericOrder(Order order);
     };
-
-    template <class T>
-    GenericOrder orderToGeneric(Order<T> order) {
-        return GenericOrder{order.m_symbol,order.m_position
-                        ,order.m_order_type.to_generic_order_info()
-                        };
-    }
-
-
-    
 
 }

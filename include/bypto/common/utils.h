@@ -6,6 +6,9 @@
 
 namespace bypto::common::utils {
 
+    template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+    template<class... Ts> overload(Ts...) -> overload<Ts...>;
+
 
     template <typename Iter>
     std::string intercalate(std::string del,Iter &&begin,Iter &&end) {

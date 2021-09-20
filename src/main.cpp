@@ -46,7 +46,7 @@ int main() {
     std::cout << klines2.front() << std::endl;
     using namespace bypto::order;
     using namespace bypto::order_type;
-    Order<Market> order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
+    Order order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
 
     std::cout << order;
     // auto open_time = t

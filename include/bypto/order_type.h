@@ -1,6 +1,8 @@
 #pragma once
 
 #include <ostream>
+#include <variant>
+
 namespace bypto::order_type {
     enum TimeInForce { GTC ,IOC, FOK };
     enum BaseOrQuote { Base,Quote    };
@@ -8,7 +10,7 @@ namespace bypto::order_type {
     std::ostream& operator<<(std::ostream &os,const TimeInForce &p);
     std::ostream& operator<<(std::ostream &os,const BaseOrQuote &p);
 
-struct Market {
+    struct Market {
         long double m_quantity;
         BaseOrQuote m_boq;
     };
@@ -61,6 +63,10 @@ struct Market {
     };
 
     std::ostream& operator<<(std::ostream &os,const LimitMaker &lm);
+
+    typedef std::variant<Market,Limit,StopLoss,StopLossLimit,TakeProfit,TakeProfitLimit,LimitMaker> OrderType;
+
+    std::ostream& operator<<(std::ostream &os,const OrderType &ot);
 
 }
 
