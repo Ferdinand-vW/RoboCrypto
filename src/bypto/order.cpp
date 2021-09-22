@@ -12,6 +12,16 @@ namespace bypto::order {
         return os;
     }
 
+    Order::Order(std::string symbol,order_type::Position pos,order_type::OrderType ot)
+                : m_symbol(symbol)
+                , m_position(pos)
+                , m_order_type(ot) {};
+
+    std::optional<Partial> Order::try_fill(Symbol symbol,Price price,Quantity qty) {
+        //we can't fill this order if the symbols don't match
+        return {};
+    }
+
     GenericOrderInfo::GenericOrderInfo(order_type::Market m)
                                       : m_quantity(m.m_quantity)
                                       , m_base_or_quote(m.m_boq) {};
@@ -55,16 +65,7 @@ namespace bypto::order {
             [](order_type::TakeProfitLimit tpl) { return GenericOrderInfo(tpl); },
             [](order_type::LimitMaker lm) { return GenericOrderInfo(lm); }
         },ot);
-    }                                                                                                                                                  
-
-    std::ostream& operator<<(std::ostream &os,const Position &p) {
-        switch(p) {
-            case Buy: os << "Buy"; break;
-            case Sell: os << "Sell"; break;
-        }
-
-        return os;
-    }
+    }                                                                                                                                                 
 
     GenericOrder::GenericOrder(Order order) : m_symbol(order.m_symbol)
                                             , m_position(order.m_position)

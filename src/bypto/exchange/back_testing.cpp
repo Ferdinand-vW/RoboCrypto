@@ -1,6 +1,8 @@
 #include "bypto/exchange/back_testing.h"
 
 #include "bypto/common/math.h"
+#include "bypto/common/utils.h"
+#include "bypto/order_type.h"
 
 namespace bypto::exchange::back_testing {
     
@@ -9,7 +11,7 @@ namespace bypto::exchange::back_testing {
                             ,m_tick_rate(tick_rate)
                             ,m_klines(klines) {};
 
-    int BackTesting::execute_order(order::GenericOrder go) {
+    int BackTesting::execute_order(order::Order go) {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
@@ -43,7 +45,16 @@ namespace bypto::exchange::back_testing {
 
         //TODO: logic to see if any outstanding orders can be filled
         for(auto &o : m_outstanding) {
-            // o.second.m_order_info.
+            std::visit(common::utils::overload{
+                [](order_type::Market m) { },
+                [](order_type::Limit l) {},
+                [](order_type::StopLoss sl) {},
+                [](order_type::StopLossLimit sll) {},
+                [](order_type::TakeProfit tp) {},
+                [](order_type::TakeProfitLimit tpl) {},
+                [](order_type::LimitMaker lm) {}
+
+            },o.second.m_order_type);
         }
 
 
