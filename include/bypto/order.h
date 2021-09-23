@@ -12,27 +12,21 @@ namespace bypto::order {
 
     using namespace bypto::common::types;
 
-    struct Partial {
-        order_type::Position m_position;
-        Quantity m_quantity;
-        Price m_price;
-    };
-
     class Order {
 
         public:
             Order(Symbol symbol,order_type::Position pos,order_type::OrderType ot);
 
             Symbol m_symbol;
-            order_type::Position m_position;
+            order_type::Position m_pos;
             order_type::OrderType m_order_type;
 
-            std::optional<Partial> try_fill(Symbol symbol,Quantity qty,Price price);
+            std::optional<order_type::Partial> try_fill(Symbol symbol,Price price);
     };
 
     class OrderResult {
         Order m_order;
-        std::vector<Partial> m_partials;
+        std::vector<order_type::Partial> m_partials;
 
         public:
             OrderResult(Order order);
@@ -47,7 +41,7 @@ namespace bypto::order {
 
     struct GenericOrderInfo {
         std::optional<order_type::TimeInForce> m_time_in_force;
-        std::optional<Quantity> m_quantity;
+        std::optional<Quantity> m_qty;
         std::optional<Price> m_price;
         std::optional<Price> m_stop_price;
         std::optional<order_type::BaseOrQuote> m_base_or_quote;
@@ -65,7 +59,7 @@ namespace bypto::order {
 
     struct GenericOrder {
         Symbol m_symbol;
-        order_type::Position m_position;
+        order_type::Position m_pos;
         GenericOrderInfo m_order_info;
 
         GenericOrder(Order order);
