@@ -3,6 +3,7 @@
 #include "bypto/data/binance/klines.h"
 #include "bypto/exchange.h"
 #include "bypto/order.h"
+#include "bypto/order_type.h"
 
 #include <string>
 
@@ -11,6 +12,7 @@ namespace bypto::exchange::back_testing {
     class BackTesting : public Exchange {
         std::deque<data::binance::klines::Kline> m_klines;
         std::map<int,order::Order> m_filled;
+        std::map<int,order_type::Partial> m_partials;
         std::map<int,order::Order> m_outstanding;
         int m_counter = 0;
         std::string m_symbol;

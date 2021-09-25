@@ -113,7 +113,7 @@ namespace bypto::order_type {
         Price m_price;
         Quantity m_qty;
         Position m_pos;
-        std::optional<std::variant<Market,Limit>> m_new_order;
+        std::optional<OrderType> m_new_order;
     };
 
     struct Partial {

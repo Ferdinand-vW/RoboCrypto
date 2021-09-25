@@ -43,20 +43,20 @@ namespace bypto::exchange::back_testing {
             else { kline = m_klines.front(); }
         }
 
+        long double curr_price = kline.m_close;
         //TODO: logic to see if any outstanding orders can be filled
         for(auto &o : m_outstanding) {
-            std::visit(common::utils::overload{
-                [](order_type::Market m) { },
-                [](order_type::Limit l) {},
-                [](order_type::StopLoss sl) {},
-                [](order_type::StopLossLimit sll) {},
-                [](order_type::TakeProfit tp) {},
-                [](order_type::TakeProfitLimit tpl) {},
-                [](order_type::LimitMaker lm) {}
-
-            },o.second.m_order_type);
+            auto opt_fr = o.second.try_fill(m_symbol, curr_price);
+            if(opt_fr) { // could fill order
+                auto fr = opt_fr.value();
+                if(fr.m_new_order) { //order triggered a new order
+                    o.second.m_order_type = fr.m_new_order.value();
+                } else { // store result
+                    auto partial = order_type::fillToPartial(fr);
+                    m_partials.insert({o.first,partial});
+                }
+            }
         }
-
 
         return true;
 
