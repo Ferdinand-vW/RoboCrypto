@@ -21,7 +21,7 @@ namespace bypto::order {
             order_type::Position m_pos;
             order_type::OrderType m_order_type;
 
-            std::optional<order_type::Partial> try_fill(Symbol symbol,Price price);
+            std::optional<order_type::FillResult> try_fill(Symbol symbol,Price price);
     };
 
     class OrderResult {

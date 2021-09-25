@@ -18,18 +18,24 @@ namespace bypto::order {
                 , m_pos(pos)
                 , m_order_type(ot) {};
 
-    std::optional<order_type::Partial> Order::try_fill(Symbol symbol,Price price) {
+    std::optional<order_type::FillResult> Order::try_fill(Symbol symbol,Price price) {
         //we can't fill this order if the symbols don't match
         if(m_symbol != symbol) {
             return {};
         }
 
-        // std::visit(common::utils::overload{
-        //     [price](order_type::Market m) { 
-        //         m.try_fill(price);
-        //         }
-        // }, m_order_type);
-        return {};
+        auto opt_fr = std::visit(common::utils::overload{
+            [&](order_type::Market m)            { return m.try_fill(m_pos,price); },
+            [&](order_type::Limit l)             { return l.try_fill(m_pos,price); },
+            [&](order_type::StopLoss sl)         { return sl.try_fill(m_pos,price); },
+            [&](order_type::StopLossLimit sll)   { return sll.try_fill(m_pos,price); },
+            [&](order_type::TakeProfit tp)       { return tp.try_fill(m_pos,price); },
+            [&](order_type::TakeProfitLimit tpl) { return tpl.try_fill(m_pos,price); },
+            [&](order_type::LimitMaker lm)       { return lm.try_fill(m_pos,price); }
+        }, m_order_type);
+
+
+        return opt_fr;
     }
 
     GenericOrderInfo::GenericOrderInfo(order_type::Market m)
