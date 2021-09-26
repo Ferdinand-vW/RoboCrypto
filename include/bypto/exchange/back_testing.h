@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bypto/common/either.h"
 #include "bypto/data/binance/klines.h"
 #include "bypto/exchange.h"
 #include "bypto/order.h"
@@ -25,6 +26,7 @@ namespace bypto::exchange::back_testing {
             int execute_order(order::Order go);
             long double fetch_price();
             void cancel_order(int o_id);
+            common::either::Either<std::string,void> tick();
             bool tick_once();
     };
 }

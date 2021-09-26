@@ -44,12 +44,12 @@ namespace bypto::order_type {
         os << "m_qty=" << fr.m_qty << ",";
         os << "m_pos=" << fr.m_pos << ",";
         os << "m_new_order=";
-        if(fr.m_new_order) {
-            std::visit(common::utils::overload{
-                [&os](Market m) { os << m;},
-                [&os](Limit l) { os << l;}
-            },fr.m_new_order.value());
-        }
+        // if(fr.m_new_order) {
+        //     std::visit(common::utils::overload{
+        //         [&os](Market m) { os << m;},
+        //         [&os](Limit l) { os << l;}
+        //     },fr.m_new_order.value());
+        // }
         os << "}";
         return os;
     }

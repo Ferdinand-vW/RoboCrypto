@@ -1,5 +1,4 @@
-set(SOURCES bypto/robo_crypto.cpp
-            bypto/exchange/back_testing.cpp
+set(SOURCES bypto/exchange/back_testing.cpp
             bypto/exchange/binance.cpp
             bypto/order.cpp
             bypto/order_type.cpp
