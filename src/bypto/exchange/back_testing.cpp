@@ -2,33 +2,34 @@
 
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
+#include "bypto/data/binance/klines.h"
 #include "bypto/order_type.h"
 
-namespace bypto::exchange::back_testing {
+namespace bypto::exchange {
     
-    BackTesting::BackTesting(std::string symbol,int tick_rate,std::deque<data::binance::klines::Kline> klines) 
+    Exchange<BackTest>::Exchange(std::string symbol,int tick_rate,std::deque<data::binance::klines::Kline> klines) 
                             : m_symbol(symbol)
                             ,m_tick_rate(tick_rate)
                             ,m_klines(klines) {};
 
-    int BackTesting::execute_order(order::Order go) {
+    int Exchange<BackTest>::execute_order(order::Order go) {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
     }
 
-    long double BackTesting::fetch_price() {
+    long double Exchange<BackTest>::fetch_price() {
         auto kline = m_klines.front();
         return common::math::interpolate(kline.m_open_time,kline.m_open
                                         ,kline.m_close_time,kline.m_close
                                         ,m_curr_time);
     }
 
-    void BackTesting::cancel_order(int o_id) {
+    void Exchange<BackTest>::cancel_order(int o_id) {
         m_outstanding.erase(o_id);
     }
 
-    bool BackTesting::tick_once() {
+    bool Exchange<BackTest>::tick_once() {
         if (m_klines.size() <= 0) { return false; }
 
         m_curr_time += m_tick_rate;
@@ -60,5 +61,15 @@ namespace bypto::exchange::back_testing {
 
         return true;
 
+    }
+
+    std::vector<Kline> Exchange<BackTest>::historical_data(time_t start, time_t end) {
+        std::vector<Kline> klines;
+        for(auto & kl : m_klines) {
+            if (kl.m_open_time >= start && kl.m_close_time < end) {
+                klines.push_back(kl);
+            } 
+        }
+        return klines;
     }
 }

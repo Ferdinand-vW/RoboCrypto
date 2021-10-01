@@ -3,9 +3,11 @@
 #include "bypto/order.h"
 #include "bypto/exchange.h"
 
-namespace bypto::exchange::binance {
+namespace bypto::exchange {
+    class Binance;
 
-    class Binance : public Exchange {
+    template<>
+    class Exchange<Binance> {
         int execute_order(order::GenericOrder go);
         long double fetch_price();
         void cancel_order(int o_id);

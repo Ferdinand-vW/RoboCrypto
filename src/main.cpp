@@ -28,49 +28,29 @@ int main() {
     std::cout << fs.is_open() << std::endl;
     using str_t = std::string;
 
-    std::string a("b");
-    std::string b("a");
-    Either<std::string,bool> e(a);
-    Either<std::string,bool> e2(b);
+    auto klines = bypto::data::binance::klines::parseCSV(fs);
+    for(auto i = 0; i < 2; i++) {
+        std::cout << klines[i] << std::endl;
+    }
 
-    std::cout << (e2 < e) << std::endl;
-    std::cout << e2.left() << std::endl;
-    e.~Either<std::string,bool>();
-    a += "a";
-    auto e3 = e2.fmap<char>([](std::string &s) { return 'c'; });
-    // std::cout << e.left() << std::endl;
-    std::cout << e2.left() << std::endl;
-    std::cout << e3.left() << std::endl;
-    std::cout << a << std::endl;
-    std::cout << sizeof(e) << std::endl;
-    std::cout << sizeof(a) << std::endl;
-    std::cout << sizeof(std::string) << std::endl;
-    std::cout << sizeof(bool) << std::endl;
-    std::cout << e.isRight() << " " << e.isLeft() << std::endl;
-
-    // auto klines = bypto::data::binance::klines::parseCSV(fs);
-    // for(auto i = 0; i < 2; i++) {
-    //     std::cout << klines[i] << std::endl;
-    // }
-
-    // auto conn = tao::pq::connection::create("dbname=historical");
+    auto conn = tao::pq::connection::create("dbname=historical");
     
-    // using namespace bypto::data::binance;
-    // klines::prepareTable(conn);
-    // klines::storeKlines(conn,klines);
+    using namespace bypto::data::binance;
+    klines::prepareTable(conn);
+    klines::storeKlines(conn,klines);
 
-    // using namespace bypto::common;
-    // auto t = utils::createTime_t(2021, 07, 01);
-    // auto open_time = utils::createTime_t(2021,07,06);
-    // auto close_time = utils::createTime_t(2021,07,20);
+    using namespace bypto::common;
+    auto t = utils::createTime_t(2021, 07, 01);
+    auto open_time = utils::createTime_t(2021,07,06);
+    auto close_time = utils::createTime_t(2021,07,20);
 
-    // auto klines2 = klines::loadKlines(conn, open_time, close_time);
-    // std::cout << klines2.front() << std::endl;
-    // using namespace bypto::order;
-    // using namespace bypto::order_type;
-    // Order order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
+    auto klines2 = klines::loadKlines(conn, open_time, close_time);
+    std::cout << klines2.front() << std::endl;
+    using namespace bypto::order;
+    using namespace bypto::order_type;
+    Order order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
 
-    // std::cout << order;
+    std::cout << order;
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");

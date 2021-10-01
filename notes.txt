@@ -46,3 +46,20 @@ AvgUp = (2*8)/14 and AvgDown=(6*1)/14
 4. Compute RSI. RSI = 100 - (100/(1+RS))
 
 ** Chart Patterns. 
+
+
+# MA Strategy:
+if no outstanding trades
+
+get historical data of last 4h
+
+calculate MA of last 1h
+calculate MA of those 4 hours
+
+if MA of 1h > MA of 4h then buy market order
+if MA of 1h < MA of 4h then sell market order
+
+# How to determine quantity for trade:
+
+to buy base use 1% of quote qty
+to buy quote use 1% of base qty

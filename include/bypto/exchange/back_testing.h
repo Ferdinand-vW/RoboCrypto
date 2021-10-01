@@ -8,9 +8,12 @@
 
 #include <string>
 
-namespace bypto::exchange::back_testing {
+namespace bypto::exchange {
 
-    class BackTesting : public Exchange {
+    class BackTest;
+
+    template<>
+    class Exchange<BackTest> {
         std::deque<data::binance::klines::Kline> m_klines;
         std::map<int,order::Order> m_filled;
         std::map<int,order_type::Partial> m_partials;
@@ -21,12 +24,13 @@ namespace bypto::exchange::back_testing {
         time_t m_curr_time;
 
         public:
-            BackTesting(std::string symbol,int tick_rate,std::deque<data::binance::klines::Kline> klines);
+            Exchange(std::string symbol,int tick_rate,std::deque<data::binance::klines::Kline> klines);
 
             int execute_order(order::Order go);
             long double fetch_price();
             void cancel_order(int o_id);
             common::either::Either<std::string,void> tick();
             bool tick_once();
+            std::vector<data::binance::klines::Kline> historical_data(time_t start,time_t end);
     };
 }
