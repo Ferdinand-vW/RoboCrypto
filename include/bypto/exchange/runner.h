@@ -2,6 +2,7 @@
 
 #include "bypto/exchange.h"
 #include "bypto/account.h"
+#include "bypto/strategy.h"
 
 namespace bypto::exchange::runner {
     

@@ -1,5 +1,13 @@
 #pragma once
 
-namespace bypto::strategy::ma {
-    
+#include "bypto/strategy.h"
+
+namespace bypto::strategy {
+
+
+    template<>
+    class Strategy<Strats::MovingAvergage> {
+        
+    };
+
 }

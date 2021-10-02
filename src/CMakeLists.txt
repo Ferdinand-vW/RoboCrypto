@@ -4,7 +4,8 @@ set(SOURCES bypto/exchange/back_testing.cpp
             bypto/order_type.cpp
             bypto/common/csv.cpp
             bypto/common/utils.cpp
-            bypto/data/binance/klines.cpp)
+            bypto/data/klines.cpp
+            bypto/data/binance.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})
 include_directories(${BINAPI_INCLUDE_DIR})
@@ -57,5 +58,5 @@ target_link_libraries(bypto z)
 target_link_libraries(bypto crypto)
 target_link_libraries(bypto taocpp::taopq)
 
-set_property(TARGET bypto PROPERTY CXX_STANDARD 17)
+set_property(TARGET bypto PROPERTY CXX_STANDARD 20)
 set_property(TARGET bypto PROPERTY CXX_STANDARD_REQUIRED ON)

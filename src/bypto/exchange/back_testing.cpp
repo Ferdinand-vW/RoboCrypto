@@ -1,47 +1,57 @@
 #include "bypto/exchange/back_testing.h"
-
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
-#include "bypto/data/binance/klines.h"
+#include "bypto/data/klines.h"
 #include "bypto/order_type.h"
+
+#include <string>
 
 namespace bypto::exchange {
     
-    Exchange<BackTest>::Exchange(std::string symbol,int tick_rate,std::deque<data::binance::klines::Kline> klines) 
+    Exchange<BackTest>::Exchange(std::string symbol,int tick_rate,KlineData &&klines) 
                             : m_symbol(symbol)
                             ,m_tick_rate(tick_rate)
-                            ,m_klines(klines) {};
+                            ,m_klines(std::move(klines)) {};
 
-    int Exchange<BackTest>::execute_order(order::Order go) {
+    //common error message
+    std::string err_his_data() { return std::string("no remaining historical data"); }
+
+    Error<int> Exchange<BackTest>::execute_order(order::Order go) {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
     }
 
-    long double Exchange<BackTest>::fetch_price() {
-        auto kline = m_klines.front();
+    Error<long double> Exchange<BackTest>::fetch_price(Symbol _s) {
+        auto mkline = m_klines.index_opt(m_kline_index);
+        if(!mkline.has_value()) { return err_his_data(); }
+
+        auto kline = mkline.value();
         return common::math::interpolate(kline.m_open_time,kline.m_open
                                         ,kline.m_close_time,kline.m_close
                                         ,m_curr_time);
     }
 
-    void Exchange<BackTest>::cancel_order(int o_id) {
+    Error<bool> Exchange<BackTest>::cancel_order(int o_id) {
         m_outstanding.erase(o_id);
+
+        return true;
     }
 
-    bool Exchange<BackTest>::tick_once() {
-        if (m_klines.size() <= 0) { return false; }
+    Error<bool> Exchange<BackTest>::tick_once() {
+        if (m_klines.size() <= 0) { return err_his_data(); }
 
         m_curr_time += m_tick_rate;
 
-        auto kline = m_klines.front();
+        auto kline = m_klines[m_kline_index];
         //if we're past the time of the current kline
         //then we should move to the next
         if (kline.m_close_time < m_curr_time) {
-            m_klines.pop_front();
+            m_kline_index++;
+            auto m_next = m_klines.index_opt(m_kline_index);
             //if current kline was last then return
-            if(m_klines.size() <= 0) { return false; }
-            else { kline = m_klines.front(); }
+            if(!m_next.has_value()) { return err_his_data(); }
+            else { kline = m_next.value(); }
         }
 
         long double curr_price = kline.m_close;
@@ -63,13 +73,7 @@ namespace bypto::exchange {
 
     }
 
-    std::vector<Kline> Exchange<BackTest>::historical_data(time_t start, time_t end) {
-        std::vector<Kline> klines;
-        for(auto & kl : m_klines) {
-            if (kl.m_open_time >= start && kl.m_close_time < end) {
-                klines.push_back(kl);
-            } 
-        }
-        return klines;
+    std::span<data::klines::Kline> Exchange<BackTest>::historical_data(time_t period) {
+        return m_klines.most_recent(period);
     }
 }

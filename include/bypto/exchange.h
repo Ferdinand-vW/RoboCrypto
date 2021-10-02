@@ -1,10 +1,10 @@
 #pragma once
 
-#include "bypto/data/binance/klines.h"
+#include "bypto/data/klines.h"
 #include "bypto/order.h"
 
 namespace bypto::exchange {
-    using namespace data::binance::klines;
+    using namespace data::klines;
 
     template<typename T>
     class Exchange {
@@ -13,6 +13,6 @@ namespace bypto::exchange {
             virtual long double fetch_price();
             virtual void cancel_order(int o_id);
             virtual bool tick_once();
-            virtual std::vector<Kline> historical_data(time_t start,time_t end);
+            virtual std::span<Kline> historical_data(time_t start,time_t end);
     };
 }

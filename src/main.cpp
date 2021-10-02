@@ -3,10 +3,13 @@
 
 
 #include "bypto/common/utils.h"
-#include "bypto/data/binance/klines.h"
+#include "bypto/data/binance.h"
+#include "bypto/data/klines.h"
 #include "bypto/common/csv.h"
 #include "bypto/order.h"
 #include "bypto/common/either.h"
+#include "bypto/strategy.h"
+#include "bypto/exchange/runner.h"
 
 #include <boost/asio/io_context.hpp>
 
@@ -28,24 +31,24 @@ int main() {
     std::cout << fs.is_open() << std::endl;
     using str_t = std::string;
 
-    auto klines = bypto::data::binance::klines::parseCSV(fs);
+    auto klines = bypto::data::binance::parseCSV(fs);
     for(auto i = 0; i < 2; i++) {
         std::cout << klines[i] << std::endl;
     }
 
     auto conn = tao::pq::connection::create("dbname=historical");
     
-    using namespace bypto::data::binance;
-    klines::prepareTable(conn);
-    klines::storeKlines(conn,klines);
+    using namespace bypto::data;
+    binance::prepareTable(conn);
+    binance::storeKlines(conn,klines);
 
     using namespace bypto::common;
     auto t = utils::createTime_t(2021, 07, 01);
     auto open_time = utils::createTime_t(2021,07,06);
     auto close_time = utils::createTime_t(2021,07,20);
 
-    auto klines2 = klines::loadKlines(conn, open_time, close_time);
-    std::cout << klines2.front() << std::endl;
+    auto klines2 = binance::loadKlines(conn, open_time, close_time);
+    std::cout << klines2.front_opt().value() << std::endl;
     using namespace bypto::order;
     using namespace bypto::order_type;
     Order order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};

@@ -1,20 +1,26 @@
 #pragma once
 
 #include "bypto/common/either.h"
-#include "bypto/data/binance/klines.h"
+#include "bypto/data/klines.h"
 #include "bypto/exchange.h"
 #include "bypto/order.h"
 #include "bypto/order_type.h"
 
 #include <string>
+#include <map>
+#include <span>
 
 namespace bypto::exchange {
+    using namespace common::types;
+    using namespace data::klines;
 
     class BackTest;
 
     template<>
     class Exchange<BackTest> {
-        std::deque<data::binance::klines::Kline> m_klines;
+        KlineData m_klines;
+        int m_kline_index;
+        
         std::map<int,order::Order> m_filled;
         std::map<int,order_type::Partial> m_partials;
         std::map<int,order::Order> m_outstanding;
@@ -24,13 +30,13 @@ namespace bypto::exchange {
         time_t m_curr_time;
 
         public:
-            Exchange(std::string symbol,int tick_rate,std::deque<data::binance::klines::Kline> klines);
+            Exchange(std::string symbol,int tick_rate,KlineData &&klines);
 
-            int execute_order(order::Order go);
-            long double fetch_price();
-            void cancel_order(int o_id);
-            common::either::Either<std::string,void> tick();
-            bool tick_once();
-            std::vector<data::binance::klines::Kline> historical_data(time_t start,time_t end);
+            Error<int> execute_order(order::Order go);
+            Error<long double> fetch_price(std::string symbol);
+            Error<bool> cancel_order(int o_id);
+            Error<bool> tick();
+            Error<bool> tick_once();
+            std::span<Kline> historical_data(time_t period);
     };
 }

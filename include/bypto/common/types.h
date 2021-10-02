@@ -1,8 +1,10 @@
 #pragma once
 
+#include "either.h"
 #include <tao/pq/connection.hpp>
 
 #include <memory>
+#include <vector>
 
 namespace bypto::common::types {
 
@@ -10,5 +12,7 @@ namespace bypto::common::types {
     typedef long double Price;
     typedef long double Quantity;
     typedef std::string Symbol;
+    template <typename R>
+    using Error = either::Either<std::string,R>;
 
 }

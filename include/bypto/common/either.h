@@ -21,24 +21,29 @@ namespace bypto::common::either {
             }
 
         public:
+            //constructor pass by move (0 copy, 1 move)
             Either(L &&l,typename std::enable_if<!std::is_same<L,R>::value,int>::type = 0) {
                 m_l = std::make_unique<L>(std::move(l));
                 m_is_left = true;
             }
 
+            //constructor pass by ref (1 copy, 0 move)
             Either(L &l,typename std::enable_if<!std::is_same<L,R>::value,int>::type = 0) {
                 m_l = std::make_unique<L>(l);
                 m_is_left = true;
             };
 
+            //constructor pass by move (0 copy, 1 move)
             Either(R &&r,typename std::enable_if<!std::is_same<L,R>::value,int>::type = 0) {
                 m_r = std::make_unique<R>(std::move(r));
             }
 
+            //constructor pass by ref (1 copy, 0 move)
             Either(R &r,typename std::enable_if<!std::is_same<L,R>::value,int>::type = 0) {
                 m_r = std::make_unique<R>(r);
             }
 
+            //move constructor
             Either(Either<L,R> &&e) {
                 if(e.isLeft()) {
                     m_l = std::make_unique<L>(std::move(e.left()));
@@ -50,6 +55,7 @@ namespace bypto::common::either {
                 }
             }
 
+            //copy constructor
             Either(Either<L,R> &e) {
                 if(e.isLeft()) {
                     m_l = std::make_unique<L>(e.left());
