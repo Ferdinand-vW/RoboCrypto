@@ -27,13 +27,15 @@ using namespace bypto::common::either;
 
 int main() {
     std::fstream fs;
+
+
     fs.open("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
     std::cout << fs.is_open() << std::endl;
     using str_t = std::string;
 
     auto klines = bypto::data::binance::parseCSV(fs);
     for(auto i = 0; i < 2; i++) {
-        std::cout << klines[i] << std::endl;
+        std::cout << " " << klines[i] << std::endl;
     }
 
     auto conn = tao::pq::connection::create("dbname=historical");

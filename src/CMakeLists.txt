@@ -1,3 +1,43 @@
+
+ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
+find_package(Boost 1.76.0 REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+
+find_package(OpenSSL REQUIRED)
+set(PostgreSQL_ADDITIONAL_VERSIONS "12.8")
+find_package(PostgreSQL REQUIRED)
+
+include(ExternalProject)
+set(taocpp_SOURCE_DIR ${BUILD_DIR}/_deps/taocpp-src)
+set(taocpp_BINARY_DIR ${BUILD_DIR}/_deps/taocpp-build)
+ExternalProject_Add(
+    taocpp
+    GIT_REPOSITORY https://github.com/taocpp/taopq
+    GIT_TAG dee2c272de16286534cbc00919b34407198777d7
+    SOURCE_DIR ${taocpp_SOURCE_DIR}
+    BINARY_DIR ${taocpp_BINARY_DIR}
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    EXCLUDE_FROM_ALL TRUE
+)
+
+set(taocpp_LIB ${taocpp_BINARY_DIR}/libtaopq.a)
+
+set(binapi_SOURCE_DIR ${BUILD_DIR}/_deps/binapi-src)
+set(binapi_BINARY_DIR ${BUILD_DIR}/_deps/binapi-build)
+ExternalProject_Add(
+    binapi
+    GIT_REPOSITORY https://github.com/Ferdinand-vW/binapi
+    GIT_TAG 93a9e08703eb0d1986368dcc094462aec5e12c06
+    SOURCE_DIR ${binapi_SOURCE_DIR}
+    BINARY_DIR ${binapi_BINARY_DIR}
+    INSTALL_COMMAND ""
+    UPDATE_COMMAND ""
+    EXCLUDE_FROM_ALL TRUE
+)
+
+set(binapi_LIB ${binapi_BINARY_DIR}/libbinapi_lib.a)
+
 set(SOURCES bypto/exchange/back_testing.cpp
             bypto/exchange/binance.cpp
             bypto/order.cpp
@@ -8,55 +48,37 @@ set(SOURCES bypto/exchange/back_testing.cpp
             bypto/data/binance.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})
-include_directories(${BINAPI_INCLUDE_DIR})
+include_directories(${PostgreSQL_INCLUDE_DIRS})
 
-add_library(byptoLib ${SOURCES})
 
-add_definitions(
-    -UNDEBUG
-    -DDTF_HEADER_ONLY
-    -D__FLATJSON__CHILDS_TYPE=std::uint32_t
-    -D__FLATJSON__VLEN_TYPE=std::uint32_t
-)
+add_library(byptoObj OBJECT ${SOURCES})
+add_dependencies(byptoObj binapi taocpp)
+target_include_directories(byptoObj PUBLIC ${taocpp_SOURCE_DIR}/include)
+target_include_directories(byptoObj PUBLIC ${binapi_SOURCE_DIR}/include)
 
-set(BINAPI_SOURCES
-    ${BINAPI_DIR}/src/errors.cpp
-    ${BINAPI_DIR}/src/api.cpp
-    ${BINAPI_DIR}/src/enums.cpp
-    ${BINAPI_DIR}/src/pairslist.cpp
-    ${BINAPI_DIR}/src/reports.cpp
-    ${BINAPI_DIR}/src/tools.cpp
-    ${BINAPI_DIR}/src/types.cpp
-    ${BINAPI_DIR}/src/websocket.cpp
-)
+# set_target_properties(taocpp PROPERTIES EXCLUDE_FROM_ALL FALSE)
+# set_target_properties(binapi PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
-ADD_DEFINITIONS(-DBOOST_LOG_DYN_LINK)
-find_package(Boost 1.76.0 REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
-
-find_package(OpenSSL REQUIRED)
-set(PostgreSQL_ADDITIONAL_VERSIONS "12.8")
-find_package(PostgreSQL REQUIRED)
-
-FetchContent_Declare(
-   taocpp-taopq
-   GIT_REPOSITORY https://github.com/taocpp/taopq
-   GIT_TAG dee2c272de16286534cbc00919b34407198777d7
-)
-FetchContent_MakeAvailable(taocpp-taopq)
-
+add_library(byptoLib STATIC $<TARGET_OBJECTS:byptoObj>)
+target_include_directories(byptoLib PUBLIC ${taocpp_SOURCE_DIR}/include)
+target_include_directories(byptoLib PUBLIC ${binapi_SOURCE_DIR}/include)
 
 # Add source to this project's executable.
-add_executable (bypto main.cpp ${SOURCES} ${BINAPI_SOURCES})
-target_link_libraries(byptoLib taocpp::taopq)
-target_include_directories(bypto PUBLIC ${BINAPI_INCLUDE_DIR})
+add_executable (bypto main.cpp $<TARGET_OBJECTS:byptoObj>)
+target_include_directories(bypto PUBLIC ${taocpp_SOURCE_DIR}/include)
+target_include_directories(bypto PUBLIC ${binapi_SOURCE_DIR}/include)
+
+target_link_libraries(byptoObj ${binapi_LIB})
+target_link_libraries(byptoObj ${taocpp_LIB})
+target_link_libraries(byptoLib ${PostgreSQL_LIBRARIES})
 target_link_libraries(bypto byptoLib)
 target_link_libraries(bypto ${BOOST_LIBRARIES})
 target_link_libraries(bypto OpenSSL::SSL)
 target_link_libraries(bypto pthread)
 target_link_libraries(bypto z)
 target_link_libraries(bypto crypto)
-target_link_libraries(bypto taocpp::taopq)
+target_link_libraries(bypto ${taocpp_LIB})
+target_link_libraries(bypto ${binapi_LIB})
 
 set_property(TARGET bypto PROPERTY CXX_STANDARD 20)
 set_property(TARGET bypto PROPERTY CXX_STANDARD_REQUIRED ON)
