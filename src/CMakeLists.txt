@@ -10,6 +10,7 @@ find_package(PostgreSQL REQUIRED)
 include(ExternalProject)
 set(taocpp_SOURCE_DIR ${BUILD_DIR}/_deps/taocpp-src)
 set(taocpp_BINARY_DIR ${BUILD_DIR}/_deps/taocpp-build)
+set(taocpp_LIB ${taocpp_BINARY_DIR}/libtaopq.a)
 ExternalProject_Add(
     taocpp
     GIT_REPOSITORY https://github.com/taocpp/taopq
@@ -17,26 +18,23 @@ ExternalProject_Add(
     SOURCE_DIR ${taocpp_SOURCE_DIR}
     BINARY_DIR ${taocpp_BINARY_DIR}
     INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
-    EXCLUDE_FROM_ALL TRUE
+    BUILD_BYPRODUCTS ${taocpp_LIB}
 )
 
-set(taocpp_LIB ${taocpp_BINARY_DIR}/libtaopq.a)
+
 
 set(binapi_SOURCE_DIR ${BUILD_DIR}/_deps/binapi-src)
 set(binapi_BINARY_DIR ${BUILD_DIR}/_deps/binapi-build)
+set(binapi_LIB ${binapi_BINARY_DIR}/libbinapi_lib.a)
 ExternalProject_Add(
     binapi
     GIT_REPOSITORY https://github.com/Ferdinand-vW/binapi
-    GIT_TAG 93a9e08703eb0d1986368dcc094462aec5e12c06
+    GIT_TAG cf09db45b78707c995017a7777fdbc9a142f5372
     SOURCE_DIR ${binapi_SOURCE_DIR}
     BINARY_DIR ${binapi_BINARY_DIR}
     INSTALL_COMMAND ""
-    UPDATE_COMMAND ""
-    EXCLUDE_FROM_ALL TRUE
+    BUILD_BYPRODUCTS ${binapi_LIB}
 )
-
-set(binapi_LIB ${binapi_BINARY_DIR}/libbinapi_lib.a)
 
 set(SOURCES bypto/exchange/back_testing.cpp
             bypto/exchange/binance.cpp
@@ -55,9 +53,6 @@ add_library(byptoObj OBJECT ${SOURCES})
 add_dependencies(byptoObj binapi taocpp)
 target_include_directories(byptoObj PUBLIC ${taocpp_SOURCE_DIR}/include)
 target_include_directories(byptoObj PUBLIC ${binapi_SOURCE_DIR}/include)
-
-# set_target_properties(taocpp PROPERTIES EXCLUDE_FROM_ALL FALSE)
-# set_target_properties(binapi PROPERTIES EXCLUDE_FROM_ALL FALSE)
 
 add_library(byptoLib STATIC $<TARGET_OBJECTS:byptoObj>)
 target_include_directories(byptoLib PUBLIC ${taocpp_SOURCE_DIR}/include)
