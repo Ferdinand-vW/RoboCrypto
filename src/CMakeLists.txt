@@ -42,7 +42,7 @@ set(SOURCES bypto/exchange/back_testing.cpp
             bypto/order_type.cpp
             bypto/common/csv.cpp
             bypto/common/utils.cpp
-            bypto/data/klines.cpp
+            bypto/data/kline.cpp
             bypto/data/binance.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})

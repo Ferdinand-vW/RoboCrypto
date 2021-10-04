@@ -1,10 +1,11 @@
 #pragma once
 
+#include "bypto/data/price.h"
 namespace bypto::strategy {
 
-    enum Strats { MovingAverage };
+    enum Indicator { MovingAverage };
 
-    template <Strats S>
+    template <Indicator S,data::price::PriceSource P>
     class Strategy;
 
 }

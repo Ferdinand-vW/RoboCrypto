@@ -1,6 +1,7 @@
 #include "bypto/exchange/back_testing.h"
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
+#include "bypto/data/kline.h"
 #include "bypto/data/klines.h"
 #include "bypto/order_type.h"
 
@@ -8,7 +9,7 @@
 
 namespace bypto::exchange {
     
-    Exchange<BackTest>::Exchange(std::string symbol,int tick_rate,KlineData &&klines) 
+    Exchange<BackTest,PriceSource::Kline>::Exchange(std::string symbol,int tick_rate,KlineData &&klines) 
                             : m_symbol(symbol)
                             ,m_tick_rate(tick_rate)
                             ,m_klines(std::move(klines)) {};
@@ -16,13 +17,13 @@ namespace bypto::exchange {
     //common error message
     std::string err_his_data() { return std::string("no remaining historical data"); }
 
-    Error<int> Exchange<BackTest>::execute_order(order::Order go) {
+    Error<int> Exchange<BackTest,PriceSource::Kline>::execute_order(order::Order go) {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
     }
 
-    Error<long double> Exchange<BackTest>::fetch_price(Symbol _s) {
+    Error<long double> Exchange<BackTest,PriceSource::Kline>::fetch_price(Symbol _s) {
         auto mkline = m_klines.index_opt(m_kline_index);
         if(!mkline.has_value()) { return err_his_data(); }
 
@@ -32,13 +33,13 @@ namespace bypto::exchange {
                                         ,m_curr_time);
     }
 
-    Error<bool> Exchange<BackTest>::cancel_order(int o_id) {
+    Error<bool> Exchange<BackTest,PriceSource::Kline>::cancel_order(int o_id) {
         m_outstanding.erase(o_id);
 
         return true;
     }
 
-    Error<bool> Exchange<BackTest>::tick_once() {
+    Error<bool> Exchange<BackTest,PriceSource::Kline>::tick_once() {
         if (m_klines.size() <= 0) { return err_his_data(); }
 
         m_curr_time += m_tick_rate;
@@ -73,7 +74,7 @@ namespace bypto::exchange {
 
     }
 
-    std::span<data::klines::Kline> Exchange<BackTest>::historical_data(time_t period) {
+    std::span<data::price::Kline_t> Exchange<BackTest,PriceSource::Kline>::historical_data(time_t period) {
         return m_klines.most_recent(period);
     }
 }

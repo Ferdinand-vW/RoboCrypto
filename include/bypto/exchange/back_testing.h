@@ -2,6 +2,7 @@
 
 #include "bypto/common/either.h"
 #include "bypto/data/klines.h"
+#include "bypto/data/price.h"
 #include "bypto/exchange.h"
 #include "bypto/order.h"
 #include "bypto/order_type.h"
@@ -17,7 +18,7 @@ namespace bypto::exchange {
     class BackTest;
 
     template<>
-    class Exchange<BackTest> {
+    class Exchange<BackTest,PriceSource::Kline> {
         KlineData m_klines;
         int m_kline_index;
         
@@ -37,6 +38,6 @@ namespace bypto::exchange {
             Error<bool> cancel_order(int o_id);
             Error<bool> tick();
             Error<bool> tick_once();
-            std::span<Kline> historical_data(time_t period);
+            std::span<data::price::Kline_t> historical_data(time_t period);
     };
 }

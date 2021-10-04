@@ -1,7 +1,9 @@
 #include "bypto/data/klines.h"
+#include "bypto/data/kline.h"
 #include "bypto/common/csv.h"
 #include "bypto/common/types.h"
 #include "bypto/common/utils.h"
+#include "bypto/data/price.h"
 #include "tao/pq/connection.hpp"
 
 #include <algorithm>
@@ -9,10 +11,10 @@
 #include <iterator>
 #include <ostream>
 
-namespace bypto::data::klines {
+namespace bypto::data::price {
 
     
-    std::ostream& operator<<(std::ostream &os,const Kline &kl) {
+    std::ostream& operator<<(std::ostream &os,const price::Kline_t &kl) {
         os << "Kline {";
         os << " m_open_time=" << std::put_time(localtime(&kl.m_open_time),"%Y-%m-%d-%H-%M-%S");
         os << ",m_open=" << kl.m_open;

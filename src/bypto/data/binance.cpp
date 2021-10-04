@@ -2,6 +2,8 @@
 #include "bypto/common/csv.h"
 #include "bypto/common/utils.h"
 #include "bypto/data/klines.h"
+#include "bypto/data/price.h"
+#include "bypto/data/kline.h"
 
 namespace bypto::data::binance {
 
@@ -14,7 +16,7 @@ namespace bypto::data::binance {
                         ,time_t,ld,long,ld,ld,ld>(is);
 
         auto toKline = [](auto &tpl) {
-            return klines::Kline
+            return price::Kline_t
                 { std::get<0>(tpl)/1000 // binance timestamps are in milliseconds, time_t is in seconds
                 , std::get<1>(tpl)
                 , std::get<2>(tpl)
@@ -30,7 +32,7 @@ namespace bypto::data::binance {
                 };
         };
 
-        std::vector<klines::Kline> klines;
+        std::vector<price::Kline_t> klines;
         std::transform(tpls.begin(),tpls.end(),std::back_inserter(klines),toKline);
 
         return klines::KlineData(std::move(klines));
@@ -92,9 +94,9 @@ namespace bypto::data::binance {
         auto results = conn->execute(
                              "SELECT * FROM klines WHERE open_time >= $1 AND close_time <= $2"
                             ,open_time,close_time);
-        std::vector<Kline> klines;
+        std::vector<price::Kline_t> klines;
         for(auto &row : results) {
-            Kline kl = { row["open_time"].as<time_t>()
+            price::Kline_t kl = { row["open_time"].as<time_t>()
                        , row["open"].as<long double>()
                        , row["high"].as<long double>()
                        , row["low"].as<long double>()

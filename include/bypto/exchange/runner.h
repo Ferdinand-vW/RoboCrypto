@@ -1,15 +1,16 @@
 #pragma once
 
+#include "bypto/data/price.h"
 #include "bypto/exchange.h"
 #include "bypto/account.h"
 #include "bypto/strategy.h"
 
 namespace bypto::exchange::runner {
     
-    template<typename T>
+    template<typename T,PriceSource P>
     class Runner {
         public:
-            Runner(Exchange<T> e,account::Account &acc) 
+            Runner(Exchange<T,P> e,account::Account &acc) 
                     : m_exchange(e)
                     , m_account(acc) {}
 
@@ -30,7 +31,7 @@ namespace bypto::exchange::runner {
             }
 
         private:
-            Exchange<T> m_exchange;
+            Exchange<T,P> m_exchange;
             account::Account m_account;
     };
 }
