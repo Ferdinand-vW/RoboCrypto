@@ -4,7 +4,7 @@
 
 #include "bypto/common/utils.h"
 #include "bypto/data/binance.h"
-#include "bypto/data/klines.h"
+#include "bypto/data/price.h"
 #include "bypto/common/csv.h"
 #include "bypto/order.h"
 #include "bypto/common/either.h"
@@ -33,7 +33,8 @@ int main() {
     std::cout << fs.is_open() << std::endl;
     using str_t = std::string;
 
-    auto klines = bypto::data::binance::parseCSV(fs);
+    auto klines = bypto::data::binance::parseCSV("BTCUSDT",fs);
+    fs.close();
     for(auto i = 0; i < 2; i++) {
         std::cout << " " << klines[i] << std::endl;
     }

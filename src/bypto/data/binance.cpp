@@ -1,13 +1,29 @@
 #include "bypto/data/binance.h"
 #include "bypto/common/csv.h"
 #include "bypto/common/utils.h"
-#include "bypto/data/klines.h"
 #include "bypto/data/price.h"
 #include "bypto/data/kline.h"
+#include "bypto/data/prices.h"
 
 namespace bypto::data::binance {
 
-    klines::KlineData parseCSV(std::istream &is) {
+    price::Klines_t klinesToPrices(std::vector<price::Kline_t> &&klines) {
+        if(klines.size() < 2) {
+            throw "Klines data must contain at least 2 entries";
+        }
+
+        auto interval = klines[1].m_close_time - klines[0].m_close_time;
+        auto eprices = price::Klines_t::CreatePrices(interval,std::move(klines));
+
+        //klines data should be provided in consistent format
+        if(eprices.isLeft()) {
+            throw eprices.left();
+        }
+
+        return eprices.right();
+    }
+
+    price::Klines_t parseCSV(std::string symbol, std::istream &is) {
         typedef long double ld;
         //sadly type inference is unable to figure out what
         //the type of the header should be
@@ -15,9 +31,10 @@ namespace bypto::data::binance {
                         <time_t,ld,ld,ld,ld,ld
                         ,time_t,ld,long,ld,ld,ld>(is);
 
-        auto toKline = [](auto &tpl) {
+        auto toKline = [symbol](auto &tpl) {
             return price::Kline_t
-                { std::get<0>(tpl)/1000 // binance timestamps are in milliseconds, time_t is in seconds
+                { symbol
+                , std::get<0>(tpl)/1000 // binance timestamps are in milliseconds, time_t is in seconds
                 , std::get<1>(tpl)
                 , std::get<2>(tpl)
                 , std::get<3>(tpl)
@@ -35,8 +52,7 @@ namespace bypto::data::binance {
         std::vector<price::Kline_t> klines;
         std::transform(tpls.begin(),tpls.end(),std::back_inserter(klines),toKline);
 
-        return klines::KlineData(std::move(klines));
-        
+        return klinesToPrices(std::move(klines));
     }
 
     void prepareTable(common::types::pgconn_t &conn) {
@@ -44,6 +60,7 @@ namespace bypto::data::binance {
         std::vector<std::string> parts = 
             {"CREATE TABLE IF NOT EXISTS klines ("s
             ,"kline_id SERIAL NOT NULL PRIMARY KEY,"
+            ,"symbol VARCHAR(32) NOT NULL,"
             ,"open_time BIGINT NOT NULL,"
             ,"open DOUBLE PRECISION NOT NULL,"
             ,"high DOUBLE PRECISION NOT NULL,"
@@ -62,25 +79,28 @@ namespace bypto::data::binance {
         conn->execute(create_query);
     }
 
-    void storeKlines(common::types::pgconn_t &conn, klines::KlineData &klines) {
+    void storeKlines(common::types::pgconn_t &conn, price::Klines_t &klines) {
         std::vector<std::string> field_list = 
-            {"open_time","open","high"
+            { "symbol"
+            ,"open_time","open","high"
             ,"low","close","volume"
             ,"close_time","quote_asset_volume","number_of_trades"
             ,"taker_buy_base_asset_volume","taker_buy_quote_asset_volume","ignore"
             };
         auto fields = common::utils::intercalate(",",field_list);
         std::vector<std::string> value_list =
-            {"$1","$2","$3"
-            ,"$4","$5","$6"
-            ,"$7","$8","$9"
-            ,"$10","$11","$12"
+            {"$1"
+            ,"$2","$3","$4"
+            ,"$5","$6","$7"
+            ,"$8","$9","$10"
+            ,"$11","$12","$13"
             };
 
         auto values = common::utils::intercalate(",",value_list);
         conn->prepare( "insert_kline", "INSERT INTO klines ("+fields+") VALUES ("+values+")");
         for(auto &kl : klines) {
             conn->execute("insert_kline"
+                        ,kl.m_symbol
                         ,kl.m_open_time,kl.m_open,kl.m_high
                         ,kl.m_low,kl.m_close,kl.m_volume
                         ,kl.m_close_time,kl.m_quote_asset_volume,kl.m_number_of_trades
@@ -89,14 +109,14 @@ namespace bypto::data::binance {
         }
     }
 
-    klines::KlineData loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time) {
-        using namespace klines;
+    price::Klines_t loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time) {
         auto results = conn->execute(
                              "SELECT * FROM klines WHERE open_time >= $1 AND close_time <= $2"
                             ,open_time,close_time);
         std::vector<price::Kline_t> klines;
         for(auto &row : results) {
-            price::Kline_t kl = { row["open_time"].as<time_t>()
+            price::Kline_t kl = { row["symbol"].as<std::string>()
+                       , row["open_time"].as<time_t>()
                        , row["open"].as<long double>()
                        , row["high"].as<long double>()
                        , row["low"].as<long double>()
@@ -112,7 +132,8 @@ namespace bypto::data::binance {
             klines.push_back(kl);
         }
 
-        return KlineData(std::move(klines));
+
+        return klinesToPrices(std::move(klines));
     }
 
 

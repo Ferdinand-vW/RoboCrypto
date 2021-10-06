@@ -1,19 +1,26 @@
 #pragma once
 
+#include "bypto/common/types.h"
 #include "bypto/data/price.h"
-#include <bits/types/time_t.h>
+#include "bypto/data/prices.h"
 
+#include <bits/types/time_t.h>
 #include <iostream>
 
 namespace bypto::data::price {
 
     typedef Price<PriceSource::Kline> Kline_t;
+    typedef prices::Prices<PriceSource::Kline> Klines_t;
+    
     // Candle data
     template<> 
     class Price<PriceSource::Kline> {
         public:
             long double get_price() { return m_close; }
+            time_t get_time() { return m_close_time; }
+            common::types::Symbol get_symbol() { return m_symbol; }
 
+            common::types::Symbol m_symbol;
             time_t m_open_time; //start kline time
             long double m_open; // price at @m_open_time
             long double m_high; // highest price between @m_open_time and @m_close_time

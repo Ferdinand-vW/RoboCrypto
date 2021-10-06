@@ -2,14 +2,14 @@
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
 #include "bypto/data/kline.h"
-#include "bypto/data/klines.h"
+#include "bypto/data/price.h"
 #include "bypto/order_type.h"
 
 #include <string>
 
 namespace bypto::exchange {
     
-    Exchange<BackTest,PriceSource::Kline>::Exchange(std::string symbol,int tick_rate,KlineData &&klines) 
+    Exchange<BackTest,PriceSource::Kline>::Exchange(std::string symbol,int tick_rate,data::price::Klines_t &&klines) 
                             : m_symbol(symbol)
                             ,m_tick_rate(tick_rate)
                             ,m_klines(std::move(klines)) {};

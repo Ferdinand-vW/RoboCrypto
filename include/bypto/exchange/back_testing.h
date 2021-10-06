@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bypto/common/either.h"
-#include "bypto/data/klines.h"
+#include "bypto/data/kline.h"
 #include "bypto/data/price.h"
 #include "bypto/exchange.h"
 #include "bypto/order.h"
@@ -13,13 +13,12 @@
 
 namespace bypto::exchange {
     using namespace common::types;
-    using namespace data::klines;
 
     class BackTest;
 
     template<>
     class Exchange<BackTest,PriceSource::Kline> {
-        KlineData m_klines;
+        data::price::Klines_t m_klines;
         int m_kline_index;
         
         std::map<int,order::Order> m_filled;
@@ -31,7 +30,7 @@ namespace bypto::exchange {
         time_t m_curr_time;
 
         public:
-            Exchange(std::string symbol,int tick_rate,KlineData &&klines);
+            Exchange(std::string symbol,int tick_rate,data::price::Klines_t &&klines);
 
             Error<int> execute_order(order::Order go);
             Error<long double> fetch_price(std::string symbol);

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "bypto/data/klines.h"
 #include "bypto/data/price.h"
 #include "bypto/order.h"
+
+#include <span>
 
 namespace bypto::exchange {
     using namespace data::price;
