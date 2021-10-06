@@ -4,7 +4,7 @@
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
 #include "bypto/order_type.h"
-
+#include "bypto/strategy/ma.h"
 #include <string>
 
 namespace bypto::exchange {

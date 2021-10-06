@@ -27,6 +27,8 @@ namespace bypto::common::either {
                 m_is_left = true;
             }
 
+            
+
             //constructor pass by ref (1 copy, 0 move)
             Either(L &l,typename std::enable_if<!std::is_same<L,R>::value,int>::type = 0) {
                 m_l = std::make_unique<L>(l);
@@ -130,5 +132,4 @@ namespace bypto::common::either {
                 }
             }
     };
-
 }
