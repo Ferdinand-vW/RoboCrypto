@@ -6,9 +6,11 @@
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
 #include "bypto/order.h"
+#include "bypto/order_type.h"
 #include "bypto/strategy.h"
 
 #include <numeric>
+#include <optional>
 #include <span>
 #include <string>
 
@@ -54,8 +56,14 @@ namespace bypto::strategy {
 
                 if(one_hour_ma > four_hour_ma) {
                     //buy base ccy, use quote ccy
+                    order_type::Market mkt(spendable_quote_qty,order_type::BaseOrQuote::Quote);
+                    order::Order ord("BTCUSDT",order_type::Position::Sell,mkt);
+                    return std::optional(ord);
                 } else if (one_hour_ma < four_hour_ma) {
                     //sell base ccy, receive quote ccy
+                    order_type::Market mkt(spendable_qty,order_type::BaseOrQuote::Base);
+                    order::Order ord("BTCUSDT",order_type::Position::Sell,mkt);
+                    return std::optional(ord);
                 } else {
                     std::optional<order::Order> nothing = {};
                     return nothing;

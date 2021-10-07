@@ -14,8 +14,8 @@ namespace bypto::exchange::runner {
                     : m_exchange(e)
                     , m_account(acc) {}
 
-            template <typename S>
-            void run(S strat) {
+            template <strategy::Indicator S>
+            void run(strategy::Strategy<S,P>) {
                 auto p = m_exchange.fetch_price();
                 
                 
