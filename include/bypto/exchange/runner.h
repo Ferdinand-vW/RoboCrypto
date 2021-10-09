@@ -10,34 +10,32 @@ namespace bypto::exchange::runner {
     template<typename T,PriceSource P>
     class Runner {
         public:
-            Runner(Exchange<T,P> e,account::Account &acc) 
-                    : m_exchange(e)
-                    , m_account(acc) {}
+            Runner(Exchange<T,P> e) 
+                    : m_exchange(e) {}
 
             template <strategy::Indicator S>
-            void run(strategy::Strategy<S,P>) {
-                //get account info from exchange
-                //decide on acceptable base qty and qoute qty
-                //call strategy
-                //if no order then tick once
-                //if new order then call exchange.execute_order
+            Error<bool> run(Symbol sym, strategy::Strategy<S,P> strat) {
+                auto acc = m_exchange.get_account_info();
+
+                auto total_base_qty = acc.get_quantity(sym.base());
+                auto total_quote_qty = acc.get_quantity(sym.quote());
+
+                auto spendable_base = total_base_qty / 100; //1%
+                auto spendable_quote = total_quote_qty / 100; // 1%
+
+                auto now = m_exchange.get_current_time();
+                auto prices = m_exchange.get_historical_prices();
+
+                auto morder = strat.make_decision(now, spendable_base, spendable_quote, prices);
+
+                if(morder) {
+                    m_exchange.execute_order(morder.value());
+                }
 
                 auto succ = m_exchange.tick_once();
-                
-                
-                /**
-
-                Given a price,account and historic price data we can do one of the following:
-
-                - Cancel Order
-                - Make new order (strategy should determine order type,position and qty)
-                - Do Nothing
-
-                **/
             }
 
         private:
             Exchange<T,P> m_exchange;
-            account::Account m_account;
     };
 }

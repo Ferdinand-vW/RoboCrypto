@@ -14,5 +14,13 @@ namespace bypto::account {
 
         public:
             void add_fund(std::string ccy,long double qty);
+
+            long double get_quantity(std::string ccy) {
+                if(m_funds.contains(ccy)) {
+                    return m_funds[ccy];
+                } else {
+                    return 0;
+                }
+            }
     };
 }

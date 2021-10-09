@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bypto/data/price.h"
+#include "bypto/data/prices.h"
 #include "bypto/order.h"
 #include "bypto/account.h"
 #include "bypto/common/types.h"
@@ -19,6 +20,6 @@ namespace bypto::exchange {
             Error<long double> fetch_price();
             Error<bool> cancel_order(int o_id);
             Error<bool> tick_once();
-            std::span<data::price::Price<P>> historical_data(time_t start,time_t end);
+            data::prices::Prices<P>& historical_data(time_t start,time_t end);
     };
 }
