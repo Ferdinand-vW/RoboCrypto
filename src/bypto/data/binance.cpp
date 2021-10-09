@@ -1,5 +1,6 @@
 #include "bypto/data/binance.h"
 #include "bypto/common/csv.h"
+#include "bypto/common/types.h"
 #include "bypto/common/utils.h"
 #include "bypto/data/price.h"
 #include "bypto/data/kline.h"
@@ -23,7 +24,7 @@ namespace bypto::data::binance {
         return eprices.right();
     }
 
-    price::Klines_t parseCSV(std::string symbol, std::istream &is) {
+    price::Klines_t parseCSV(common::types::Symbol sym, std::istream &is) {
         typedef long double ld;
         //sadly type inference is unable to figure out what
         //the type of the header should be
@@ -31,9 +32,9 @@ namespace bypto::data::binance {
                         <time_t,ld,ld,ld,ld,ld
                         ,time_t,ld,long,ld,ld,ld>(is);
 
-        auto toKline = [symbol](auto &tpl) {
+        auto toKline = [sym](auto &tpl) {
             return price::Kline_t
-                { symbol
+                { sym
                 , std::get<0>(tpl)/1000 // binance timestamps are in milliseconds, time_t is in seconds
                 , std::get<1>(tpl)
                 , std::get<2>(tpl)
@@ -100,7 +101,7 @@ namespace bypto::data::binance {
         conn->prepare( "insert_kline", "INSERT INTO klines ("+fields+") VALUES ("+values+")");
         for(auto &kl : klines) {
             conn->execute("insert_kline"
-                        ,kl.m_symbol
+                        ,kl.m_symbol.to_string()
                         ,kl.m_open_time,kl.m_open,kl.m_high
                         ,kl.m_low,kl.m_close,kl.m_volume
                         ,kl.m_close_time,kl.m_quote_asset_volume,kl.m_number_of_trades
@@ -115,7 +116,7 @@ namespace bypto::data::binance {
                             ,open_time,close_time);
         std::vector<price::Kline_t> klines;
         for(auto &row : results) {
-            price::Kline_t kl = { row["symbol"].as<std::string>()
+            price::Kline_t kl = { common::types::Symbol::from_string(row["symbol"].as<std::string>())
                        , row["open_time"].as<time_t>()
                        , row["open"].as<long double>()
                        , row["high"].as<long double>()

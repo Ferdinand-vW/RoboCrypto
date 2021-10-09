@@ -36,12 +36,14 @@ ExternalProject_Add(
     BUILD_BYPRODUCTS ${binapi_LIB}
 )
 
-set(SOURCES bypto/exchange/back_testing.cpp
+set(SOURCES bypto/account.cpp
+            bypto/exchange/back_testing.cpp
             bypto/exchange/binance.cpp
             bypto/order.cpp
             bypto/order_type.cpp
             bypto/common/csv.cpp
             bypto/common/utils.cpp
+            bypto/common/types.cpp
             bypto/data/kline.cpp
             bypto/data/binance.cpp)
 

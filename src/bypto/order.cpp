@@ -13,7 +13,7 @@ namespace bypto::order {
         return os;
     }
 
-    Order::Order(std::string symbol,order_type::Position pos,order_type::OrderType ot)
+    Order::Order(Symbol symbol,order_type::Position pos,order_type::OrderType ot)
                 : m_symbol(symbol)
                 , m_pos(pos)
                 , m_order_type(ot) {};

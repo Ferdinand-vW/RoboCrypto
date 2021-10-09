@@ -1,4 +1,5 @@
 #include "bypto/exchange/back_testing.h"
+#include "bypto/account.h"
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
 #include "bypto/data/kline.h"
@@ -9,10 +10,16 @@
 
 namespace bypto::exchange {
     
-    Exchange<BackTest,PriceSource::Kline>::Exchange(std::string symbol,int tick_rate,data::price::Klines_t &&klines) 
-                            : m_symbol(symbol)
-                            ,m_tick_rate(tick_rate)
-                            ,m_klines(std::move(klines)) {};
+    Exchange<BackTest,PriceSource::Kline>::Exchange(Symbol symbol
+                                                   ,Quantity base_fund,Quantity quote_fund
+                                                   ,int tick_rate,data::price::Klines_t &&klines) 
+                                                   :m_symbol(symbol)
+                                                   ,m_tick_rate(tick_rate)
+                                                   ,m_klines(std::move(klines)) {
+        m_account.add_fund(symbol.base(),base_fund);
+        m_account.add_fund(symbol.quote(),quote_fund);
+                                                       
+    };
 
     //common error message
     std::string err_his_data() { return std::string("no remaining historical data"); }
@@ -21,6 +28,10 @@ namespace bypto::exchange {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
+    }
+
+    Error<account::Account> Exchange<BackTest,PriceSource::Kline>::get_account() {
+        return m_account;
     }
 
     Error<long double> Exchange<BackTest,PriceSource::Kline>::fetch_price(Symbol _s) {

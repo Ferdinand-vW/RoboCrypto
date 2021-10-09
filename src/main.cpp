@@ -32,8 +32,8 @@ int main() {
     fs.open("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
     std::cout << fs.is_open() << std::endl;
     using str_t = std::string;
-
-    auto klines = bypto::data::binance::parseCSV("BTCUSDT",fs);
+    bypto::common::types::Symbol sym("BTC","USDT");
+    auto klines = bypto::data::binance::parseCSV(sym,fs);
     fs.close();
     for(auto i = 0; i < 2; i++) {
         std::cout << " " << klines[i] << std::endl;
@@ -54,7 +54,7 @@ int main() {
     std::cout << klines2.front_opt().value() << std::endl;
     using namespace bypto::order;
     using namespace bypto::order_type;
-    Order order {"BTCUSDT",Position::Buy,Market { 1.0,Base }};
+    Order order {sym,Position::Buy,Market { 1.0,Base }};
 
     std::cout << order;
     // auto open_time = t

@@ -16,7 +16,13 @@ namespace bypto::exchange::runner {
 
             template <strategy::Indicator S>
             void run(strategy::Strategy<S,P>) {
-                auto p = m_exchange.fetch_price();
+                //get account info from exchange
+                //decide on acceptable base qty and qoute qty
+                //call strategy
+                //if no order then tick once
+                //if new order then call exchange.execute_order
+
+                auto succ = m_exchange.tick_once();
                 
                 
                 /**

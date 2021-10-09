@@ -54,15 +54,16 @@ namespace bypto::strategy {
                 auto four_hour_ma = compute_moving_average(four_hour, prices);
                 auto one_hour_ma = compute_moving_average(one_hour, prices);
 
+                common::types::Symbol sym("BTC","USDT");
                 if(one_hour_ma > four_hour_ma) {
                     //buy base ccy, use quote ccy
                     order_type::Market mkt(spendable_quote_qty,order_type::BaseOrQuote::Quote);
-                    order::Order ord("BTCUSDT",order_type::Position::Sell,mkt);
+                    order::Order ord(sym,order_type::Position::Sell,mkt);
                     return std::optional(ord);
                 } else if (one_hour_ma < four_hour_ma) {
                     //sell base ccy, receive quote ccy
                     order_type::Market mkt(spendable_qty,order_type::BaseOrQuote::Base);
-                    order::Order ord("BTCUSDT",order_type::Position::Sell,mkt);
+                    order::Order ord(sym,order_type::Position::Sell,mkt);
                     return std::optional(ord);
                 } else {
                     std::optional<order::Order> nothing = {};
