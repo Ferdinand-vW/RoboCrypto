@@ -30,4 +30,19 @@ namespace bypto::common::types {
     };
 
     std::ostream& operator<<(std::ostream &os,const Symbol &s);
+
+    class Value {
+        public:
+            Value(std::string m_curreny,long double quantity);
+
+            std::string m_currency;
+            long double m_quantity;
+
+            Value add(Value v1);
+            Value subtract(Value v1);
+            Value multiply(Value v1);
+            Value divide(Value v1);
+    };
+
+    std::ostream& operator<<(std::ostream &os,const Value &s);
 }

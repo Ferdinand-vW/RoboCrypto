@@ -78,6 +78,14 @@ namespace bypto::data::prices {
                 }
             }
 
+            std::optional<Price<P>> back_opt() {
+                if(m_prices.size() == 0) {
+                    return {};
+                } else {
+                    return m_prices.back();
+                }
+            }
+
             std::optional<Price<P>> index_opt(int index) {
                 if(m_prices.size() > index) { return m_prices[index]; }
                 else { return {};}

@@ -17,6 +17,7 @@ namespace bypto::data::price {
     class Price<PriceSource::Kline> {
         public:
             long double get_price() { return m_close; }
+            long double get_quote_price() { return 1 / m_close; }
             time_t get_time() { return m_close_time; }
             common::types::Symbol get_symbol() { return m_symbol; }
 

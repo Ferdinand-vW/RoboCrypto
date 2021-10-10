@@ -15,11 +15,9 @@
 
 namespace bypto::exchange {
     using namespace common::types;
-
-    class BackTest;
-
+    
     template<>
-    class Exchange<BackTest,PriceSource::Kline> {
+    class Exchange<ExchangeType::BackTest,PriceSource::Kline> {
         data::price::Klines_t m_klines;
         int m_kline_index;
 
@@ -31,14 +29,15 @@ namespace bypto::exchange {
 
         int m_counter = 0;
         Symbol m_symbol;
-        int m_tick_rate;
+        time_t m_tick_rate;
         time_t m_curr_time;
 
         public:
-            Exchange(Symbol symbol,Quantity base_fund, Quantity quote_fund,int tick_rate,data::price::Klines_t &&klines);
+            Exchange(Symbol symbol,Quantity base_fund, Quantity quote_fund,time_t tick_rate,data::price::Klines_t &&klines);
 
             Error<int> execute_order(order::Order go);
-            Error<account::Account> get_account();
+            Error<account::Account> get_account_info();
+            Error<Value> get_account_value(time_t t = 0);
             Error<long double> fetch_price(Symbol symbol);
             Error<bool> cancel_order(int o_id);
             Error<bool> tick();

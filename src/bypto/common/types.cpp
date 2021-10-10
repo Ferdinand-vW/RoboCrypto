@@ -26,4 +26,53 @@ namespace bypto::common::types {
         return os;
     }
 
+
+    Value::Value(std::string currency,long double quantity) 
+                : m_currency(currency)
+                , m_quantity(quantity) {};
+
+    Value Value::add(Value v1) {
+        if(m_currency != v1.m_currency) {
+            return *this;
+        }
+
+        m_quantity += v1.m_quantity;
+
+        return *this;
+    }
+
+    Value Value::subtract(Value v1) {
+        if(m_currency != v1.m_currency) {
+            return *this;
+        }
+
+        m_quantity -= v1.m_quantity;
+
+        return *this;
+    }
+
+    Value Value::multiply(Value v1) {
+        if(m_currency != v1.m_currency) {
+            return *this;
+        }
+
+        m_quantity *= v1.m_quantity;
+
+        return *this;
+    }
+
+    Value Value::divide(Value v1) {
+        if(m_currency != v1.m_currency) {
+            return *this;
+        }
+
+        m_quantity /= v1.m_quantity;
+
+        return *this;
+    }
+
+    std::ostream& operator<<(std::ostream &os,const Value &v) {
+        os << "{" << v.m_currency << "," << v.m_quantity << "}";
+        return os;
+    }
 }

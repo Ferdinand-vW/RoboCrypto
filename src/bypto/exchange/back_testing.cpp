@@ -4,15 +4,16 @@
 #include "bypto/common/utils.h"
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
+#include "bypto/exchange.h"
 #include "bypto/order_type.h"
 #include "bypto/strategy/ma.h"
 #include <string>
 
 namespace bypto::exchange {
     
-    Exchange<BackTest,PriceSource::Kline>::Exchange(Symbol symbol
+    Exchange<ExchangeType::BackTest,PriceSource::Kline>::Exchange(Symbol symbol
                                                    ,Quantity base_fund,Quantity quote_fund
-                                                   ,int tick_rate,data::price::Klines_t &&klines) 
+                                                   ,time_t tick_rate,data::price::Klines_t &&klines) 
                                                    :m_symbol(symbol)
                                                    ,m_tick_rate(tick_rate)
                                                    ,m_klines(std::move(klines)) {
@@ -24,17 +25,44 @@ namespace bypto::exchange {
     //common error message
     std::string err_his_data() { return std::string("no remaining historical data"); }
 
-    Error<int> Exchange<BackTest,PriceSource::Kline>::execute_order(order::Order go) {
+    Error<int> Exchange<ExchangeType::BackTest,PriceSource::Kline>::execute_order(order::Order go) {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
     }
 
-    Error<account::Account> Exchange<BackTest,PriceSource::Kline>::get_account() {
+    Error<account::Account> Exchange<ExchangeType::BackTest,PriceSource::Kline>::get_account_info() {
         return m_account;
     }
 
-    Error<long double> Exchange<BackTest,PriceSource::Kline>::fetch_price(Symbol _s) {
+    Error<Value> BackTestExchange::get_account_value(time_t t) {
+        using namespace std::literals::string_literals;
+    
+        auto quote_price = 0;
+        if(t == 0) {
+            auto mlast = m_klines.back_opt();
+            if(mlast) { 
+                quote_price = mlast->get_quote_price();
+            }
+            else { return "No klines data available."s;}
+        } else {
+            auto klines = m_klines.most_recent(t);
+            if(klines.size() < 0) {
+                return "No klines data available."s;
+            } else {
+                auto kline = klines.front();
+                quote_price = kline.get_quote_price();
+            }
+        }
+
+        Value base_value(m_symbol.base(),m_account.get_quantity(m_symbol.base()));
+        auto quote_qty = m_account.get_quantity(m_symbol.quote());
+        Value quote_to_base(m_symbol.base(),quote_price * quote_qty);
+
+        return base_value.add(quote_to_base);
+    }
+
+    Error<long double> Exchange<ExchangeType::BackTest,PriceSource::Kline>::fetch_price(Symbol _s) {
         auto mkline = m_klines.index_opt(m_kline_index);
         if(!mkline.has_value()) { return err_his_data(); }
 
@@ -44,13 +72,13 @@ namespace bypto::exchange {
                                         ,m_curr_time);
     }
 
-    Error<bool> Exchange<BackTest,PriceSource::Kline>::cancel_order(int o_id) {
+    Error<bool> Exchange<ExchangeType::BackTest,PriceSource::Kline>::cancel_order(int o_id) {
         m_outstanding.erase(o_id);
 
         return true;
     }
 
-    Error<bool> Exchange<BackTest,PriceSource::Kline>::tick_once() {
+    Error<bool> Exchange<ExchangeType::BackTest,PriceSource::Kline>::tick_once() {
         if (m_klines.size() <= 0) { return err_his_data(); }
 
         m_curr_time += m_tick_rate;
@@ -85,7 +113,7 @@ namespace bypto::exchange {
 
     }
 
-    std::span<data::price::Kline_t> Exchange<BackTest,PriceSource::Kline>::historical_data(time_t period) {
+    std::span<data::price::Kline_t> Exchange<ExchangeType::BackTest,PriceSource::Kline>::historical_data(time_t period) {
         return m_klines.most_recent(period);
     }
 }

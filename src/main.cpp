@@ -6,6 +6,7 @@
 #include "bypto/data/binance.h"
 #include "bypto/data/price.h"
 #include "bypto/common/csv.h"
+#include "bypto/exchange/back_testing.h"
 #include "bypto/order.h"
 #include "bypto/common/either.h"
 #include "bypto/strategy.h"
@@ -29,18 +30,15 @@ int main() {
     std::fstream fs;
 
 
+    //parse binance klines historical data
     fs.open("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
-    std::cout << fs.is_open() << std::endl;
-    using str_t = std::string;
     bypto::common::types::Symbol sym("BTC","USDT");
     auto klines = bypto::data::binance::parseCSV(sym,fs);
     fs.close();
-    for(auto i = 0; i < 2; i++) {
-        std::cout << " " << klines[i] << std::endl;
-    }
 
     auto conn = tao::pq::connection::create("dbname=historical");
     
+    //store historical data in database
     using namespace bypto::data;
     binance::prepareTable(conn);
     binance::storeKlines(conn,klines);
@@ -50,13 +48,14 @@ int main() {
     auto open_time = utils::createTime_t(2021,07,06);
     auto close_time = utils::createTime_t(2021,07,20);
 
-    auto klines2 = binance::loadKlines(conn, open_time, close_time);
-    std::cout << klines2.front_opt().value() << std::endl;
-    using namespace bypto::order;
-    using namespace bypto::order_type;
-    Order order {sym,Position::Buy,Market { 1.0,Base }};
+    using namespace bypto::exchange;
+    auto fifteen_minutes = utils::createTime_t(0, 0, 0,0,15,0);
+    BackTestExchange bte(sym,1000,1000,fifteen_minutes,std::move(klines));
+    runner::BackTestRunner bt_runner(bte);
+    auto ev = bte.get_account_value();
 
-    std::cout << order;
+    std::cout << ev.right() << std::endl;
+
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
     // const auto sk = std::getenv("BINANCE_TEST_SECRET_KEY");

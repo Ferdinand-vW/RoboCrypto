@@ -6,8 +6,8 @@
 #include "bypto/strategy.h"
 
 namespace bypto::exchange::runner {
-    
-    template<typename T,PriceSource P>
+
+    template<ExchangeType T,PriceSource P>
     class Runner {
         public:
             Runner(Exchange<T,P> e) 
@@ -38,4 +38,6 @@ namespace bypto::exchange::runner {
         private:
             Exchange<T,P> m_exchange;
     };
+
+    typedef Runner<ExchangeType::BackTest,PriceSource::Kline> BackTestRunner;
 }
