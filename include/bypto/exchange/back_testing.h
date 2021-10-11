@@ -42,6 +42,7 @@ namespace bypto::exchange {
             Error<bool> cancel_order(int o_id);
             Error<bool> tick();
             Error<bool> tick_once();
-            std::span<data::price::Kline_t> historical_data(time_t period);
+            time_t get_current_time();
+            std::span<Kline_t> get_historical_prices(time_t period);
     };
 }

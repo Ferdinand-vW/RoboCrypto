@@ -22,8 +22,9 @@ namespace bypto::exchange {
             Error<long double> get_account_value(time_t t = 0);
             Error<long double> fetch_price();
             Error<bool> cancel_order(int o_id);
+            time_t get_current_time();
             Error<bool> tick_once();
-            data::prices::Prices<P>& historical_data(time_t start,time_t end);
+            std::span<data::price::Price<P>> get_historical_prices(time_t start,time_t end);
     };
 
     typedef Exchange<ExchangeType::BackTest,PriceSource::Kline> BackTestExchange;

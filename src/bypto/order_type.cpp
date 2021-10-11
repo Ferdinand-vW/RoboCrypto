@@ -8,8 +8,8 @@ namespace bypto::order_type {
 
     std::ostream& operator<<(std::ostream &os,const Position &p) {
         switch(p) {
-            case Buy: os << "Buy"; break;
-            case Sell: os << "Sell"; break;
+            case Position::Buy: os << "Buy"; break;
+            case Position::Sell: os << "Sell"; break;
         }
 
         return os;
@@ -17,9 +17,9 @@ namespace bypto::order_type {
 
     std::ostream& operator<<(std::ostream &os,const TimeInForce &tif) {
         switch(tif) {
-            case GTC: os << "GTC"; break;
-            case IOC: os << "IOC"; break;
-            case FOK: os << "FOK"; break;
+            case TimeInForce::GTC: os << "GTC"; break;
+            case TimeInForce::IOC: os << "IOC"; break;
+            case TimeInForce::FOK: os << "FOK"; break;
         }
 
         return os;
@@ -27,8 +27,8 @@ namespace bypto::order_type {
 
     std::ostream& operator<<(std::ostream &os,const BaseOrQuote &boq) {
         switch(boq) {
-            case Base: os  << "Base"; break;
-            case Quote: os << "Quote"; break;
+            case BaseOrQuote::Base: os  << "Base"; break;
+            case BaseOrQuote::Quote: os << "Quote"; break;
         }
 
         return os;

@@ -1,7 +1,6 @@
 ﻿// RoboCrypto.cpp : Defines the entry point for the application.
 //
 
-
 #include "bypto/common/utils.h"
 #include "bypto/data/binance.h"
 #include "bypto/data/price.h"
@@ -52,6 +51,12 @@ int main() {
     auto fifteen_minutes = utils::createTime_t(0, 0, 0,0,15,0);
     BackTestExchange bte(sym,1000,1000,fifteen_minutes,std::move(klines));
     runner::BackTestRunner bt_runner(bte);
+
+    using namespace bypto::strategy;
+    Strategy<MovingAverage,PriceSource::Kline> strat_ma;
+
+    bt_runner.run(sym, strat_ma);
+
     auto ev = bte.get_account_value();
 
     std::cout << ev.right() << std::endl;

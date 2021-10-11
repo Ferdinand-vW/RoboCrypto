@@ -11,12 +11,12 @@
 
 namespace bypto::exchange {
     
-    Exchange<ExchangeType::BackTest,PriceSource::Kline>::Exchange(Symbol symbol
-                                                   ,Quantity base_fund,Quantity quote_fund
-                                                   ,time_t tick_rate,data::price::Klines_t &&klines) 
-                                                   :m_symbol(symbol)
-                                                   ,m_tick_rate(tick_rate)
-                                                   ,m_klines(std::move(klines)) {
+    BackTestExchange::Exchange(Symbol symbol
+                              ,Quantity base_fund,Quantity quote_fund
+                              ,time_t tick_rate,data::price::Klines_t &&klines) 
+                              :m_symbol(symbol)
+                              ,m_tick_rate(tick_rate)
+                              ,m_klines(std::move(klines)) {
         m_account.add_fund(symbol.base(),base_fund);
         m_account.add_fund(symbol.quote(),quote_fund);
                                                        
@@ -25,13 +25,13 @@ namespace bypto::exchange {
     //common error message
     std::string err_his_data() { return std::string("no remaining historical data"); }
 
-    Error<int> Exchange<ExchangeType::BackTest,PriceSource::Kline>::execute_order(order::Order go) {
+    Error<int> BackTestExchange::execute_order(order::Order go) {
         m_outstanding.insert({m_counter,go});
         m_counter++;
         return m_counter - 1;
     }
 
-    Error<account::Account> Exchange<ExchangeType::BackTest,PriceSource::Kline>::get_account_info() {
+    Error<account::Account> BackTestExchange::get_account_info() {
         return m_account;
     }
 
@@ -62,7 +62,7 @@ namespace bypto::exchange {
         return base_value.add(quote_to_base);
     }
 
-    Error<long double> Exchange<ExchangeType::BackTest,PriceSource::Kline>::fetch_price(Symbol _s) {
+    Error<long double> BackTestExchange::fetch_price(Symbol _s) {
         auto mkline = m_klines.index_opt(m_kline_index);
         if(!mkline.has_value()) { return err_his_data(); }
 
@@ -72,13 +72,17 @@ namespace bypto::exchange {
                                         ,m_curr_time);
     }
 
-    Error<bool> Exchange<ExchangeType::BackTest,PriceSource::Kline>::cancel_order(int o_id) {
+    Error<bool> BackTestExchange::cancel_order(int o_id) {
         m_outstanding.erase(o_id);
 
         return true;
     }
 
-    Error<bool> Exchange<ExchangeType::BackTest,PriceSource::Kline>::tick_once() {
+    time_t BackTestExchange::get_current_time() {
+        return m_curr_time;
+    }
+
+    Error<bool> BackTestExchange::tick_once() {
         if (m_klines.size() <= 0) { return err_his_data(); }
 
         m_curr_time += m_tick_rate;
@@ -113,7 +117,7 @@ namespace bypto::exchange {
 
     }
 
-    std::span<data::price::Kline_t> Exchange<ExchangeType::BackTest,PriceSource::Kline>::historical_data(time_t period) {
+    std::span<Kline_t> BackTestExchange::get_historical_prices(time_t period) {
         return m_klines.most_recent(period);
     }
 }

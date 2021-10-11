@@ -19,6 +19,7 @@ ExternalProject_Add(
     BINARY_DIR ${taocpp_BINARY_DIR}
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${taocpp_LIB}
+    CMAKE_ARGS -DCMAKE_CXX_STANDARD=20
 )
 
 
@@ -34,6 +35,7 @@ ExternalProject_Add(
     BINARY_DIR ${binapi_BINARY_DIR}
     INSTALL_COMMAND ""
     BUILD_BYPRODUCTS ${binapi_LIB}
+    CMAKE_ARGS -DCMAKE_CXX_STANDARD=20
 )
 
 set(SOURCES bypto/account.cpp
@@ -77,5 +79,7 @@ target_link_libraries(bypto crypto)
 target_link_libraries(bypto ${taocpp_LIB})
 target_link_libraries(bypto ${binapi_LIB})
 
+set_property(TARGET byptoLib PROPERTY CXX_STANDARD 20)
+set_property(TARGET byptoLib PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET bypto PROPERTY CXX_STANDARD 20)
 set_property(TARGET bypto PROPERTY CXX_STANDARD_REQUIRED ON)

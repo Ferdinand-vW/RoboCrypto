@@ -10,9 +10,9 @@ namespace bypto::order_type {
 
 /************************Base types for constructing order types****************/
 
-    enum Position    { Buy ,Sell };
-    enum TimeInForce { GTC ,IOC, FOK };
-    enum BaseOrQuote { Base,Quote    };
+    enum class Position    { Buy ,Sell };
+    enum class TimeInForce { GTC ,IOC, FOK };
+    enum class BaseOrQuote { Base,Quote    };
 
     std::ostream& operator<<(std::ostream &os,const Position &p);
     std::ostream& operator<<(std::ostream &os,const TimeInForce &p);

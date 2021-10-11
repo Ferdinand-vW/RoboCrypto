@@ -4,6 +4,7 @@
 #include "bypto/exchange.h"
 #include "bypto/account.h"
 #include "bypto/strategy.h"
+#include "bypto/strategy/ma.h"
 
 namespace bypto::exchange::runner {
 
@@ -13,26 +14,43 @@ namespace bypto::exchange::runner {
             Runner(Exchange<T,P> e) 
                     : m_exchange(e) {}
 
-            template <strategy::Indicator S>
+            template<template<PriceSource> typename S>
             Error<bool> run(Symbol sym, strategy::Strategy<S,P> strat) {
-                auto acc = m_exchange.get_account_info();
+                bool cont = true;
+                int i = 0;
+                time_t hp_time = m_exchange.get_current_time();
+                while (cont) {
+                    auto eacc = m_exchange.get_account_info();
+                    if(eacc.isLeft()) { return eacc.left(); }
 
-                auto total_base_qty = acc.get_quantity(sym.base());
-                auto total_quote_qty = acc.get_quantity(sym.quote());
+                    auto acc = eacc.right();
 
-                auto spendable_base = total_base_qty / 100; //1%
-                auto spendable_quote = total_quote_qty / 100; // 1%
+                    auto total_base_qty = acc.get_quantity(sym.base());
+                    auto total_quote_qty = acc.get_quantity(sym.quote());
 
-                auto now = m_exchange.get_current_time();
-                auto prices = m_exchange.get_historical_prices();
+                    auto spendable_base = total_base_qty / 100; //1%
+                    auto spendable_quote = total_quote_qty / 100; // 1%
 
-                auto morder = strat.make_decision(now, spendable_base, spendable_quote, prices);
+                    auto now = m_exchange.get_current_time();
+                    auto prices = m_exchange.get_historical_prices(hp_time);
 
-                if(morder) {
-                    m_exchange.execute_order(morder.value());
+                    auto emorder = strat.make_decision(now, spendable_base, spendable_quote, prices);
+
+                    if(emorder.isLeft()) {
+                        return emorder.left();
+                    }
+                    if(emorder.right()) {
+                        m_exchange.execute_order(emorder.right().value());
+                    }
+
+                    auto esucc = m_exchange.tick_once();
+                    if(esucc.isLeft()) { return esucc; }
+                    else { cont = esucc.right(); }
+
+                    std::cout << i << std::endl;
                 }
 
-                auto succ = m_exchange.tick_once();
+                return true;
             }
 
         private:

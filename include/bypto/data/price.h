@@ -5,7 +5,7 @@
 
 namespace bypto::data::price {
 
-    enum PriceSource { Kline, Spot };
+    enum class PriceSource { Kline, Spot };
 
     template<PriceSource P>
     class Price {
