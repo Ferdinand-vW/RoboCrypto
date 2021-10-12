@@ -19,7 +19,7 @@ namespace bypto::exchange {
     template<>
     class Exchange<ExchangeType::BackTest,PriceSource::Kline> {
         data::price::Klines_t m_klines;
-        int m_kline_index;
+        int m_kline_index = 0;
 
         
         std::map<int,order::Order> m_filled;
@@ -33,7 +33,9 @@ namespace bypto::exchange {
         time_t m_curr_time;
 
         public:
-            Exchange(Symbol symbol,Quantity base_fund, Quantity quote_fund,time_t tick_rate,data::price::Klines_t &&klines);
+            Exchange(Symbol symbol,Quantity base_fund,Quantity quote_fund
+                    ,time_t start_time,time_t tick_rate
+                    ,data::price::Klines_t &&klines);
 
             Error<int> execute_order(order::Order go);
             Error<account::Account> get_account_info();

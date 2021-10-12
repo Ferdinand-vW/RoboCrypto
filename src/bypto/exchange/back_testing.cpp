@@ -13,13 +13,14 @@ namespace bypto::exchange {
     
     BackTestExchange::Exchange(Symbol symbol
                               ,Quantity base_fund,Quantity quote_fund
-                              ,time_t tick_rate,data::price::Klines_t &&klines) 
+                              ,time_t start_time,time_t tick_rate
+                              ,data::price::Klines_t &&klines) 
                               :m_symbol(symbol)
+                              ,m_curr_time(start_time)
                               ,m_tick_rate(tick_rate)
                               ,m_klines(std::move(klines)) {
         m_account.add_fund(symbol.base(),base_fund);
         m_account.add_fund(symbol.quote(),quote_fund);
-                                                       
     };
 
     //common error message
