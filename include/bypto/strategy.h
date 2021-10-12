@@ -15,7 +15,7 @@ namespace bypto::strategy {
             make_decision(time_t now
                              ,long double spendable_qty
                              ,long double spendable_quote_qty
-                             ,std::span<data::price::Price<P>> prices) {
+                             ,data::prices::Prices<P> prices) {
                 return S<P>::make_decision(now,spendable_qty,spendable_quote_qty,prices);
             }
     };

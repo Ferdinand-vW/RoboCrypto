@@ -23,11 +23,10 @@ namespace bypto::strategy {
         private:
             long double m_ma;
 
-            long double compute_moving_average(time_t oldest,std::span<data::price::Kline_t> prices) {
+            long double compute_moving_average(time_t oldest,const Klines_t& prices) {
                 if(prices.size() <= 0) { return 0; } // prevent divide by 0
 
-
-                std::span<data::price::Kline_t> prices_in_period = prices;//prices.most_recent(oldest);
+                const std::span<const Kline_t> prices_in_period = prices.most_recent(oldest);
                 auto sum = std::accumulate(prices_in_period.begin(),prices_in_period.end(),0,[](const int&acc,auto &kl) {
                     return acc + kl.m_close;
                 });
@@ -42,7 +41,7 @@ namespace bypto::strategy {
             make_decision(time_t now
                          ,long double spendable_qty
                          ,long double spendable_quote_qty
-                         ,std::span<data::price::Kline_t> prices) {
+                         ,const Klines_t& prices) {
                 // E.g. 15 min interval then 4 hour MA against 1 hour MA
                 // 4h/15min = 16. We probably want this to be configurable at call site.
                 if (prices.size() < 16) {

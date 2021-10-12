@@ -14,18 +14,23 @@ namespace bypto::data::prices {
     class Prices {
 
         private:
-            std::vector<Price<P>> m_prices;
+            std::span<Price<P>> m_prices;
 
-            Prices(time_t interval,std::vector<Price<P>> &&prices) : m_interval(interval)
-                                                                    ,m_prices(std::move(prices)) {}
+            Prices(time_t interval,std::vector<Price<P>> &prices) : m_interval(interval)
+                                                                  , m_prices(prices) {}
+
+            Prices(time_t interval,std::span<Price<P>> prices) : m_interval(interval)
+                                                               , m_prices(prices) {}
 
         public:
             time_t m_interval;
 
+
+
             //Overrides any existing data. Performs sanity check.
-            static common::types::Error<Prices<P>> CreatePrices(time_t interval,std::vector<Price<P>> &&prices) {
+            static common::types::Error<Prices<P>> CreatePrices(time_t interval,std::vector<Price<P>> &prices) {
                 if(prices.size() <= 0) {
-                    return Prices(interval,std::move(prices));
+                    return Prices(interval,prices);
                 }
 
                 //confirm that every price was taken at an interval of @interval@
@@ -39,7 +44,7 @@ namespace bypto::data::prices {
                     t0 = prices[i].get_time();
                 }
 
-                return Prices(interval,std::move(prices));
+                return Prices(interval,prices);
             }
             
             //This price should be exactly taken at @m_interval@ time after the last price in @m_prices@
@@ -54,15 +59,16 @@ namespace bypto::data::prices {
                 }
             }
 
-            std::span<Price<P>> time_interval(time_t start, time_t end) {
-                return m_prices;
-            }
-            std::span<Price<P>> most_recent(time_t time_period) {
+            Prices<P> time_interval(time_t start, time_t end) const {
                 return m_prices;
             }
 
+            Prices<P> most_recent(time_t time_period) const {
+                return Prices(m_interval,m_prices);
+            }
 
-            Price<P>& operator[](int index) {
+
+            Price<P> operator[](int index) const {
                 return m_prices[index];
             }
 
@@ -70,7 +76,7 @@ namespace bypto::data::prices {
                 return m_prices;
             }
 
-            std::optional<Price<P>> front_opt() {
+            std::optional<Price<P>> front_opt() const {
                 if(m_prices.size() == 0) {
                     return {};
                 } else {
@@ -78,7 +84,7 @@ namespace bypto::data::prices {
                 }
             }
 
-            std::optional<Price<P>> back_opt() {
+            std::optional<Price<P>> back_opt() const {
                 if(m_prices.size() == 0) {
                     return {};
                 } else {
@@ -86,19 +92,19 @@ namespace bypto::data::prices {
                 }
             }
 
-            std::optional<Price<P>> index_opt(int index) {
+            std::optional<Price<P>> index_opt(int index) const {
                 if(m_prices.size() > index) { return m_prices[index]; }
                 else { return {};}
             }
 
-            size_t size() {
+            size_t size() const {
                 return m_prices.size();
             }
 
-            auto begin() {
+            auto begin() const {
                 return m_prices.begin();
             }
-            auto end() {
+            auto end() const {
                 return m_prices.end();
             }
     };

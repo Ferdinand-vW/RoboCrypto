@@ -2,6 +2,7 @@
 #include "bypto/account.h"
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
+#include "bypto/data/binance.h"
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
 #include "bypto/exchange.h"
@@ -14,7 +15,7 @@ namespace bypto::exchange {
     BackTestExchange::Exchange(Symbol symbol
                               ,Quantity base_fund,Quantity quote_fund
                               ,time_t start_time,time_t tick_rate
-                              ,data::price::Klines_t &&klines) 
+                              ,std::vector<Kline_t> &&klines) 
                               :m_symbol(symbol)
                               ,m_curr_time(start_time)
                               ,m_tick_rate(tick_rate)
@@ -38,21 +39,22 @@ namespace bypto::exchange {
 
     Error<Value> BackTestExchange::get_account_value(time_t t) {
         using namespace std::literals::string_literals;
-    
+        auto prices = pricesFromKlines(m_klines);
+
         auto quote_price = 0;
         if(t == 0) {
-            auto mlast = m_klines.back_opt();
+            auto mlast = prices.back_opt();
             if(mlast) { 
                 quote_price = mlast->get_quote_price();
             }
             else { return "No klines data available."s;}
         } else {
-            auto klines = m_klines.most_recent(t);
-            if(klines.size() < 0) {
+            auto klines = prices.most_recent(t);
+            auto mfirst = klines.front_opt();
+            if(!mfirst.has_value()) {
                 return "No klines data available."s;
             } else {
-                auto kline = klines.front();
-                quote_price = kline.get_quote_price();
+                quote_price = mfirst.value().get_quote_price();
             }
         }
 
@@ -64,7 +66,9 @@ namespace bypto::exchange {
     }
 
     Error<long double> BackTestExchange::fetch_price(Symbol _s) {
-        auto mkline = m_klines.index_opt(m_kline_index);
+        auto prices = pricesFromKlines(m_klines);
+
+        auto mkline = prices.index_opt(m_kline_index);
         if(!mkline.has_value()) { return err_his_data(); }
 
         auto kline = mkline.value();
@@ -84,16 +88,17 @@ namespace bypto::exchange {
     }
 
     Error<bool> BackTestExchange::tick_once() {
+        auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
 
         m_curr_time += m_tick_rate;
 
-        auto kline = m_klines[m_kline_index];
+        auto kline = prices[m_kline_index];
         //if we're past the time of the current kline
         //then we should move to the next
         if (kline.m_close_time < m_curr_time) {
             m_kline_index++;
-            auto m_next = m_klines.index_opt(m_kline_index);
+            auto m_next = prices.index_opt(m_kline_index);
             //if current kline was last then return
             if(!m_next.has_value()) { return err_his_data(); }
             else { kline = m_next.value(); }
@@ -118,7 +123,7 @@ namespace bypto::exchange {
 
     }
 
-    std::span<Kline_t> BackTestExchange::get_historical_prices(time_t period) {
-        return m_klines.most_recent(period);
+    Klines_t BackTestExchange::get_historical_prices(time_t period) {
+        return pricesFromKlines(m_klines).most_recent(period);
     }
 }

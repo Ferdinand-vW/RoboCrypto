@@ -27,7 +27,7 @@ namespace bypto::common::types {
 
             bool operator==(const Symbol &s1) const;
             static Symbol from_string(std::string s);
-            std::string to_string();
+            std::string to_string() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const Symbol &s);

@@ -13,7 +13,7 @@ namespace bypto::common::types {
         return Symbol(base,quote);
     }
 
-    std::string Symbol::to_string() {
+    std::string Symbol::to_string() const {
         return this->base() + this->quote();
     }
 

@@ -3,6 +3,7 @@
 #include "bypto/account.h"
 #include "bypto/common/either.h"
 #include "bypto/common/types.h"
+#include "bypto/data/binance.h"
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
 #include "bypto/exchange.h"
@@ -15,10 +16,11 @@
 
 namespace bypto::exchange {
     using namespace common::types;
+    using namespace bypto::data::binance;
     
     template<>
     class Exchange<ExchangeType::BackTest,PriceSource::Kline> {
-        data::price::Klines_t m_klines;
+        std::vector<Kline_t> m_klines;
         int m_kline_index = 0;
 
         
@@ -35,7 +37,7 @@ namespace bypto::exchange {
         public:
             Exchange(Symbol symbol,Quantity base_fund,Quantity quote_fund
                     ,time_t start_time,time_t tick_rate
-                    ,data::price::Klines_t &&klines);
+                    ,std::vector<Kline_t> &&klines);
 
             Error<int> execute_order(order::Order go);
             Error<account::Account> get_account_info();
@@ -45,6 +47,6 @@ namespace bypto::exchange {
             Error<bool> tick();
             Error<bool> tick_once();
             time_t get_current_time();
-            std::span<Kline_t> get_historical_prices(time_t period);
+            Klines_t get_historical_prices(time_t period);
     };
 }

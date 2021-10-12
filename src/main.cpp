@@ -48,7 +48,7 @@ int main() {
     auto close_time = utils::createTime_t(2021,07,20);
 
     using namespace bypto::exchange;
-    auto start_time = klines.front_opt().value().m_close_time;
+    auto start_time = klines.front().m_close_time;
     auto fifteen_minutes = utils::createTime_t(0, 0, 0,0,15,0);
     BackTestExchange bte(sym,1000,1000,start_time,fifteen_minutes,std::move(klines));
     runner::BackTestRunner bt_runner(bte);

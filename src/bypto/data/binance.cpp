@@ -8,13 +8,13 @@
 
 namespace bypto::data::binance {
 
-    price::Klines_t klinesToPrices(std::vector<price::Kline_t> &&klines) {
+    price::Klines_t pricesFromKlines(std::vector<price::Kline_t> &klines) {
         if(klines.size() < 2) {
             throw "Klines data must contain at least 2 entries";
         }
 
         auto interval = klines[1].m_close_time - klines[0].m_close_time;
-        auto eprices = price::Klines_t::CreatePrices(interval,std::move(klines));
+        auto eprices = price::Klines_t::CreatePrices(interval,klines);
 
         //klines data should be provided in consistent format
         if(eprices.isLeft()) {
@@ -24,7 +24,7 @@ namespace bypto::data::binance {
         return eprices.right();
     }
 
-    price::Klines_t parseCSV(common::types::Symbol sym, std::istream &is) {
+    std::vector<price::Kline_t> parseCSV(common::types::Symbol sym, std::istream &is) {
         typedef long double ld;
         //sadly type inference is unable to figure out what
         //the type of the header should be
@@ -53,7 +53,7 @@ namespace bypto::data::binance {
         std::vector<price::Kline_t> klines;
         std::transform(tpls.begin(),tpls.end(),std::back_inserter(klines),toKline);
 
-        return klinesToPrices(std::move(klines));
+        return klines;
     }
 
     void prepareTable(common::types::pgconn_t &conn) {
@@ -80,7 +80,7 @@ namespace bypto::data::binance {
         conn->execute(create_query);
     }
 
-    void storeKlines(common::types::pgconn_t &conn, price::Klines_t &klines) {
+    void storeKlines(common::types::pgconn_t &conn, const std::vector<price::Kline_t> &klines) {
         std::vector<std::string> field_list = 
             { "symbol"
             ,"open_time","open","high"
@@ -110,7 +110,7 @@ namespace bypto::data::binance {
         }
     }
 
-    price::Klines_t loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time) {
+    std::vector<price::Kline_t> loadKlines(common::types::pgconn_t &conn,time_t open_time,time_t close_time) {
         auto results = conn->execute(
                              "SELECT * FROM klines WHERE open_time >= $1 AND close_time <= $2"
                             ,open_time,close_time);
@@ -134,7 +134,7 @@ namespace bypto::data::binance {
         }
 
 
-        return klinesToPrices(std::move(klines));
+        return klines;
     }
 
 
