@@ -44,4 +44,10 @@ namespace bypto::common::utils {
 
         return std::mktime(timeinfo);
     }
+
+    Ord compare_time(time_t t1, time_t t2) {
+        if(t1 == t2) { return Ord::EQ; }
+        else if(t1 < t2) { return Ord::LT;}
+        else {return Ord::GT;}
+    }
 }

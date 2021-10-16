@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bypto/common/types.h"
+#include "bypto/common/utils.h"
 #include <bits/types/time_t.h>
 
 namespace bypto::data::price {

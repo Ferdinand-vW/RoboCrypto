@@ -4,6 +4,7 @@
 #include <span>
 #include <optional>
 
+#include "bypto/common/utils.h"
 #include "bypto/data/price.h"
 #include "bypto/common/types.h"
 
@@ -60,10 +61,39 @@ namespace bypto::data::prices {
             }
 
             Prices<P> time_interval(time_t start, time_t end) const {
-                return m_prices;
+                using namespace common::utils;
+                auto start_pred = [start](auto &p) { return compare_time(p.get_time(),start);};
+                auto end_pred = [end](auto &p) { return compare_time(p.get_time(),end);};
+                auto start_i = bin_search_index(m_prices, start_pred);
+                auto end_i = bin_search_index(m_prices, end_pred);
+
+                //We have to assume that either or both start and end are time_t values that we cannot find
+                //in m_prices. Should either one be missing then let's assume they were not provided
+                if(start_i >= 0 && end_i >= 0 && start_i <= end_i) {
+                    return Prices(m_interval,m_prices.subspan(start_i,end_i - start_i + 1));
+                } else if(start_i >= 0) {
+                    return Prices(m_interval,m_prices.subspan(start_i));
+                } else if(end_i >= 0) {
+                    return Prices(m_interval,m_prices.subspan(0,end_i + 1));
+                }
+
+                return Prices(m_interval,m_prices);
             }
 
+            //Can be implemented using @time_interval@, however this is slightly faster
+            //since we only do a binary search once instead of twice
             Prices<P> most_recent(time_t time_period) const {
+                using namespace common::utils;
+                
+                auto pred = [time_period](auto &p) { return compare_time(p.get_time(), time_period); };
+
+                //Find the index of @time_period@ in price span
+                auto i = common::utils::bin_search_index(m_prices,pred);
+                if(i >= 0) {
+                    return Prices(m_interval,m_prices.subspan(i));
+                }
+
+                //if we cannot find @time_period@ then simply return original span
                 return Prices(m_interval,m_prices);
             }
 
