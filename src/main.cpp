@@ -43,24 +43,28 @@ int main() {
     binance::storeKlines(conn,klines);
 
     using namespace bypto::common;
-    auto t = utils::createTime_t(2021, 07, 01);
-    auto open_time = utils::createTime_t(2021,07,06);
-    auto close_time = utils::createTime_t(2021,07,20);
+    auto t = utils::create_time(2021, 07, 01);
+    auto open_time = utils::create_time(2021,07,06);
+    auto close_time = utils::create_time(2021,07,20);
 
     using namespace bypto::exchange;
     auto start_time = klines.front().m_close_time;
-    auto fifteen_minutes = utils::createTime_t(0, 0, 0,0,15,0);
-    BackTestExchange bte(sym,1000,1000,start_time,fifteen_minutes,std::move(klines));
-    runner::BackTestRunner bt_runner(bte);
+    std::cout << "start time " << start_time << std::endl;
+    utils::time_unit fifteen_minutes = {0,0,0,0,15,0};
 
-    using namespace bypto::strategy;
-    Strategy<MovingAverage,PriceSource::Kline> strat_ma;
+    std::cout << fifteen_minutes << std::endl;
+    std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
+    // BackTestExchange bte(sym,1000,1000,start_time,fifteen_minutes,std::move(klines));
+    // runner::BackTestRunner bt_runner(bte);
 
-    bt_runner.run(sym, strat_ma);
+    // using namespace bypto::strategy;
+    // Strategy<MovingAverage,PriceSource::Kline> strat_ma;
 
-    auto ev = bte.get_account_value();
+    // bt_runner.run(sym, strat_ma);
 
-    std::cout << ev.right() << std::endl;
+    // auto ev = bte.get_account_value();
+
+    // std::cout << ev.right() << std::endl;
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");

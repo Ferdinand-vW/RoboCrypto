@@ -40,7 +40,9 @@ namespace bypto::exchange::runner {
                         return emorder.left();
                     }
                     if(emorder.right()) {
-                        m_exchange.execute_order(emorder.right().value());
+                        auto order = emorder.right().value();
+                        std::cout << "New order " << order.m_order_type;
+                        m_exchange.execute_order(order);
                     }
 
                     auto esucc = m_exchange.tick_once();

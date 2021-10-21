@@ -35,7 +35,19 @@ namespace bypto::common::utils {
 
     enum class Ord { LT, EQ, GT };
 
-    time_t createTime_t(int y,int m,int d,int h=0,int min=0,int sec=0);
+    struct time_unit {
+        int m_years = 0;
+        int m_months = 0;
+        int m_days = 0;
+        int m_hours = 0;
+        int m_minutes = 0;
+        int m_seconds = 0;
+    };
+    
+    std::ostream& operator<<(std::ostream &os,const time_unit& tu);
+
+    time_t add_time(time_t t,time_unit tu);
+    time_t create_time(int y,int m,int d,int h=0,int min=0,int sec=0);
     Ord compare_time(time_t t1,time_t t2);
 
     template <typename I>

@@ -90,7 +90,7 @@ namespace bypto::exchange {
     Error<bool> BackTestExchange::tick_once() {
         auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
-
+        std::cout << "Time: " << m_curr_time << std::endl;
         m_curr_time += m_tick_rate;
 
         auto kline = prices[m_kline_index];
@@ -108,7 +108,8 @@ namespace bypto::exchange {
         //TODO: logic to see if any outstanding orders can be filled
         for(auto &o : m_outstanding) {
             auto opt_fr = o.second.try_fill(m_symbol, curr_price);
-            if(opt_fr) { // could fill order
+            if(opt_fr) { // could fill 
+                std::cout << "can fill oustanding:" << o.first << std::endl;
                 auto fr = opt_fr.value();
                 if(fr.m_new_order) { //order triggered a new order
                     o.second.m_order_type = fr.m_new_order.value();
