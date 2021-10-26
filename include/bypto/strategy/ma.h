@@ -42,9 +42,8 @@ namespace bypto::strategy {
                          ,long double spendable_qty
                          ,long double spendable_quote_qty
                          ,const Klines_t& prices) {
-                // E.g. 15 min interval then 4 hour MA against 1 hour MA
-                // 4h/15min = 16. We probably want this to be configurable at call site.
-                if (prices.size() < 16) {
+                
+                if (!has_enough_data(prices)) {
                     using namespace std::literals::string_literals;
                     return "Too few data points to apply MA strategy. Require at least 16 points which is 16xtime_interval worth of time."s;
                 }
@@ -55,6 +54,8 @@ namespace bypto::strategy {
 
                 auto four_hour_ma = compute_moving_average(four_hour, prices);
                 auto one_hour_ma = compute_moving_average(one_hour, prices);
+                std::cout << "4h_ma: " << four_hour_ma << std::endl;
+                std::cout << "1h_ma: " << one_hour_ma << std::endl;
 
                 common::types::Symbol sym("BTC","USDT");
                 if(one_hour_ma > four_hour_ma) {
@@ -72,6 +73,12 @@ namespace bypto::strategy {
                     return nothing;
                 }
 
+            }
+
+            bool has_enough_data(const Klines_t& prices) {
+                // E.g. 15 min interval then 4 hour MA against 1 hour MA
+                // 4h/15min = 16. We probably want this to be configurable at call site.
+                return prices.size() >= 16;
             }
     };
 

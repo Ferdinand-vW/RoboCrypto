@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include <type_traits>
 #include <variant>
 #include <memory>
@@ -26,8 +27,6 @@ namespace bypto::common::either {
                 m_l = std::make_unique<L>(std::move(l));
                 m_is_left = true;
             }
-
-            
 
             //constructor pass by ref (1 copy, 0 move)
             Either(L &l,typename std::enable_if<!std::is_same<L,R>::value,int>::type = 0) {
@@ -87,18 +86,18 @@ namespace bypto::common::either {
                 }
             }
 
-            bool isLeft() {
+            bool isLeft() const {
                 return m_is_left;
             }
 
-            bool isRight() {
+            bool isRight() const {
                 return !m_is_left;
             }
 
-            L& left() {
+            L& left() const {
                 return *m_l;
             }
-            R& right() {
+            R& right() const {
                 return *m_r;
             }
 
@@ -132,4 +131,15 @@ namespace bypto::common::either {
                 }
             }
     };
+
+    template <typename L,typename R>
+    std::ostream& operator<<(std::ostream&os,const Either<L,R> &e) {
+        if(e.isLeft()) {
+            os << "{L " << e.left() << " }";
+        } else {
+            os << "{R " << e.right() << " }";
+        }
+
+        return os;
+    }
 }

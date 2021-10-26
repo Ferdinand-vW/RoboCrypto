@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <string>
 #include <vector>
 #include <deque>
@@ -64,21 +65,19 @@ namespace bypto::common::utils {
         size_t lb = 0;
         size_t ub = v.size() - 1;
 
-        size_t res = -1;
-        while(lb >= ub) {
-            size_t mid = (lb+ub) / 2;
+        while(lb < ub) {
+            double sum = lb + ub;
+            size_t mid = std::ceil(sum / 2);
             auto ord = pred(v[mid]);
 
-            if(ord == Ord::EQ) {
-                res = mid;
-            } else if(ord == Ord::LT) {
-                lb = mid + 1;
-            } else {
+            if(ord == Ord::GT) {
                 ub = mid - 1;
+            } else {
+                lb = mid;
             }
         }
 
-        return res;
+        return lb;
     }
 
     template<Indexable I,typename F,typename A>

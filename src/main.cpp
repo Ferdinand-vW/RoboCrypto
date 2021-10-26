@@ -60,7 +60,8 @@ int main() {
     using namespace bypto::strategy;
     Strategy<MovingAverage,PriceSource::Kline> strat_ma;
 
-    bt_runner.run(sym, strat_ma);
+    auto res = bt_runner.run(sym, strat_ma);
+    std::cout << res << std::endl;
 
     auto ev = bte.get_account_value();
 

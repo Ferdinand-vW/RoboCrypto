@@ -18,6 +18,10 @@ namespace bypto::strategy {
                              ,data::prices::Prices<P> prices) {
                 return S<P>::make_decision(now,spendable_qty,spendable_quote_qty,prices);
             }
+
+            bool has_enough_data(data::prices::Prices<P> prices) {
+                return S<P>::has_enough_data(prices);
+            }
     };
 
 }

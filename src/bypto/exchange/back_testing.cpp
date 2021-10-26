@@ -90,10 +90,13 @@ namespace bypto::exchange {
     Error<bool> BackTestExchange::tick_once() {
         auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
+        if(m_kline_index >= m_klines.size()) { return false; }// we ran out of data so signal to stop
         std::cout << "Time: " << pp_time(m_curr_time) << std::endl;
         m_curr_time = add_time(m_curr_time, m_tick_rate);
 
+        std::cout << m_klines.size() << std::endl;
         auto kline = prices[m_kline_index];
+        std::cout << m_kline_index <<std::endl;
         //if we're past the time of the current kline
         //then we should move to the next
         if (kline.m_close_time < m_curr_time) {
@@ -105,26 +108,36 @@ namespace bypto::exchange {
         }
 
         long double curr_price = kline.m_close;
+        if(m_kline_index == 2974) {
+            std::cout << "2974" << std::endl;
+        }
         //TODO: logic to see if any outstanding orders can be filled
-        for(auto &o : m_outstanding) {
-            auto opt_fr = o.second.try_fill(m_symbol, curr_price);
+        for(auto o = m_outstanding.begin(); o != m_outstanding.end() ; ) {
+            auto opt_fr = o->second.try_fill(m_symbol, curr_price);
             if(opt_fr) { // could fill 
-                std::cout << "can fill oustanding:" << o.first << std::endl;
+                std::cout << "can fill oustanding:" << o->first << std::endl;
                 auto fr = opt_fr.value();
                 if(fr.m_new_order) { //order triggered a new order
-                    o.second.m_order_type = fr.m_new_order.value();
+                    o->second.m_order_type = fr.m_new_order.value();
                 } else { // store result
                     auto partial = order_type::fillToPartial(fr);
-                    m_partials.insert({o.first,partial});
+                    m_partials.insert({o->first,partial});
                 }
+
+                o = m_outstanding.erase(o);
+            } else {
+                ++o;
             }
+
+            std::cout << "here" << std::endl;
         }
+
 
         return true;
 
     }
 
-    Klines_t BackTestExchange::get_historical_prices(time_t period) {
-        return pricesFromKlines(m_klines).most_recent(period);
+    Klines_t BackTestExchange::get_historical_prices(time_t start,time_t end) {
+        return pricesFromKlines(m_klines).time_interval(start, end);
     }
 }
