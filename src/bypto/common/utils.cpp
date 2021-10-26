@@ -1,6 +1,8 @@
 #include "bypto/common/utils.h"
 #include <ctime>
+#include <iomanip>
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace bypto::common::utils {
@@ -72,5 +74,13 @@ namespace bypto::common::utils {
         if(t1 == t2) { return Ord::EQ; }
         else if(t1 < t2) { return Ord::LT;}
         else {return Ord::GT;}
+    }
+
+    std::string pp_time(time_t t) {
+        auto timeinfo = std::localtime(&t);
+
+        std::ostringstream oss;
+        oss << std::put_time(timeinfo, "%d-%m-%Y %H-%M-%S");
+        return oss.str();
     }
 }

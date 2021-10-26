@@ -54,17 +54,17 @@ int main() {
 
     std::cout << fifteen_minutes << std::endl;
     std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
-    // BackTestExchange bte(sym,1000,1000,start_time,fifteen_minutes,std::move(klines));
-    // runner::BackTestRunner bt_runner(bte);
+    BackTestExchange bte(sym,1000,1000,start_time,fifteen_minutes,std::move(klines));
+    runner::BackTestRunner bt_runner(bte);
 
-    // using namespace bypto::strategy;
-    // Strategy<MovingAverage,PriceSource::Kline> strat_ma;
+    using namespace bypto::strategy;
+    Strategy<MovingAverage,PriceSource::Kline> strat_ma;
 
-    // bt_runner.run(sym, strat_ma);
+    bt_runner.run(sym, strat_ma);
 
-    // auto ev = bte.get_account_value();
+    auto ev = bte.get_account_value();
 
-    // std::cout << ev.right() << std::endl;
+    std::cout << ev.right() << std::endl;
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");

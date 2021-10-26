@@ -3,6 +3,7 @@
 #include "bypto/account.h"
 #include "bypto/common/either.h"
 #include "bypto/common/types.h"
+#include "bypto/common/utils.h"
 #include "bypto/data/binance.h"
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
@@ -16,6 +17,7 @@
 
 namespace bypto::exchange {
     using namespace common::types;
+    using namespace common::utils;
     using namespace bypto::data::binance;
     
     template<>
@@ -31,12 +33,12 @@ namespace bypto::exchange {
 
         int m_counter = 0;
         Symbol m_symbol;
-        time_t m_tick_rate;
+        time_unit m_tick_rate;
         time_t m_curr_time;
 
         public:
             Exchange(Symbol symbol,Quantity base_fund,Quantity quote_fund
-                    ,time_t start_time,time_t tick_rate
+                    ,time_t start_time,time_unit tick_rate
                     ,std::vector<Kline_t> &&klines);
 
             Error<int> execute_order(order::Order go);

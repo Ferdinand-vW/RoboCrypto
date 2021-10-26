@@ -14,7 +14,7 @@ namespace bypto::exchange {
     
     BackTestExchange::Exchange(Symbol symbol
                               ,Quantity base_fund,Quantity quote_fund
-                              ,time_t start_time,time_t tick_rate
+                              ,time_t start_time,time_unit tick_rate
                               ,std::vector<Kline_t> &&klines) 
                               :m_symbol(symbol)
                               ,m_curr_time(start_time)
@@ -90,8 +90,8 @@ namespace bypto::exchange {
     Error<bool> BackTestExchange::tick_once() {
         auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
-        std::cout << "Time: " << m_curr_time << std::endl;
-        m_curr_time += m_tick_rate;
+        std::cout << "Time: " << pp_time(m_curr_time) << std::endl;
+        m_curr_time = add_time(m_curr_time, m_tick_rate);
 
         auto kline = prices[m_kline_index];
         //if we're past the time of the current kline

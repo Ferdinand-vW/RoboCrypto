@@ -17,7 +17,6 @@ namespace bypto::exchange::runner {
             template<template<PriceSource> typename S>
             Error<bool> run(Symbol sym, strategy::Strategy<S,P> strat) {
                 bool cont = true;
-                int i = 0;
                 time_t hp_time = m_exchange.get_current_time();
                 while (cont) {
                     auto eacc = m_exchange.get_account_info();
@@ -49,7 +48,6 @@ namespace bypto::exchange::runner {
                     if(esucc.isLeft()) { return esucc; }
                     else { cont = esucc.right(); }
 
-                    std::cout << i << std::endl;
                 }
 
                 return true;

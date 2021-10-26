@@ -49,6 +49,7 @@ namespace bypto::common::utils {
     time_t add_time(time_t t,time_unit tu);
     time_t create_time(int y,int m,int d,int h=0,int min=0,int sec=0);
     Ord compare_time(time_t t1,time_t t2);
+    std::string pp_time(time_t t);
 
     template <typename I>
     concept Indexable = requires(I t) {
