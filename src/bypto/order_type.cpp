@@ -34,8 +34,8 @@ namespace bypto::order_type {
         return os;
     }
 
-        Partial fillToPartial(FillResult fr) {
-        return Partial{fr.m_price,fr.m_qty,fr.m_pos};
+    Partial fillToPartial(FillResult fr) {
+        return Partial{fr.m_price,fr.m_symbol,fr.m_qty,fr.m_pos};
     }
 
     std::ostream& operator<<(std::ostream &os,const FillResult &fr) {
@@ -59,16 +59,20 @@ namespace bypto::order_type {
         return os;
     }
 
-    Market::Market(Quantity qty,BaseOrQuote boq) : m_qty(qty),m_boq(boq) {};
+    Market::Market(Symbol sym,Quantity qty,Position pos,BaseOrQuote boq) 
+                 : m_sym(sym)
+                 , m_qty(qty)
+                 , m_pos(pos)
+                 , m_boq(boq) {};
 
-    std::optional<FillResult> Market::try_fill(Position pos,Price price) {
+    std::optional<FillResult> Market::try_fill(Price price) {
         Price actual = price;
         if(m_boq == BaseOrQuote::Quote) {
             actual = 1/price;
         }
 
         //market order accepts any price
-        return FillResult{actual,m_qty,pos,{}};
+        return FillResult{actual,m_sym,m_qty,m_pos,{}};
     }
 
     std::ostream& operator<<(std::ostream &os,const Market &m) {
@@ -79,19 +83,22 @@ namespace bypto::order_type {
         return os;
     }
 
-    Limit::Limit(TimeInForce tif,Quantity qty,Price price) 
-                : m_time_in_force(tif)
-                , m_qty(qty)
-                , m_price(price) {};
+    Limit::Limit(Symbol sym,Quantity qty,Position pos,TimeInForce tif,Price limit) 
+                 : m_sym(sym)
+                 , m_qty(qty)
+                 , m_pos(pos)
+                 , m_boq(BaseOrQuote::Base)
+                 , m_time_in_force(tif)
+                 , m_limit(limit) {};
 
-    std::optional<FillResult> Limit::try_fill(Position pos,Price price) {
-        if(pos == Position::Buy && price <= m_price) {
+    std::optional<FillResult> Limit::try_fill(Price price) {
+        if(m_pos == Position::Buy && price <= m_limit) {
             //If price equals or is lower than LIMIT then buy
-            return FillResult{price,m_qty,pos,{}};
+            return FillResult{price,m_qty,m_pos,{}};
         
-        } else if (pos == Position::Sell && price >= m_price) {
+        } else if (m_pos == Position::Sell && price >= m_limit) {
             //If price equals or is higher than LIMIT then buy
-            return FillResult{price,m_qty,pos,{}};
+            return FillResult{price,m_qty,m_pos,{}};
         
         } else {
             //otherwise don't fill
@@ -101,22 +108,27 @@ namespace bypto::order_type {
 
     std::ostream& operator<<(std::ostream &os,const Limit &l) {
         os << "Limit {";
-        os << "m_time_in_force=" << l.m_time_in_force << ",";
-        os << "m_qty="           << l.m_qty      << ",";
-        os << "m_price="         << l.m_price         << "}";
+        os << "m_time_in_force=" << l.get_time_in_force() << ",";
+        os << "m_qty="           << l.get_quantity()      << ",";
+        os << "m_limit="         << l.get_limit()         << "}";
 
         return os;
     }
 
-    std::optional<FillResult> StopLoss::try_fill(Position pos,Price price) {
-        if(m_stop_price >= price) {
+    StopLoss::StopLoss(Symbol sym,Quantity qty,Position pos,Price stop)
+                      : m_sym(sym)
+                      , m_qty(qty)
+                      , m_pos(pos)
+                      , m_stop(stop) {};
+
+    std::optional<FillResult> StopLoss::try_fill(Price price) {
+        if(m_stop >= price) {
         //If price falls and reaches stop price then trigger market order
-            return FillResult{price,m_qty,pos,Market(m_qty,BaseOrQuote::Base)};
+            return FillResult{price,m_qty,m_pos,Market(m_qty,BaseOrQuote::Base)};
         
         } else {
          
             return {};
-        
         }   
     }
 

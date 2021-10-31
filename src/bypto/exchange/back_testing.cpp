@@ -37,6 +37,16 @@ namespace bypto::exchange {
         return m_account;
     }
 
+    void BackTestExchange::update_account(order_type::Partial p) {
+        switch(p.m_pos) {
+            case order_type::Position::Buy:
+                m_account.add_fund(p.m_symbol, -p.m_qty)
+            break;
+            case order_type::Position::Sell:
+            break;
+        }
+    }
+
     Error<Value> BackTestExchange::get_account_value(time_t t) {
         using namespace std::literals::string_literals;
         auto prices = pricesFromKlines(m_klines);
@@ -108,9 +118,6 @@ namespace bypto::exchange {
         }
 
         long double curr_price = kline.m_close;
-        if(m_kline_index == 2974) {
-            std::cout << "2974" << std::endl;
-        }
         //TODO: logic to see if any outstanding orders can be filled
         for(auto o = m_outstanding.begin(); o != m_outstanding.end() ; ) {
             auto opt_fr = o->second.try_fill(m_symbol, curr_price);
@@ -121,17 +128,14 @@ namespace bypto::exchange {
                     o->second.m_order_type = fr.m_new_order.value();
                 } else { // store result
                     auto partial = order_type::fillToPartial(fr);
-                    m_partials.insert({o->first,partial});
+                    update_account(partial);
                 }
 
                 o = m_outstanding.erase(o);
             } else {
                 ++o;
             }
-
-            std::cout << "here" << std::endl;
         }
-
 
         return true;
 

@@ -27,7 +27,6 @@ namespace bypto::exchange {
 
         
         std::map<int,order::Order> m_filled;
-        std::map<int,order_type::Partial> m_partials;
         std::map<int,order::Order> m_outstanding;
         account::Account m_account;
 
@@ -35,6 +34,8 @@ namespace bypto::exchange {
         Symbol m_symbol;
         time_unit m_tick_rate;
         time_t m_curr_time;
+
+        void update_account(order_type::Partial p);
 
         public:
             Exchange(Symbol symbol,Quantity base_fund,Quantity quote_fund
