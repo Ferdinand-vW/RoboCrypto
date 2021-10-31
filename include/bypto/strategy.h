@@ -2,7 +2,8 @@
 
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
-#include "bypto/order.h"
+#include "bypto/order/order.h"
+#include "bypto/order/order_type.h"
 
 namespace bypto::strategy {
 
@@ -11,7 +12,7 @@ namespace bypto::strategy {
     class Strategy : S<P> {
 
         public:
-            common::types::Error<std::optional<order::Order>>
+            common::types::Error<std::optional<order::Order<order::Market>>>
             make_decision(time_t now
                              ,long double spendable_qty
                              ,long double spendable_quote_qty

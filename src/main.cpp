@@ -6,7 +6,7 @@
 #include "bypto/data/price.h"
 #include "bypto/common/csv.h"
 #include "bypto/exchange/back_testing.h"
-#include "bypto/order.h"
+#include "bypto/order/order.h"
 #include "bypto/common/either.h"
 #include "bypto/strategy.h"
 #include "bypto/exchange/runner.h"

@@ -132,6 +132,16 @@ namespace bypto::common::either {
             }
     };
 
+    template<typename L,typename R> 
+    Either<L,R> left(L &&l) {
+        return Either<L,R>(l);
+    }
+
+    template<typename L,typename R> 
+    Either<L,R> right(R &&r) {
+        return Either<L,R>(r);
+    }
+
     template <typename L,typename R>
     std::ostream& operator<<(std::ostream&os,const Either<L,R> &e) {
         if(e.isLeft()) {

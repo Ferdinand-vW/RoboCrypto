@@ -41,8 +41,10 @@ ExternalProject_Add(
 set(SOURCES bypto/account.cpp
             bypto/exchange/back_testing.cpp
             bypto/exchange/binance.cpp
-            bypto/order.cpp
-            bypto/order_type.cpp
+            bypto/order/generic.cpp
+            bypto/order/order_type.cpp
+            bypto/order/fill.cpp
+            bypto/order/types.cpp
             bypto/common/csv.cpp
             bypto/common/utils.cpp
             bypto/common/types.cpp

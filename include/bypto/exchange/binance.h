@@ -1,7 +1,8 @@
 #pragma once
 
 #include "bypto/data/price.h"
-#include "bypto/order.h"
+#include "bypto/order/order.h"
+#include "bypto/order/generic.h"
 #include "bypto/exchange.h"
 
 namespace bypto::exchange {

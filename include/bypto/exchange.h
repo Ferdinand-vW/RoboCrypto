@@ -2,7 +2,7 @@
 
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
-#include "bypto/order.h"
+#include "bypto/order/order.h"
 #include "bypto/account.h"
 #include "bypto/common/types.h"
 
@@ -17,7 +17,8 @@ namespace bypto::exchange {
     template<ExchangeType T,PriceSource P>
     class Exchange {
         public:
-            Error<int> execute_order(order::Order order);
+            template<typename OT>
+            Error<int> execute_order(order::Order<OT> order);
             Error<account::Account> get_account_info();
             Error<long double> get_account_value(time_t t = 0);
             Error<long double> fetch_price();

@@ -5,8 +5,8 @@
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
-#include "bypto/order.h"
-#include "bypto/order_type.h"
+#include "bypto/order/order.h"
+#include "bypto/order/order_type.h"
 #include "bypto/strategy.h"
 
 #include <numeric>
@@ -17,6 +17,7 @@
 namespace bypto::strategy {
 
     using namespace common::types;
+    using namespace order;
     template<data::price::PriceSource P>
     class MovingAverage {
 
@@ -37,7 +38,7 @@ namespace bypto::strategy {
             }
 
         public:
-            Error<std::optional<order::Order>> 
+            Error<std::optional<Order<Market>>> 
             make_decision(time_t now
                          ,long double spendable_qty
                          ,long double spendable_quote_qty
@@ -60,17 +61,16 @@ namespace bypto::strategy {
                 common::types::Symbol sym("BTC","USDT");
                 if(one_hour_ma > four_hour_ma) {
                     //buy base ccy, use quote ccy
-                    order_type::Market mkt(spendable_quote_qty,order_type::BaseOrQuote::Quote);
-                    order::Order ord(sym,order_type::Position::Sell,mkt);
+                    Market mkt{BaseOrQuote::Quote};
+                    Order ord(sym,spendable_quote_qty,Position::Sell,mkt);
                     return std::optional(ord);
                 } else if (one_hour_ma < four_hour_ma) {
                     //sell base ccy, receive quote ccy
-                    order_type::Market mkt(spendable_qty,order_type::BaseOrQuote::Base);
-                    order::Order ord(sym,order_type::Position::Sell,mkt);
+                    Market mkt{BaseOrQuote::Base};
+                    order::Order ord(sym,spendable_qty,Position::Sell,mkt);
                     return std::optional(ord);
                 } else {
-                    std::optional<order::Order> nothing = {};
-                    return nothing;
+                    return common::either::right<std::string,std::optional<Order<Market>>>(std::nullopt);
                 }
 
             }

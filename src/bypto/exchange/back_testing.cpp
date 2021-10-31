@@ -6,7 +6,8 @@
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
 #include "bypto/exchange.h"
-#include "bypto/order_type.h"
+#include "bypto/order/order.h"
+#include "bypto/order/order_type.h"
 #include "bypto/strategy/ma.h"
 #include <string>
 
@@ -27,22 +28,16 @@ namespace bypto::exchange {
     //common error message
     std::string err_his_data() { return std::string("no remaining historical data"); }
 
-    Error<int> BackTestExchange::execute_order(order::Order go) {
-        m_outstanding.insert({m_counter,go});
-        m_counter++;
-        return m_counter - 1;
-    }
-
     Error<account::Account> BackTestExchange::get_account_info() {
         return m_account;
     }
 
-    void BackTestExchange::update_account(order_type::Partial p) {
+    void BackTestExchange::update_account(order::Partial p) {
         switch(p.m_pos) {
-            case order_type::Position::Buy:
-                m_account.add_fund(p.m_symbol, -p.m_qty)
+            case order::Position::Buy:
+                m_account.add_fund(p.m_sym.to_string(), -p.m_qty);
             break;
-            case order_type::Position::Sell:
+            case order::Position::Sell:
             break;
         }
     }
@@ -120,15 +115,14 @@ namespace bypto::exchange {
         long double curr_price = kline.m_close;
         //TODO: logic to see if any outstanding orders can be filled
         for(auto o = m_outstanding.begin(); o != m_outstanding.end() ; ) {
-            auto opt_fr = o->second.try_fill(m_symbol, curr_price);
+            auto opt_fr = o->second.m_generic_fill(curr_price);
             if(opt_fr) { // could fill 
                 std::cout << "can fill oustanding:" << o->first << std::endl;
                 auto fr = opt_fr.value();
                 if(fr.m_new_order) { //order triggered a new order
-                    o->second.m_order_type = fr.m_new_order.value();
+                    o->second = fr.m_new_order.value();
                 } else { // store result
-                    auto partial = order_type::fillToPartial(fr);
-                    update_account(partial);
+                    update_account(fr.m_partial);
                 }
 
                 o = m_outstanding.erase(o);
