@@ -35,9 +35,12 @@ namespace bypto::exchange {
     void BackTestExchange::update_account(order::Partial p) {
         switch(p.m_pos) {
             case order::Position::Buy:
-                m_account.add_fund(p.m_sym.to_string(), -p.m_qty);
+                m_account.add_fund(p.m_sym.base(), p.m_qty);
+                m_account.add_fund(p.m_sym.quote(), -p.m_qty * p.m_price);
             break;
             case order::Position::Sell:
+                m_account.add_fund(p.m_sym.base(), -p.m_qty);
+                m_account.add_fund(p.m_sym.quote(), p.m_qty * p.m_price);
             break;
         }
     }

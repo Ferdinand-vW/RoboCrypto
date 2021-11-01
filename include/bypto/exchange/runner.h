@@ -11,7 +11,7 @@ namespace bypto::exchange::runner {
     template<ExchangeType T,PriceSource P>
     class Runner {
         public:
-            Runner(Exchange<T,P> e) 
+            Runner(Exchange<T,P> &e) 
                     : m_exchange(e) {}
 
             template<template<PriceSource> typename S>
@@ -44,7 +44,7 @@ namespace bypto::exchange::runner {
                         if(emorder.isLeft()) {
                             return emorder.left();
                         }
-                        if(emorder.right()) {
+                        else if (emorder.right()) {
                             auto order = emorder.right().value();
                             std::cout << "New order " << order.m_ot;
                             m_exchange.execute_order(order); //is only executed at tick
@@ -63,7 +63,7 @@ namespace bypto::exchange::runner {
             }
 
         private:
-            Exchange<T,P> m_exchange;
+            Exchange<T,P> &m_exchange;
     };
 
     typedef Runner<ExchangeType::BackTest,PriceSource::Kline> BackTestRunner;

@@ -66,6 +66,7 @@ int main() {
     auto ev = bte.get_account_value();
 
     std::cout << ev.right() << std::endl;
+    std::cout << bte.get_account_info().right() << std::endl;
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
