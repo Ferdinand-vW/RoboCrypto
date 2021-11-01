@@ -10,6 +10,8 @@ namespace bypto::order {
     enum class TimeInForce { GTC ,IOC, FOK };
     enum class BaseOrQuote { Base,Quote    };
 
+    Position opposing(Position p);
+
     std::ostream& operator<<(std::ostream &os,const Position &p);
     std::ostream& operator<<(std::ostream &os,const TimeInForce &p);
     std::ostream& operator<<(std::ostream &os,const BaseOrQuote &p);

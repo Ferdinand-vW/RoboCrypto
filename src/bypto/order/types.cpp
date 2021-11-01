@@ -1,6 +1,14 @@
 #include "bypto/order/types.h"
 
 namespace bypto::order {
+
+    Position opposing(Position p) {
+        switch(p) {
+            case Position::Sell: return Position::Buy; break;
+            case Position::Buy: return Position::Sell; break;
+        }
+    }
+
     std::ostream& operator<<(std::ostream &os,const Position &p) {
         switch(p) {
             case Position::Buy: os << "Buy"; break;

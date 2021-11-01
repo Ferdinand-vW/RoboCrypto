@@ -126,6 +126,7 @@ namespace bypto::exchange {
                     o->second = fr.m_new_order.value();
                 } else { // store result
                     update_account(fr.m_partial);
+                    std::cout << m_account << std::endl;
                 }
 
                 o = m_outstanding.erase(o);

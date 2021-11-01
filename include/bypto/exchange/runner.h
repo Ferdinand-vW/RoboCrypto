@@ -46,7 +46,7 @@ namespace bypto::exchange::runner {
                         }
                         else if (emorder.right()) {
                             auto order = emorder.right().value();
-                            std::cout << "New order " << order.m_ot;
+                            std::cout << "New order " << order;
                             m_exchange.execute_order(order); //is only executed at tick
                         }
                     } else {

@@ -18,6 +18,8 @@ namespace bypto::order {
         Price actual = price;
         if(m.m_ot.m_boq == BaseOrQuote::Quote) {
             actual = 1/price;
+            m.m_qty = m.m_qty * actual;
+            m.m_pos = opposing(m.m_pos);
         }
 
         //market order accepts any price
