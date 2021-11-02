@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bypto/common/types.h"
+#include "bypto/common/utils.h"
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
 
@@ -34,7 +35,11 @@ namespace bypto::data::price {
             long double m_taker_buy_base_asset_volume; // How much of @volume was taker buy orders
             long double m_taker_buy_quote_asset_volume; // How much of @quote_asset_volume was taker buy orders
             long double m_ignore;
+
+            std::string to_string() const;
     };
+
+    common::types::Error<common::utils::time_unit> infer_tick_rate(const std::vector<Kline_t> &klines);
 
     std::ostream& operator<<(std::ostream&os,const price::Kline_t &kl);
 

@@ -37,17 +37,20 @@ namespace bypto::common::utils {
     enum class Ord { LT, EQ, GT };
 
     struct time_unit {
-        int m_years = 0;
-        int m_months = 0;
         int m_days = 0;
         int m_hours = 0;
         int m_minutes = 0;
         int m_seconds = 0;
     };
     
+    std::string to_string(const time_unit &tu);
+    bool operator==(const time_unit &tu1,const time_unit &tu2);
+    bool operator!=(const time_unit &tu1,const time_unit &tu2);
+
     std::ostream& operator<<(std::ostream &os,const time_unit& tu);
 
     time_t add_time(time_t t,time_unit tu);
+    time_unit diff_time(time_t t1,time_t t2);
     time_t create_time(int y,int m,int d,int h=0,int min=0,int sec=0);
     Ord compare_time(time_t t1,time_t t2);
     std::string pp_time(time_t t);

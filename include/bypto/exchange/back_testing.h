@@ -22,6 +22,20 @@ namespace bypto::exchange {
     using namespace common::utils;
     using namespace bypto::data::binance;
     
+    struct BackTestParams {
+        //Support for backtesting is limited to one currencypair at a time
+        Symbol m_sym;
+        //initial funds
+        Quantity m_base_qty;
+        Quantity m_quote_qty;
+        //start time defaults to first kline in @m_klines@
+        std::optional<time_t> m_start_time;
+        //tick rate defaults to tick rate in @m_klines@
+        std::optional<time_unit> m_tick_rate;
+        //historical kline data used for back testing
+        std::vector<Kline_t> m_klines;
+    };
+
     template<>
     class Exchange<ExchangeType::BackTest,PriceSource::Kline> {
         std::vector<Kline_t> m_klines;
@@ -40,9 +54,7 @@ namespace bypto::exchange {
         void update_account(order::Partial p);
 
         public:
-            Exchange(Symbol symbol,Quantity base_fund,Quantity quote_fund
-                    ,time_t start_time,time_unit tick_rate
-                    ,std::vector<Kline_t> &&klines);
+            Exchange(BackTestParams &&prms);
 
             template<typename T>
             Error<int> execute_order(order::Order<T> go) {

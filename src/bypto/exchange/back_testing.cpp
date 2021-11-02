@@ -9,20 +9,27 @@
 #include "bypto/order/order.h"
 #include "bypto/order/order_type.h"
 #include "bypto/strategy/ma.h"
+#include <stdexcept>
 #include <string>
 
 namespace bypto::exchange {
     
-    BackTestExchange::Exchange(Symbol symbol
-                              ,Quantity base_fund,Quantity quote_fund
-                              ,time_t start_time,time_unit tick_rate
-                              ,std::vector<Kline_t> &&klines) 
-                              :m_symbol(symbol)
-                              ,m_curr_time(start_time)
-                              ,m_tick_rate(tick_rate)
-                              ,m_klines(std::move(klines)) {
-        m_account.add_fund(symbol.base(),base_fund);
-        m_account.add_fund(symbol.quote(),quote_fund);
+    BackTestExchange::Exchange(BackTestParams &&prms) 
+                              :m_symbol(prms.m_sym)
+                              ,m_klines(std::move(prms.m_klines)) {
+        m_account.add_fund(prms.m_sym.base(),prms.m_base_qty);
+        m_account.add_fund(prms.m_sym.quote(),prms.m_quote_qty);
+        if(!prms.m_start_time) {
+            m_curr_time = m_klines.front().get_time();
+        } else {
+            m_curr_time = prms.m_start_time.value();
+        }
+        if(!prms.m_tick_rate) {
+            auto etick_rate = infer_tick_rate(m_klines);
+            if(etick_rate.isLeft()) { throw std::invalid_argument(etick_rate.left()); }
+            std::cout << "Inferred tick rate: " << etick_rate.right() << std::endl;
+            m_tick_rate = etick_rate.right();
+        }
     };
 
     //common error message

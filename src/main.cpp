@@ -12,9 +12,12 @@
 #include "bypto/exchange/runner.h"
 
 #include <boost/asio/io_context.hpp>
+#include <boost/stacktrace.hpp>
+#include <execinfo.h>
 
 #include <binapi/api.hpp>
 #include <binapi/enums.hpp>
+#include <optional>
 #include <tao/pq.hpp>
 #include <tao/pq/connection.hpp>
 
@@ -25,12 +28,26 @@
 
 using namespace bypto::common::either;
 
-int main() {
-    std::fstream fs;
 
+void my_segfault_handler(int sig) {
+    void *array[10];
+    size_t size;
+
+     // get void*'s for all entries on the stack
+    size = backtrace(array, 10);
+
+    // print out all the frames to stderr
+    fprintf(stderr, "Error: signal %d:\n", sig);
+    backtrace_symbols_fd(array, size, STDERR_FILENO);
+    exit(1);
+}
+
+int main() {
+    // set up exceptions handlers
+    signal(SIGSEGV,my_segfault_handler);
 
     //parse binance klines historical data
-    fs.open("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
+    std::fstream fs("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
     bypto::common::types::Symbol sym("BTC","USDT");
     auto klines = bypto::data::binance::parseCSV(sym,fs);
     fs.close();
@@ -50,11 +67,12 @@ int main() {
     using namespace bypto::exchange;
     auto start_time = klines.front().m_close_time;
     std::cout << "start time " << start_time << std::endl;
-    utils::time_unit fifteen_minutes = {0,0,0,0,15,0};
+    utils::time_unit fifteen_minutes = {0,0,15,0};
 
     std::cout << fifteen_minutes << std::endl;
     std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
-    BackTestExchange bte(sym,1000,1000,start_time,fifteen_minutes,std::move(klines));
+    BackTestParams btp{sym,1000,1000,std::nullopt,std::nullopt,std::move(klines)};
+    BackTestExchange bte(std::move(btp));
     runner::BackTestRunner bt_runner(bte);
 
     using namespace bypto::strategy;

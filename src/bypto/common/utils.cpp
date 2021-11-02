@@ -24,9 +24,7 @@ namespace bypto::common::utils {
     }
 
     std::ostream& operator<<(std::ostream &os,const time_unit& tu) {
-        os << "{years="   + std::to_string(tu.m_years);
-        os << ",months="  + std::to_string(tu.m_months);
-        os << ",days="    + std::to_string(tu.m_days);
+        os << "{days="    + std::to_string(tu.m_days);
         os << ",hours="   + std::to_string(tu.m_hours);
         os << ",minutes=" + std::to_string(tu.m_minutes);
         os << ",seconds=" + std::to_string(tu.m_seconds) + "}";
@@ -36,14 +34,51 @@ namespace bypto::common::utils {
     time_t add_time(time_t t, time_unit tu) {
         auto timeinfo = localtime(&t);
         
-        return create_time(timeinfo->tm_year + tu.m_years + 1900
-                          ,timeinfo->tm_mon + tu.m_months + 1
+        return create_time(timeinfo->tm_year + 1900
+                          ,timeinfo->tm_mon + 1
                           ,timeinfo->tm_mday + tu.m_days
                           //localtime may be DST, whereas the considered time
                           //will always be in UTC
                           ,timeinfo->tm_hour + tu.m_hours - timeinfo->tm_isdst
                           ,timeinfo->tm_min + tu.m_minutes
                           ,timeinfo->tm_sec + tu.m_seconds);
+    }
+
+    time_unit diff_time(time_t t2,time_t t1) {
+        int dsecs = difftime(t2, t1);
+
+        int min_in_seconds = 60;
+        int hour_in_seconds = min_in_seconds*60;
+        int day_in_seconds = 24*hour_in_seconds;
+
+        int ddays = std::floor(dsecs / day_in_seconds);
+        dsecs = dsecs - ddays*day_in_seconds;
+        int dhours = std::floor(dsecs / hour_in_seconds);
+        dsecs = dsecs - dhours*hour_in_seconds;
+        int dmins = std::floor(dsecs / min_in_seconds);
+        dsecs = dsecs - dmins*min_in_seconds;
+        return time_unit{ddays,dhours,dmins,dsecs};
+    }
+
+    std::string to_string(const time_unit &tu) {
+        std::string res("");
+        if(tu.m_days > 0)    { res += std::to_string(tu.m_days)   +"d"; }
+        if(tu.m_hours > 0)   { res += std::to_string(tu.m_hours)  +"h"; }
+        if(tu.m_minutes > 0) { res += std::to_string(tu.m_minutes)+"m"; }
+        if(tu.m_seconds > 0) { res += std::to_string(tu.m_seconds)+"s"; }
+        return res;
+    }
+
+    bool operator==(const time_unit &tu1,const time_unit &tu2) {
+        return
+            tu1.m_seconds == tu2.m_seconds &&
+            tu1.m_minutes == tu2.m_minutes &&
+            tu1.m_hours == tu2.m_hours     &&
+            tu1.m_days == tu2.m_days;
+    }
+
+    bool operator!=(const time_unit &tu1, const time_unit &tu2) {
+        return !(tu1 == tu2);
     }
 
     time_t create_time(int y,int m,int d,int h,int min,int sec) {
