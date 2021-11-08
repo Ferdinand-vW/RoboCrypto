@@ -157,4 +157,8 @@ namespace bypto::exchange {
     Klines_t BackTestExchange::get_historical_prices(time_t start,time_t end) {
         return pricesFromKlines(m_klines).time_interval(start, end);
     }
+
+    Klines_t BackTestExchange::get_all_historical() {
+        return pricesFromKlines(m_klines);
+    }
 }

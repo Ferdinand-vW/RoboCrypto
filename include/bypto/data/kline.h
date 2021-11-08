@@ -21,6 +21,9 @@ namespace bypto::data::price {
             long double get_quote_price() { return 1 / m_close; }
             time_t get_time() { return m_close_time; }
             common::types::Symbol get_symbol() { return m_symbol; }
+            std::tuple<common::types::Symbol,time_t,long double> as_tuple() {
+                return {get_symbol(),get_time(),get_price()};
+            }
 
             common::types::Symbol m_symbol;
             time_t m_open_time; //start kline time

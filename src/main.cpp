@@ -1,6 +1,7 @@
 ﻿// RoboCrypto.cpp : Defines the entry point for the application.
 //
 
+#include "bypto/common/types.h"
 #include "bypto/common/utils.h"
 #include "bypto/data/binance.h"
 #include "bypto/data/price.h"
@@ -11,6 +12,7 @@
 #include "bypto/strategy.h"
 #include "bypto/exchange/runner.h"
 
+#include <array>
 #include <boost/asio/io_context.hpp>
 #include <boost/stacktrace.hpp>
 #include <execinfo.h>
@@ -50,7 +52,6 @@ int main() {
     std::fstream fs("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
     bypto::common::types::Symbol sym("BTC","USDT");
     auto klines = bypto::data::binance::parseCSV(sym,fs);
-    fs.close();
 
     auto conn = tao::pq::connection::create("dbname=historical");
     
@@ -77,7 +78,6 @@ int main() {
 
     using namespace bypto::strategy;
     Strategy<MovingAverage,PriceSource::Kline> strat_ma;
-
     auto res = bt_runner.run(sym, strat_ma);
     std::cout << res << std::endl;
 
@@ -85,6 +85,14 @@ int main() {
 
     std::cout << ev.right() << std::endl;
     std::cout << bte.get_account_info().right() << std::endl;
+
+    std::ofstream csv("test.csv");
+    std::array<std::string,3> header = {"TIME","PRICE"};
+    auto prices = bte.get_all_historical();
+    auto raw_prices = prices.get_data();
+    std::vector<std::tuple<Symbol,time_t,long double>> tuples;
+    std::transform(raw_prices.begin(),raw_prices.end(),tuples.begin(),std::mem_fn(&Kline_t::as_tuple));
+    csv::write(header,tuples,csv);
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");

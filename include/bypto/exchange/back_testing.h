@@ -71,5 +71,6 @@ namespace bypto::exchange {
             Error<bool> tick_once();
             time_t get_current_time();
             Klines_t get_historical_prices(time_t start,time_t end);
+            Klines_t get_all_historical();
     };
 }

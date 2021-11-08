@@ -102,7 +102,7 @@ namespace bypto::data::prices {
                 return m_prices[index];
             }
 
-            std::vector<Price<P>>& get_data() {
+            std::span<Price<P>>& get_data() {
                 return m_prices;
             }
 

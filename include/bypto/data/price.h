@@ -16,6 +16,8 @@ namespace bypto::data::price {
             time_t get_time();
             common::types::Symbol get_symbol();
 
+            std::tuple<common::types::Symbol,time_t,long double> as_tuple();
+
     };
 
 }
