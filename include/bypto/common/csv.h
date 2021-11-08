@@ -53,4 +53,44 @@ namespace bypto::common::csv {
 
         return records;
     }
+
+    template<typename ...Ts>
+    std::ostream& writeHeader(std::array<std::string,sizeof...(Ts)> header,std::ostream &os) {
+        bool first = true;
+        for(auto h : header) {
+            if(first) {
+                os << h;
+            }
+            else {
+                os << "," << h;
+            }
+        }
+
+        return os;
+    }
+
+        template<typename ...Ts>
+    std::ostream& writeRow(std::vector<std::tuple<Ts...>> &data,std::ostream &os) {
+        bool first = true;
+        for(auto &d : data) {
+            if(first) {
+                os << d;
+            }
+            else {
+                os << "," << d;
+            }
+        }
+
+        return os;
+    }
+
+    template<typename ...Ts>
+    std::ostream & write(std::array<std::string,sizeof...(Ts)> header,std::vector<std::tuple<Ts...>> &data,std::ostream & os) {
+        os << writeHeader(header,os) << std::endl;
+        for(auto &t : data) {
+            os << writeRow(t) << std::endl;
+        }
+
+        return os;
+    }
 }

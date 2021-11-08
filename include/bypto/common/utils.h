@@ -92,4 +92,7 @@ namespace bypto::common::utils {
             return std::nullopt;
         }
     }
+
+    template<int n,typename ...Ts>
+
 }

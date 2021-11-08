@@ -26,6 +26,7 @@ namespace bypto::common::types {
             std::string quote() const;
 
             bool operator==(const Symbol &s1) const;
+            bool operator<(const Symbol &rhs) const;
             static Symbol from_string(std::string s);
             std::string to_string() const;
     };

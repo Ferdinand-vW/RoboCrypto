@@ -102,6 +102,13 @@ namespace bypto::exchange {
         return m_curr_time;
     }
 
+    account::Account express_as(account::Account acc, Symbol s,long double f) {
+        std::map<Symbol,long double> m {{s,f}};
+        account::Account acc1;
+        acc1.add_funds(acc.express_as("USDT", m));
+        return acc1;
+    }
+
     Error<bool> BackTestExchange::tick_once() {
         auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
@@ -133,7 +140,8 @@ namespace bypto::exchange {
                     o->second = fr.m_new_order.value();
                 } else { // store result
                     update_account(fr.m_partial);
-                    std::cout << m_account << std::endl;
+                    std::cout << m_account;
+                    std::cout << " valued at " << express_as(m_account,kline.m_symbol,kline.m_close) << std::endl;
                 }
 
                 o = m_outstanding.erase(o);

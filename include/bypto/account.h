@@ -14,7 +14,15 @@ namespace bypto::account {
 
         public:
             std::map<std::string,long double> get_funds() const;
+            //ideally we would convert all currencies in @m_funds to a single currency,
+            //but we cannot guarantee that the given price_map has enough data to perform such conversion
+            //For now we will do a one-pass conversion. E.g. if we maintain the following funds:
+            // {(BTC,1),(USDT,100),(BUSD,200)}
+            //and we are given the following price map
+            // {(BTCUSDT,10000),(USD)}
+            std::map<std::string,long double> express_as(std::string ccy,std::map<Symbol,long double> price_map) const;
             void add_fund(std::string ccy,long double qty);
+            void add_funds(const std::map<std::string,long double> &funds);
 
             long double get_quantity(std::string ccy) const;
     };

@@ -21,6 +21,10 @@ namespace bypto::common::types {
         return this->base() == s1.base() && this->quote() == s1.quote();
     }
 
+    bool Symbol::operator<(const Symbol &rhs) const {
+        return this->to_string() < rhs.to_string();
+    }
+
     std::ostream& operator<<(std::ostream &os,const Symbol &s) {
         os << s.base() << s.quote();
         return os;
