@@ -60,6 +60,7 @@ namespace bypto::common::csv {
         for(auto h : header) {
             if(first) {
                 os << h;
+                first = false;
             }
             else {
                 os << "," << h;
@@ -69,14 +70,14 @@ namespace bypto::common::csv {
         return os;
     }
 
-        template<typename T,typename ...Ts>
-    std::ostream& writeRow(std::tuple<T,Ts...> &data,std::ostream &os) {
+        template<typename ...Ts>
+    std::ostream& writeRow(std::tuple<Ts...> &data,std::ostream &os) {
         bool first = true;
         
-        os << std::get<0>(data);
         auto f = [&os,&first](auto t) {
             if(first) {
                 os << t;
+                first = false;
             } else {
                 os << "," << t;
             }

@@ -63,8 +63,10 @@ namespace bypto::exchange {
                 return m_counter - 1;
             }
 
+            //Return prices for symbols as given time
+            Error<std::map<Symbol,long double>> get_price_map(time_t t = 0);
+
             Error<account::Account> get_account_info();
-            Error<Value> get_account_value(time_t t = 0);
             Error<long double> fetch_price(Symbol symbol);
             Error<bool> cancel_order(int o_id);
             Error<bool> tick();

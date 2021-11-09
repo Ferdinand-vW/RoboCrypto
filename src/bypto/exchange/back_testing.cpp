@@ -39,45 +39,50 @@ namespace bypto::exchange {
         return m_account;
     }
 
+    //We always buy/sell from the perspective of the base currency
     void BackTestExchange::update_account(order::Partial p) {
         switch(p.m_pos) {
             case order::Position::Buy:
+                //sym=BTCUSDT
+                //price = 1 / actual
+                //BTC_qty:qty
+                //USDT_qty:qty/price
                 m_account.add_fund(p.m_sym.base(), p.m_qty);
-                m_account.add_fund(p.m_sym.quote(), -p.m_qty * p.m_price);
+                m_account.add_fund(p.m_sym.quote(), -p.m_qty / p.m_price);
             break;
             case order::Position::Sell:
+                std::cout << p.m_sym << " " << p.m_qty << " " << p.m_price << std::endl;
                 m_account.add_fund(p.m_sym.base(), -p.m_qty);
                 m_account.add_fund(p.m_sym.quote(), p.m_qty * p.m_price);
             break;
         }
     }
 
-    Error<Value> BackTestExchange::get_account_value(time_t t) {
-        using namespace std::literals::string_literals;
+    Error<std::map<Symbol,long double>> BackTestExchange::get_price_map(time_t t) {
         auto prices = pricesFromKlines(m_klines);
 
-        auto quote_price = 0;
+        auto price = 0;
         if(t == 0) {
             auto mlast = prices.back_opt();
             if(mlast) { 
-                quote_price = mlast->get_quote_price();
+                price = mlast->get_price();
             }
-            else { return "No klines data available."s;}
+            else { return std::string("No klines data available.");}
         } else {
             auto klines = prices.most_recent(t);
             auto mfirst = klines.front_opt();
             if(!mfirst.has_value()) {
-                return "No klines data available."s;
+                return std::string("No klines data available.");
             } else {
-                quote_price = mfirst.value().get_quote_price();
+                price = mfirst.value().get_price();
             }
         }
 
-        Value base_value(m_symbol.base(),m_account.get_quantity(m_symbol.base()));
-        auto quote_qty = m_account.get_quantity(m_symbol.quote());
-        Value quote_to_base(m_symbol.base(),quote_price * quote_qty);
+        auto sym_price = std::make_tuple(m_symbol,price);
+        std::map<Symbol,long double> pm;
+        pm.insert({m_symbol,price});
+        return pm;
 
-        return base_value.add(quote_to_base);
     }
 
     Error<long double> BackTestExchange::fetch_price(Symbol _s) {
@@ -112,13 +117,12 @@ namespace bypto::exchange {
     Error<bool> BackTestExchange::tick_once() {
         auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
-        if(m_kline_index >= m_klines.size()) { return false; }// we ran out of data so signal to stop
+        if(m_kline_index >= m_klines.size()) { return false; } // we ran out of data so signal to stop
+
         std::cout << "Time: " << pp_time(m_curr_time) << std::endl;
         m_curr_time = add_time(m_curr_time, m_tick_rate);
 
-        std::cout << m_klines.size() << std::endl;
         auto kline = prices[m_kline_index];
-        std::cout << m_kline_index <<std::endl;
         //if we're past the time of the current kline
         //then we should move to the next
         if (kline.m_close_time < m_curr_time) {

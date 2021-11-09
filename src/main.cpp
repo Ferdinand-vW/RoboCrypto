@@ -72,7 +72,7 @@ int main() {
 
     std::cout << fifteen_minutes << std::endl;
     std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
-    BackTestParams btp{sym,1000,1000,std::nullopt,std::nullopt,std::move(klines)};
+    BackTestParams btp{sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
     BackTestExchange bte(std::move(btp));
     runner::BackTestRunner bt_runner(bte);
 
@@ -81,17 +81,20 @@ int main() {
     auto res = bt_runner.run(sym, strat_ma);
     std::cout << res << std::endl;
 
-    auto ev = bte.get_account_value();
+    auto pm = bte.get_price_map().right();
+    auto ai = bte.get_account_info().right();
 
-    std::cout << ev.right() << std::endl;
-    std::cout << bte.get_account_info().right() << std::endl;
+    std::cout << ai << std::endl;
+    bypto::account::Account acc;
+    acc.add_funds(ai.express_as("BTC", pm));
+    std::cout << acc << std::endl;
 
     std::ofstream csv("test.csv");
-    std::array<std::string,3> header = {"TIME","PRICE"};
+    std::array<std::string,3> header = {"SYMBOL","TIME","PRICE"};
     auto prices = bte.get_all_historical();
     auto raw_prices = prices.get_data();
     std::vector<std::tuple<Symbol,time_t,long double>> tuples;
-    std::transform(raw_prices.begin(),raw_prices.end(),tuples.begin(),std::mem_fn(&Kline_t::as_tuple));
+    std::transform(raw_prices.begin(),raw_prices.end(),std::back_inserter(tuples),std::mem_fn(&Kline_t::as_tuple));
     csv::write(header,tuples,csv);
 
     // auto open_time = t
