@@ -8,6 +8,7 @@
 namespace bypto::strategy {
 
     using namespace data::price;
+
     template <template<PriceSource> typename S,PriceSource P>
     class Strategy : S<P> {
 

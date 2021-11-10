@@ -17,7 +17,39 @@
 namespace bypto::strategy {
 
     using namespace common::types;
+    using namespace data::prices;
     using namespace order;
+
+    template<data::price::PriceSource P>
+    class CollectorMA {
+        std::vector<time_t> m_times;
+        std::vector<data::prices::Price<P>> m_prices;
+        std::vector<long double> m_short_ma;
+        std::vector<long double> m_long_ma;
+        public:
+            //here sma=short moving average and lma = long moving average
+            //short/long indicates the period and which is faster/slower moving
+            void put(time_t t,data::prices::Price<P> p,long double short_ma, long double long_ma) {
+                m_times.push_back(t);
+                m_prices.push_back(p);
+                m_short_ma.push_back(short_ma);
+                m_long_ma.push_back(long_ma);
+            }
+
+            auto get() {
+                std::vector<std::tuple<time_t,data::prices::Price<P>,long double, long double>> res;
+                for(int i = 0; i < m_times.size(); i++) {
+                    res.push_back(std::make_tuple(m_times[i],m_prices[i],m_short_ma[i],m_long_ma[i]));
+                }
+                return res;
+            }
+
+            std::array<std::string,4> csvHeader() {
+                return {"TIME","PRICE","SHORT MA","LONG MA"};
+            }
+    };
+
+    // 4 Moving Averages shortold short new long old long new by time and price
     template<data::price::PriceSource P>
     class MovingAverage {
 
@@ -25,7 +57,7 @@ namespace bypto::strategy {
             long double m_long_ma = -1;
             long double m_short_ma = -1;
 
-            long double compute_moving_average(time_t oldest,const Klines_t& prices) {
+            long double compute_moving_average(time_t oldest,const Prices<P>& prices) {
                 if(prices.size() <= 0) { return 0; } // prevent divide by 0
 
                 const std::span<const Kline_t> prices_in_period = prices.most_recent(oldest);
@@ -41,7 +73,7 @@ namespace bypto::strategy {
             make_decision(time_t now
                          ,long double spendable_qty
                          ,long double spendable_quote_qty
-                         ,const Klines_t& prices) {
+                         ,const Prices<P> & prices) {
                 
                 if (!has_enough_data(prices)) {
                     using namespace std::literals::string_literals;
@@ -91,7 +123,7 @@ namespace bypto::strategy {
                 return res;
             }
 
-            bool has_enough_data(const Klines_t& prices) {
+            bool has_enough_data(const Prices<P>& prices) {
                 // E.g. 15 min interval then 4 hour MA against 1 hour MA
                 // 4h/15min = 16. We probably want this to be configurable at call site.
                 return prices.size() >= 16;
