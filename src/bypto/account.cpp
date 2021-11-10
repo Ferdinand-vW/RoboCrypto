@@ -6,9 +6,8 @@ namespace bypto::account {
         return m_funds;
     }
 
-    std::map<std::string,long double> Account::express_as(std::string ccy,std::map<Symbol,long double> price_map) const {
-        std::map<std::string,long double> res;
-        
+    Error<Value> Account::value(std::string ccy,std::map<Symbol,long double> price_map) const {
+        long double res = 0;
         for(auto &p : m_funds) {
             //look for the currency in the price_map, it can be either base or quote
             auto it = std::find_if(price_map.begin(),price_map.end(),[p](auto &kvp) {
@@ -16,27 +15,25 @@ namespace bypto::account {
             });
 
             if(it != price_map.end()) {
-                //add or insert value depending on existing presence
-                auto add_to_res = [&res](auto &c,auto &&v) {
-                    if(res.contains(c)) { res[c] += v; }
-                    else                { res.insert({c,v}); }
-                };
+
                 if(p.first == ccy) {
                     //p=USDT,ccy=USDT, no conversion required
-                    add_to_res(p.first, p.second);
+                    res += p.second;
                 }
                 else if (it->first.base() == ccy) {
                     //p=BTC,ccy=USDT,it=USDTBTC, divide by USDTBTC
-                    add_to_res(ccy, p.second/it->second);
+                    res += p.second/it->second;
                 }
                 else if (it->first.quote() == ccy) {
                     //p=BTC,ccy=USDT,it=BTCUSDT, multiply by BTCUSDT
-                    add_to_res(ccy, p.second*it->second);
+                    res += p.second*it->second;
                 }
+            } else {
+                return std::string("Could not find price mapping for "+p.first+" to "+ccy);
             }
         }
 
-        return res;
+        return Value(ccy,res);
     }
 
     void Account::add_fund(std::string s,long double qty) {

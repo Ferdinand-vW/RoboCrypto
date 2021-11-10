@@ -74,6 +74,7 @@ int main() {
     std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
     BackTestParams btp{sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
     BackTestExchange bte(std::move(btp));
+    auto initial_account = bte.get_account_info().right();
     runner::BackTestRunner bt_runner(bte);
 
     using namespace bypto::strategy;
@@ -82,12 +83,16 @@ int main() {
     std::cout << res << std::endl;
 
     auto pm = bte.get_price_map().right();
-    auto ai = bte.get_account_info().right();
+    auto updated_account = bte.get_account_info().right();
 
-    std::cout << ai << std::endl;
-    bypto::account::Account acc;
-    acc.add_funds(ai.express_as("BTC", pm));
-    std::cout << acc << std::endl;
+    std::cout << "Using price map for valuation: " << pm << std::endl;
+    auto in_val = initial_account.value("USDT", pm);
+    std::cout << "Initial account: " << initial_account << std::endl;
+    std::cout << "Value without strategy: " << in_val.right().ppValue() << std::endl;
+    auto upd_val = updated_account.value("USDT", pm);
+    std::cout << "Updated account: " << updated_account << std::endl;
+    std::cout << "Value with strategy: " << upd_val.right().ppValue() << std::endl;
+
 
     std::ofstream csv("test.csv");
     std::array<std::string,3> header = {"SYMBOL","TIME","PRICE"};

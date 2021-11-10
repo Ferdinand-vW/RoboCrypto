@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <map>
 #include <optional>
 #include <functional>
 
@@ -91,5 +92,30 @@ namespace bypto::common::utils {
         } else {
             return std::nullopt;
         }
+    }
+
+    template<typename K,typename V>
+    std::map<K,V> singleton(K k,V v) {
+        std::map<K,V> m;
+        m.insert({k,v});
+        return m;
+    }
+
+    template<typename K,typename V>
+    std::ostream& operator<<(std::ostream& os,const std::map<K,V> &m) {
+        os << std::string("{");
+        bool first = true;
+        for(auto &kvp : m) {
+            if(first) {
+                os << std::string("(") << kvp.first << "," << kvp.second << ")";
+                first = false;
+            } else {
+                os << std::string(", (") << kvp.first << "," << kvp.second << ")";
+            }
+        }
+
+        os << std::string("}");
+
+        return os;
     }
 }

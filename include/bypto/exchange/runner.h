@@ -57,7 +57,6 @@ namespace bypto::exchange::runner {
                     auto esucc = m_exchange.tick_once();
                     if(esucc.isLeft()) { return esucc; }
                     else { cont = esucc.right(); }
-                    std::cout << cont << std::endl;   
                 }
                 return true;
             }

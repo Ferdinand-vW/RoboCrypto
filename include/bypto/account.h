@@ -20,7 +20,7 @@ namespace bypto::account {
             // {(BTC,1),(USDT,100),(BUSD,200)}
             //and we are given the following price map
             // {(BTCUSDT,10000),(USD)}
-            std::map<std::string,long double> express_as(std::string ccy,std::map<Symbol,long double> price_map) const;
+            Error<Value> value(std::string ccy,std::map<Symbol,long double> price_map) const;
             void add_fund(std::string ccy,long double qty);
             void add_funds(const std::map<std::string,long double> &funds);
 

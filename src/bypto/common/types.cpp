@@ -75,6 +75,10 @@ namespace bypto::common::types {
         return *this;
     }
 
+    std::string Value::ppValue() {
+        return std::to_string(m_quantity) + m_currency;
+    }
+
     std::ostream& operator<<(std::ostream &os,const Value &v) {
         os << "{" << v.m_currency << "," << v.m_quantity << "}";
         return os;

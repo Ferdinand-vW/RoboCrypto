@@ -22,7 +22,8 @@ namespace bypto::strategy {
     class MovingAverage {
 
         private:
-            long double m_ma;
+            long double m_long_ma = -1;
+            long double m_short_ma = -1;
 
             long double compute_moving_average(time_t oldest,const Klines_t& prices) {
                 if(prices.size() <= 0) { return 0; } // prevent divide by 0
@@ -32,9 +33,7 @@ namespace bypto::strategy {
                     return acc + kl.m_close;
                 });
 
-                m_ma = sum / prices_in_period.size();
-
-                return m_ma;
+                return sum / prices_in_period.size();
             }
 
         public:
@@ -55,24 +54,41 @@ namespace bypto::strategy {
 
                 auto four_hour_ma = compute_moving_average(four_hour, prices);
                 auto one_hour_ma = compute_moving_average(one_hour, prices);
-                std::cout << "4h_ma: " << four_hour_ma << std::endl;
-                std::cout << "1h_ma: " << one_hour_ma << std::endl;
+
+                if(m_long_ma == -1) { m_long_ma = four_hour_ma; }
+                if(m_short_ma == -1) { m_short_ma = one_hour_ma; }
 
                 common::types::Symbol sym("BTC","USDT");
-                if(one_hour_ma > four_hour_ma) {
-                    //buy base ccy, use quote ccy
+                //short ma moves above long ma indicating rising trend
+                //which means we should buy base ccy
+                std::optional<Order<Market>> res;
+                if(one_hour_ma > four_hour_ma && one_hour_ma < m_long_ma) {
+                    //buy base ccy, pay quote ccy
                     Market mkt{BaseOrQuote::Quote};
                     Order ord(sym,spendable_quote_qty,Position::Sell,mkt);
-                    return std::optional(ord);
-                } else if (one_hour_ma < four_hour_ma) {
+                    res = ord;
+                    std::cout << "ohm: " << one_hour_ma;
+                    std::cout << ",fhm: " << four_hour_ma;
+                    std::cout << ",lma: " << m_long_ma;
+                    std::cout << ": Short crosses over Long MA" << std::endl;
+                    //short ma moves below long ma indicating falling trend
+                    //which means we should sell base ccy
+                } else if (one_hour_ma < four_hour_ma && one_hour_ma > m_long_ma) {
                     //sell base ccy, receive quote ccy
                     Market mkt{BaseOrQuote::Base};
                     order::Order ord(sym,spendable_qty,Position::Sell,mkt);
-                    return std::optional(ord);
-                } else {
-                    return common::either::right<std::string,std::optional<Order<Market>>>(std::nullopt);
+                    res = ord;
+                    std::cout << "ohm: " << one_hour_ma;
+                    std::cout << ",fhm: " << four_hour_ma;
+                    std::cout << ",lma: " << m_long_ma;
+                    std::cout << ": Long crosses over Short MA" << std::endl;
                 }
 
+                //save previously computed moving averages so that we can compare against these in the next iteration
+                m_long_ma = four_hour_ma;
+                m_short_ma = one_hour_ma;
+
+                return res;
             }
 
             bool has_enough_data(const Klines_t& prices) {

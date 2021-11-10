@@ -44,6 +44,8 @@ namespace bypto::common::types {
             Value subtract(Value v1);
             Value multiply(Value v1);
             Value divide(Value v1);
+
+            std::string ppValue();
     };
 
     std::ostream& operator<<(std::ostream &os,const Value &s);
