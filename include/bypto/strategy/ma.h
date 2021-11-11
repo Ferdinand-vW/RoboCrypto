@@ -29,7 +29,7 @@ namespace bypto::strategy {
         public:
             //here sma=short moving average and lma = long moving average
             //short/long indicates the period and which is faster/slower moving
-            void put(time_t t,data::prices::Price<P> p,long double short_ma, long double long_ma) {
+            void put(time_t t, data::prices::Price<P> p, long double short_ma, long double long_ma) {
                 m_times.push_back(t);
                 m_prices.push_back(p);
                 m_short_ma.push_back(short_ma);
@@ -44,6 +44,14 @@ namespace bypto::strategy {
                 return res;
             }
 
+            auto csvData() {
+                std::vector<std::tuple<time_t,long double,long double, long double>> res;
+                for(int i = 0; i < m_times.size(); i++) {
+                    res.push_back(std::make_tuple(m_times[i],m_prices[i].get_price(),m_short_ma[i],m_long_ma[i]));
+                }
+                return res;
+            }
+
             std::array<std::string,4> csvHeader() {
                 return {"TIME","PRICE","SHORT MA","LONG MA"};
             }
@@ -54,6 +62,8 @@ namespace bypto::strategy {
     class MovingAverage {
 
         private:
+            CollectorMA<P> &m_collector;
+
             long double m_long_ma = -1;
             long double m_short_ma = -1;
 
@@ -69,6 +79,8 @@ namespace bypto::strategy {
             }
 
         public:
+            MovingAverage(CollectorMA<P> &collector) : m_collector(collector) {};
+
             Error<std::optional<Order<Market>>> 
             make_decision(time_t now
                          ,long double spendable_qty
@@ -116,6 +128,10 @@ namespace bypto::strategy {
                     std::cout << ": Long crosses over Short MA" << std::endl;
                 }
 
+                auto price_now = prices.back_opt();
+                if(price_now) {  //write to collector if price is present
+                    m_collector.put(now,price_now.value(),one_hour_ma, four_hour_ma);
+                }
                 //save previously computed moving averages so that we can compare against these in the next iteration
                 m_long_ma = four_hour_ma;
                 m_short_ma = one_hour_ma;

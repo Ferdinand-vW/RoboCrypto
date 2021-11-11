@@ -9,10 +9,12 @@ namespace bypto::strategy {
 
     using namespace data::price;
 
-    template <template<PriceSource> typename S,PriceSource P>
+    template <template<PriceSource> typename S,PriceSource P,typename C>
     class Strategy : S<P> {
 
         public:
+            Strategy(C &c) : S<P>(c){}; 
+
             common::types::Error<std::optional<order::Order<order::Market>>>
             make_decision(time_t now
                              ,long double spendable_qty

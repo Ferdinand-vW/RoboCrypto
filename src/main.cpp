@@ -11,6 +11,7 @@
 #include "bypto/common/either.h"
 #include "bypto/strategy.h"
 #include "bypto/exchange/runner.h"
+#include "bypto/strategy/ma.h"
 
 #include <array>
 #include <boost/asio/io_context.hpp>
@@ -78,7 +79,8 @@ int main() {
     runner::BackTestRunner bt_runner(bte);
 
     using namespace bypto::strategy;
-    Strategy<MovingAverage,PriceSource::Kline> strat_ma;
+    CollectorMA<PriceSource::Kline> collector;
+    Strategy<MovingAverage,PriceSource::Kline,CollectorMA<PriceSource::Kline>> strat_ma(collector);
     auto res = bt_runner.run(sym, strat_ma);
     std::cout << res << std::endl;
 
@@ -94,13 +96,19 @@ int main() {
     std::cout << "Value with strategy: " << upd_val.right().ppValue() << std::endl;
 
 
-    std::ofstream csv("test.csv");
-    std::array<std::string,3> header = {"SYMBOL","TIME","PRICE"};
-    auto prices = bte.get_all_historical();
-    auto raw_prices = prices.get_data();
-    std::vector<std::tuple<Symbol,time_t,long double>> tuples;
-    std::transform(raw_prices.begin(),raw_prices.end(),std::back_inserter(tuples),std::mem_fn(&Kline_t::as_tuple));
-    csv::write(header,tuples,csv);
+    std::ofstream csv("ma.csv");
+
+    auto csvHeader = collector.csvHeader();
+    auto csvData = collector.csvData();
+    
+    csv::write(csvHeader, csvData, csv);
+
+    // std::array<std::string,3> header = {"SYMBOL","TIME","PRICE"};
+    // auto prices = bte.get_all_historical();
+    // auto raw_prices = prices.get_data();
+    // std::vector<std::tuple<Symbol,time_t,long double>> tuples;
+    // std::transform(raw_prices.begin(),raw_prices.end(),std::back_inserter(tuples),std::mem_fn(&Kline_t::as_tuple));
+    // csv::write(header,tuples,csv);
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");
