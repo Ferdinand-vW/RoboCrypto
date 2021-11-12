@@ -17,9 +17,12 @@ ExternalProject_Add(
     GIT_TAG dee2c272de16286534cbc00919b34407198777d7
     SOURCE_DIR ${taocpp_SOURCE_DIR}
     BINARY_DIR ${taocpp_BINARY_DIR}
-    INSTALL_COMMAND ""
+    STEP_TARGETS build
+    EXCLUDE_FROM_ALL TRUE
     BUILD_BYPRODUCTS ${taocpp_LIB}
     CMAKE_ARGS -DCMAKE_CXX_STANDARD=20
+    CONFIGURE_HANDLED_BY_BUILD ON
+    UPDATE_COMMAND ""
 )
 
 
@@ -33,9 +36,12 @@ ExternalProject_Add(
     GIT_TAG cf09db45b78707c995017a7777fdbc9a142f5372
     SOURCE_DIR ${binapi_SOURCE_DIR}
     BINARY_DIR ${binapi_BINARY_DIR}
-    INSTALL_COMMAND ""
+    STEP_TARGETS build
+    EXCLUDE_FROM_ALL TRUE
     BUILD_BYPRODUCTS ${binapi_LIB}
     CMAKE_ARGS -DCMAKE_CXX_STANDARD=20
+    CONFIGURE_HANDLED_BY_BUILD ON
+    UPDATE_COMMAND ""
 )
 
 set(SOURCES bypto/account.cpp
@@ -56,7 +62,7 @@ include_directories(${PostgreSQL_INCLUDE_DIRS})
 
 
 add_library(byptoObj OBJECT ${SOURCES})
-add_dependencies(byptoObj binapi taocpp)
+add_dependencies(byptoObj binapi-build taocpp-build)
 target_include_directories(byptoObj PUBLIC ${taocpp_SOURCE_DIR}/include)
 target_include_directories(byptoObj PUBLIC ${binapi_SOURCE_DIR}/include)
 
