@@ -98,8 +98,8 @@ int main() {
 
     std::ofstream csv("ma.csv");
 
-    auto csvHeader = collector.csvHeader();
-    auto csvData = collector.csvData();
+    auto csvHeader = collector.csv_header();
+    auto csvData = collector.csv_data();
     
     csv::write(csvHeader, csvData, csv);
 

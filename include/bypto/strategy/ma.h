@@ -26,6 +26,7 @@ namespace bypto::strategy {
         std::vector<data::prices::Price<P>> m_prices;
         std::vector<long double> m_short_ma;
         std::vector<long double> m_long_ma;
+        std::set<time_t> m_crossovers;
         public:
             //here sma=short moving average and lma = long moving average
             //short/long indicates the period and which is faster/slower moving
@@ -36,6 +37,10 @@ namespace bypto::strategy {
                 m_long_ma.push_back(long_ma);
             }
 
+            void put_crossover(time_t time) {
+                m_crossovers.insert(time);
+            }
+
             auto get() {
                 std::vector<std::tuple<time_t,data::prices::Price<P>,long double, long double>> res;
                 for(int i = 0; i < m_times.size(); i++) {
@@ -44,16 +49,22 @@ namespace bypto::strategy {
                 return res;
             }
 
-            auto csvData() {
-                std::vector<std::tuple<time_t,long double,long double, long double>> res;
+            auto csv_data() {
+                std::vector<std::tuple<std::string,long double,long double, long double,std::string>> res;
                 for(int i = 0; i < m_times.size(); i++) {
-                    res.push_back(std::make_tuple(m_times[i],m_prices[i].get_price(),m_short_ma[i],m_long_ma[i]));
+                    auto pp_co = m_crossovers.contains(m_times[i]) 
+                                    ? common::utils::pp_time(m_times[i]) 
+                                    : "";
+                    res.push_back(std::make_tuple(common::utils::pp_time(m_times[i])
+                                                 ,m_prices[i].get_price()
+                                                 ,m_short_ma[i],m_long_ma[i]
+                                                 ,pp_co));
                 }
                 return res;
             }
 
-            std::array<std::string,4> csvHeader() {
-                return {"TIME","PRICE","SHORT MA","LONG MA"};
+            std::array<std::string,5> csv_header() {
+                return {"TIME","PRICE","SHORT MA","LONG MA","CROSS OVER"};
             }
     };
 
@@ -106,7 +117,7 @@ namespace bypto::strategy {
                 //short ma moves above long ma indicating rising trend
                 //which means we should buy base ccy
                 std::optional<Order<Market>> res;
-                if(one_hour_ma > four_hour_ma && one_hour_ma < m_long_ma) {
+                if(one_hour_ma > four_hour_ma && m_short_ma < m_long_ma) {
                     //buy base ccy, pay quote ccy
                     Market mkt{BaseOrQuote::Quote};
                     Order ord(sym,spendable_quote_qty,Position::Sell,mkt);
@@ -115,9 +126,10 @@ namespace bypto::strategy {
                     std::cout << ",fhm: " << four_hour_ma;
                     std::cout << ",lma: " << m_long_ma;
                     std::cout << ": Short crosses over Long MA" << std::endl;
+                    m_collector.put_crossover(now);
                     //short ma moves below long ma indicating falling trend
                     //which means we should sell base ccy
-                } else if (one_hour_ma < four_hour_ma && one_hour_ma > m_long_ma) {
+                } else if (one_hour_ma < four_hour_ma && m_short_ma > m_long_ma) {
                     //sell base ccy, receive quote ccy
                     Market mkt{BaseOrQuote::Base};
                     order::Order ord(sym,spendable_qty,Position::Sell,mkt);
@@ -126,6 +138,7 @@ namespace bypto::strategy {
                     std::cout << ",fhm: " << four_hour_ma;
                     std::cout << ",lma: " << m_long_ma;
                     std::cout << ": Long crosses over Short MA" << std::endl;
+                    m_collector.put_crossover(now);
                 }
 
                 auto price_now = prices.back_opt();
