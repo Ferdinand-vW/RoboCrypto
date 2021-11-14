@@ -4,7 +4,6 @@
 #include "bypto/exchange.h"
 #include "bypto/account.h"
 #include "bypto/strategy.h"
-#include "bypto/strategy/ma.h"
 
 namespace bypto::exchange::runner {
 
@@ -14,8 +13,8 @@ namespace bypto::exchange::runner {
             Runner(Exchange<T,P> &e) 
                     : m_exchange(e) {}
 
-            template<template<PriceSource> typename S,typename C>
-            Error<bool> run(Symbol sym, strategy::Strategy<S,P,C> strat) {
+            template<typename Ind,template<PriceSource,typename> typename S,template<PriceSource> typename C>
+            Error<bool> run(Symbol sym, strategy::Strategy<P,Ind,S,C> strat) {
                 bool cont = true;
                 //starting time point of historical data
                 time_t hp_time = m_exchange.get_current_time();

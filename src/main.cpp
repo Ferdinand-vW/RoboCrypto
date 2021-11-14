@@ -11,7 +11,7 @@
 #include "bypto/common/either.h"
 #include "bypto/strategy.h"
 #include "bypto/exchange/runner.h"
-#include "bypto/strategy/ma.h"
+#include "bypto/strategy/crossover.h"
 
 #include <array>
 #include <boost/asio/io_context.hpp>
@@ -79,8 +79,9 @@ int main() {
     runner::BackTestRunner bt_runner(bte);
 
     using namespace bypto::strategy;
-    CollectorMA<PriceSource::Kline> collector;
-    Strategy<MovingAverage,PriceSource::Kline,CollectorMA<PriceSource::Kline>> strat_ma(collector);
+    using namespace bypto::indicator;
+    CollectCrossover<PriceSource::Kline> collector;
+    Strategy<PriceSource::Kline,MovingAverage,Crossover,CollectCrossover> strat_ma(collector);
     auto res = bt_runner.run(sym, strat_ma);
     std::cout << res << std::endl;
 

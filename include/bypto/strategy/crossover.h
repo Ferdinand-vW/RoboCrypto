@@ -8,6 +8,7 @@
 #include "bypto/order/order.h"
 #include "bypto/order/order_type.h"
 #include "bypto/strategy.h"
+#include "bypto/indicator/trend.h"
 
 #include <numeric>
 #include <optional>
@@ -21,11 +22,11 @@ namespace bypto::strategy {
     using namespace order;
 
     template<data::price::PriceSource P>
-    class CollectorMA {
+    class CollectCrossover {
         std::vector<time_t> m_times;
         std::vector<data::prices::Price<P>> m_prices;
-        std::vector<long double> m_short_ma;
-        std::vector<long double> m_long_ma;
+        std::vector<long double> m_fast;
+        std::vector<long double> m_slow;
         std::set<time_t> m_crossovers;
         public:
             //here sma=short moving average and lma = long moving average
@@ -33,8 +34,8 @@ namespace bypto::strategy {
             void put(time_t t, data::prices::Price<P> p, long double short_ma, long double long_ma) {
                 m_times.push_back(t);
                 m_prices.push_back(p);
-                m_short_ma.push_back(short_ma);
-                m_long_ma.push_back(long_ma);
+                m_fast.push_back(short_ma);
+                m_slow.push_back(long_ma);
             }
 
             void put_crossover(time_t time) {
@@ -44,7 +45,7 @@ namespace bypto::strategy {
             auto get() {
                 std::vector<std::tuple<time_t,data::prices::Price<P>,long double, long double>> res;
                 for(int i = 0; i < m_times.size(); i++) {
-                    res.push_back(std::make_tuple(m_times[i],m_prices[i],m_short_ma[i],m_long_ma[i]));
+                    res.push_back(std::make_tuple(m_times[i],m_prices[i],m_fast[i],m_slow[i]));
                 }
                 return res;
             }
@@ -57,7 +58,7 @@ namespace bypto::strategy {
                                     : "";
                     res.push_back(std::make_tuple(common::utils::pp_time(m_times[i])
                                                  ,m_prices[i].get_price()
-                                                 ,m_short_ma[i],m_long_ma[i]
+                                                 ,m_fast[i],m_slow[i]
                                                  ,pp_co));
                 }
                 return res;
@@ -69,28 +70,17 @@ namespace bypto::strategy {
     };
 
     // 4 Moving Averages shortold short new long old long new by time and price
-    template<data::price::PriceSource P>
-    class MovingAverage {
+    template<data::price::PriceSource P,typename Ind>
+    class Crossover {
 
         private:
-            CollectorMA<P> &m_collector;
+            CollectCrossover<P> &m_collector;
 
-            long double m_long_ma = -1;
-            long double m_short_ma = -1;
-
-            long double compute_moving_average(time_t oldest,const Prices<P>& prices) {
-                if(prices.size() <= 0) { return 0; } // prevent divide by 0
-
-                const std::span<const Kline_t> prices_in_period = prices.most_recent(oldest);
-                auto sum = std::accumulate(prices_in_period.begin(),prices_in_period.end(),0,[](const int&acc,auto &kl) {
-                    return acc + kl.m_close;
-                });
-
-                return sum / prices_in_period.size();
-            }
+            long double m_slow = -1;
+            long double m_fast = -1;
 
         public:
-            MovingAverage(CollectorMA<P> &collector) : m_collector(collector) {};
+            Crossover(CollectCrossover<P> &collector) : m_collector(collector) {};
 
             Error<std::optional<Order<Market>>> 
             make_decision(time_t now
@@ -100,54 +90,56 @@ namespace bypto::strategy {
                 
                 if (!has_enough_data(prices)) {
                     using namespace std::literals::string_literals;
-                    return "Too few data points to apply MA strategy. Require at least 16 points which is 16xtime_interval worth of time."s;
+                    return "Too few data points to apply Crossover strategy. Require at least 16 points which is 16xtime_interval worth of time."s;
                 }
 
                 //naming of variables is for the example. Actual times will depend on the time interval of @prices
-                time_t four_hour = prices[prices.size() - 16].get_time();
-                time_t one_hour = prices[prices.size() - 5].get_time();
+                time_t slow_moving_time = prices[prices.size() - 16].get_time();
+                time_t fast_moving_time = prices[prices.size() - 5].get_time();
 
-                auto four_hour_ma = compute_moving_average(four_hour, prices);
-                auto one_hour_ma = compute_moving_average(one_hour, prices);
+                auto slow_moving = indicator::TrendIndicator<Ind>::calculate(slow_moving_time,prices);
+                auto fast_moving = indicator::TrendIndicator<Ind>::calculate(fast_moving_time,prices);
 
-                if(m_long_ma == -1) { m_long_ma = four_hour_ma; }
-                if(m_short_ma == -1) { m_short_ma = one_hour_ma; }
+                if(m_slow == -1) { m_slow = slow_moving; }
+                if(m_fast == -1) { m_fast = fast_moving; }
 
                 common::types::Symbol sym("BTC","USDT");
                 //short ma moves above long ma indicating rising trend
                 //which means we should buy base ccy
                 std::optional<Order<Market>> res;
-                if(one_hour_ma > four_hour_ma && m_short_ma < m_long_ma) {
+                if(fast_moving > slow_moving && m_fast < m_slow) {
                     //buy base ccy, pay quote ccy
                     Market mkt{BaseOrQuote::Quote};
                     Order ord(sym,spendable_quote_qty,Position::Sell,mkt);
                     res = ord;
-                    std::cout << "ohm: " << one_hour_ma;
-                    std::cout << ",fhm: " << four_hour_ma;
-                    std::cout << ",lma: " << m_long_ma;
+                    std::cout << "fast moving: " << fast_moving;
+                    std::cout << ",slow moving: " << slow_moving;
+                    std::cout << ",fast moving prev: " << m_fast;
+                    std::cout << ",slow moving prev: " << m_slow;
                     std::cout << ": Short crosses over Long MA" << std::endl;
                     m_collector.put_crossover(now);
                     //short ma moves below long ma indicating falling trend
                     //which means we should sell base ccy
-                } else if (one_hour_ma < four_hour_ma && m_short_ma > m_long_ma) {
+                } else if (fast_moving < slow_moving && m_fast > m_slow) {
                     //sell base ccy, receive quote ccy
                     Market mkt{BaseOrQuote::Base};
                     order::Order ord(sym,spendable_qty,Position::Sell,mkt);
                     res = ord;
-                    std::cout << "ohm: " << one_hour_ma;
-                    std::cout << ",fhm: " << four_hour_ma;
-                    std::cout << ",lma: " << m_long_ma;
+                    std::cout << "fast moving: " << fast_moving;
+                    std::cout << ",slow moving: " << slow_moving;
+                    std::cout << ",fast moving prev: " << m_fast;
+                    std::cout << ",slow moving prev: " << m_slow;
                     std::cout << ": Long crosses over Short MA" << std::endl;
                     m_collector.put_crossover(now);
                 }
 
                 auto price_now = prices.back_opt();
                 if(price_now) {  //write to collector if price is present
-                    m_collector.put(now,price_now.value(),one_hour_ma, four_hour_ma);
+                    m_collector.put(now,price_now.value(),fast_moving, slow_moving);
                 }
                 //save previously computed moving averages so that we can compare against these in the next iteration
-                m_long_ma = four_hour_ma;
-                m_short_ma = one_hour_ma;
+                m_slow = slow_moving;
+                m_fast = fast_moving;
 
                 return res;
             }

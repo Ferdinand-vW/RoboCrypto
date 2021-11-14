@@ -8,7 +8,6 @@
 #include "bypto/exchange.h"
 #include "bypto/order/order.h"
 #include "bypto/order/order_type.h"
-#include "bypto/strategy/ma.h"
 #include <stdexcept>
 #include <string>
 
