@@ -20,6 +20,7 @@ namespace bypto::strategy {
     using namespace common::types;
     using namespace data::prices;
     using namespace order;
+    using namespace indicator;
 
     template<data::price::PriceSource P>
     class CollectCrossover {
@@ -31,11 +32,11 @@ namespace bypto::strategy {
         public:
             //here sma=short moving average and lma = long moving average
             //short/long indicates the period and which is faster/slower moving
-            void put(time_t t, data::prices::Price<P> p, long double short_ma, long double long_ma) {
+            void put(time_t t, data::prices::Price<P> p, long double fast_ma, long double slow_ma) {
                 m_times.push_back(t);
                 m_prices.push_back(p);
-                m_fast.push_back(short_ma);
-                m_slow.push_back(long_ma);
+                m_fast.push_back(fast_ma);
+                m_slow.push_back(slow_ma);
             }
 
             void put_crossover(time_t time) {
@@ -65,7 +66,7 @@ namespace bypto::strategy {
             }
 
             std::array<std::string,5> csv_header() {
-                return {"TIME","PRICE","SHORT MA","LONG MA","CROSS OVER"};
+                return {"TIME","PRICE","SLOW","FAST","CROSS OVER"};
             }
     };
 
@@ -75,12 +76,13 @@ namespace bypto::strategy {
 
         private:
             CollectCrossover<P> &m_collector;
+            TrendIndicator<Ind> m_indicator;
 
             long double m_slow = -1;
             long double m_fast = -1;
 
         public:
-            Crossover(CollectCrossover<P> &collector) : m_collector(collector) {};
+            Crossover(TrendIndicator<Ind> indicator,CollectCrossover<P> &collector) : m_indicator(indicator),m_collector(collector) {};
 
             Error<std::optional<Order<Market>>> 
             make_decision(time_t now
@@ -95,10 +97,13 @@ namespace bypto::strategy {
 
                 //naming of variables is for the example. Actual times will depend on the time interval of @prices
                 time_t slow_moving_time = prices[prices.size() - 16].get_time();
-                time_t fast_moving_time = prices[prices.size() - 5].get_time();
+                time_t fast_moving_time = prices[prices.size() - 4].get_time();
 
-                auto slow_moving = indicator::TrendIndicator<Ind>::calculate(slow_moving_time,prices);
-                auto fast_moving = indicator::TrendIndicator<Ind>::calculate(fast_moving_time,prices);
+                auto slow_tp = TrendParams<P> { slow_moving_time, prices};
+                auto slow_moving = m_indicator.calculate(slow_tp);
+
+                auto fast_tp = TrendParams<P> { fast_moving_time, prices};
+                auto fast_moving = m_indicator.calculate(fast_tp);
 
                 if(m_slow == -1) { m_slow = slow_moving; }
                 if(m_fast == -1) { m_fast = fast_moving; }
@@ -112,11 +117,6 @@ namespace bypto::strategy {
                     Market mkt{BaseOrQuote::Quote};
                     Order ord(sym,spendable_quote_qty,Position::Sell,mkt);
                     res = ord;
-                    std::cout << "fast moving: " << fast_moving;
-                    std::cout << ",slow moving: " << slow_moving;
-                    std::cout << ",fast moving prev: " << m_fast;
-                    std::cout << ",slow moving prev: " << m_slow;
-                    std::cout << ": Short crosses over Long MA" << std::endl;
                     m_collector.put_crossover(now);
                     //short ma moves below long ma indicating falling trend
                     //which means we should sell base ccy
@@ -125,11 +125,6 @@ namespace bypto::strategy {
                     Market mkt{BaseOrQuote::Base};
                     order::Order ord(sym,spendable_qty,Position::Sell,mkt);
                     res = ord;
-                    std::cout << "fast moving: " << fast_moving;
-                    std::cout << ",slow moving: " << slow_moving;
-                    std::cout << ",fast moving prev: " << m_fast;
-                    std::cout << ",slow moving prev: " << m_slow;
-                    std::cout << ": Long crosses over Short MA" << std::endl;
                     m_collector.put_crossover(now);
                 }
 

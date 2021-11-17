@@ -12,24 +12,66 @@ namespace bypto::indicator {
     using namespace data::prices;
     using namespace data::price;
 
+    template<PriceSource P>
+    struct TrendParams {
+        time_t m_begin;
+        Prices<P> m_prices;
+    };
+
     template <typename I>
     class TrendIndicator : I {
         public:
             template<PriceSource P>
-            static long double calculate(time_t oldest,const Prices<P>& prices) {
-                return I::calculate(oldest,prices);
+            long double calculate(const TrendParams<P> &tp) {
+                return I::calculate(tp);
             }
     };
 
     class MovingAverage {
         public:
             template<PriceSource P>
-            static long double calculate(time_t oldest,const Prices<P>& prices) {
-                auto prices_in_period = prices.most_recent(oldest);
+            long double calculate(const TrendParams<P> &tp) {
+                auto prices_in_period = tp.m_prices.most_recent(tp.m_begin);
 
                 auto avg = common::math::average(prices_in_period,[](Price<P> &p) { return p.get_price(); });
 
                 return avg;
+            }
+    };
+
+    class ExponentialMA {
+        //Closing price x multiplier + EMA (previous day) x (1-multiplier)
+
+        long double m_previous = -1;
+        long double m_smoothing = 2; //gives most recent observations more weights
+                            //a higher number means more recent observations have
+                            //more influence on EMA
+
+        public:
+            template<PriceSource P>
+            long double calculate(const TrendParams<P> &tp) {
+                auto prices_in_period = tp.m_prices.most_recent(tp.m_begin);
+                auto mprice = prices_in_period.front_opt();
+                
+                if(!mprice) { return 0; }
+                if(m_previous < 0) { 
+                    auto ema = mprice.value().get_price();
+                    m_previous = ema;
+                    return ema;
+                }
+
+                auto multiplier = m_smoothing / (1 + prices_in_period.size());
+                auto ema = mprice.value().get_price() * multiplier + m_previous * (1 - multiplier);
+
+                std::cout << "multiplier: " << multiplier << std::endl;
+                std::cout << "m_smoothing: " << m_smoothing << std::endl;
+                std::cout << "div: " << (prices_in_period.size()) << std::endl;
+                std::cout << "ema: " << ema << std::endl;
+
+                //update previous ema for next calculation
+                m_previous = ema;
+
+                return ema;
             }
     };
 }

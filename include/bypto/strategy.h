@@ -10,13 +10,13 @@ namespace bypto::strategy {
 
     using namespace data::price;
 
-    template <PriceSource P,typename Ind
+    template <PriceSource P,template<typename> typename Indicator,typename Ind
              ,template<PriceSource,typename> typename S
              ,template<PriceSource> typename C>
     class Strategy : S<P,Ind> {
 
         public:
-            Strategy(C<P> &c) : S<P,Ind>(c){}; 
+            Strategy(Indicator<Ind> ind,C<P> &c) : S<P,Ind>(ind,c){}; 
 
             common::types::Error<std::optional<order::Order<order::Market>>>
             make_decision(time_t now

@@ -81,7 +81,8 @@ int main() {
     using namespace bypto::strategy;
     using namespace bypto::indicator;
     CollectCrossover<PriceSource::Kline> collector;
-    Strategy<PriceSource::Kline,MovingAverage,Crossover,CollectCrossover> strat_ma(collector);
+    TrendIndicator<ExponentialMA> ind_ma;
+    Strategy<PriceSource::Kline,TrendIndicator,ExponentialMA,Crossover,CollectCrossover> strat_ma(ind_ma,collector);
     auto res = bt_runner.run(sym, strat_ma);
     std::cout << res << std::endl;
 
