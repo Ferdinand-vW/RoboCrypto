@@ -36,8 +36,7 @@ namespace bypto::exchange {
         std::vector<Kline_t> m_klines;
     };
 
-    template<>
-    class Exchange<ExchangeType::BackTest,PriceSource::Kline> {
+    class BackTest : public Exchange<BackTest,PriceSource::Kline> {
         std::vector<Kline_t> m_klines;
         int m_kline_index = 0;
 
@@ -54,7 +53,7 @@ namespace bypto::exchange {
         void update_account(order::Partial p);
 
         public:
-            Exchange(BackTestParams &&prms);
+            BackTest(BackTestParams &&prms);
 
             template<typename T>
             Error<int> execute_order(order::Order<T> go) {
@@ -69,7 +68,6 @@ namespace bypto::exchange {
             Error<account::Account> get_account_info();
             Error<long double> fetch_price(Symbol symbol);
             Error<bool> cancel_order(int o_id);
-            Error<bool> tick();
             Error<bool> tick_once();
             time_t get_current_time();
             Klines_t get_historical_prices(time_t start,time_t end);

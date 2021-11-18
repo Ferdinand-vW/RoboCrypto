@@ -74,9 +74,9 @@ int main() {
     std::cout << fifteen_minutes << std::endl;
     std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
     BackTestParams btp{sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
-    BackTestExchange bte(std::move(btp));
+    BackTest bte(std::move(btp));
     auto initial_account = bte.get_account_info().right();
-    runner::BackTestRunner bt_runner(bte);
+    runner::Runner<BackTest,PriceSource::Kline> bt_runner(bte);
 
     using namespace bypto::strategy;
     using namespace bypto::indicator;
@@ -104,13 +104,6 @@ int main() {
     auto csvData = collector.csv_data();
     
     csv::write(csvHeader, csvData, csv);
-
-    // std::array<std::string,3> header = {"SYMBOL","TIME","PRICE"};
-    // auto prices = bte.get_all_historical();
-    // auto raw_prices = prices.get_data();
-    // std::vector<std::tuple<Symbol,time_t,long double>> tuples;
-    // std::transform(raw_prices.begin(),raw_prices.end(),std::back_inserter(tuples),std::mem_fn(&Kline_t::as_tuple));
-    // csv::write(header,tuples,csv);
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");

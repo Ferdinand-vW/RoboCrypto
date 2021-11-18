@@ -13,7 +13,7 @@
 
 namespace bypto::exchange {
     
-    BackTestExchange::Exchange(BackTestParams &&prms) 
+    BackTest::BackTest(BackTestParams &&prms) 
                               :m_symbol(prms.m_sym)
                               ,m_klines(std::move(prms.m_klines)) {
         m_account.add_fund(prms.m_sym.base(),prms.m_base_qty);
@@ -34,12 +34,12 @@ namespace bypto::exchange {
     //common error message
     std::string err_his_data() { return std::string("no remaining historical data"); }
 
-    Error<account::Account> BackTestExchange::get_account_info() {
+    Error<account::Account> BackTest::get_account_info() {
         return m_account;
     }
 
     //We always buy/sell from the perspective of the base currency
-    void BackTestExchange::update_account(order::Partial p) {
+    void BackTest::update_account(order::Partial p) {
         switch(p.m_pos) {
             case order::Position::Buy:
                 //sym=BTCUSDT
@@ -57,7 +57,7 @@ namespace bypto::exchange {
         }
     }
 
-    Error<std::map<Symbol,long double>> BackTestExchange::get_price_map(time_t t) {
+    Error<std::map<Symbol,long double>> BackTest::get_price_map(time_t t) {
         auto prices = pricesFromKlines(m_klines);
 
         auto price = 0;
@@ -84,7 +84,7 @@ namespace bypto::exchange {
 
     }
 
-    Error<long double> BackTestExchange::fetch_price(Symbol _s) {
+    Error<long double> BackTest::fetch_price(Symbol _s) {
         auto prices = pricesFromKlines(m_klines);
 
         auto mkline = prices.index_opt(m_kline_index);
@@ -96,17 +96,17 @@ namespace bypto::exchange {
                                         ,m_curr_time);
     }
 
-    Error<bool> BackTestExchange::cancel_order(int o_id) {
+    Error<bool> BackTest::cancel_order(int o_id) {
         m_outstanding.erase(o_id);
 
         return true;
     }
 
-    time_t BackTestExchange::get_current_time() {
+    time_t BackTest::get_current_time() {
         return m_curr_time;
     }
 
-    Error<bool> BackTestExchange::tick_once() {
+    Error<bool> BackTest::tick_once() {
         auto prices = pricesFromKlines(m_klines);
         if (m_klines.size() <= 0) { return err_his_data(); }
         if(m_kline_index >= m_klines.size()) { return false; } // we ran out of data so signal to stop
@@ -153,11 +153,11 @@ namespace bypto::exchange {
 
     }
 
-    Klines_t BackTestExchange::get_historical_prices(time_t start,time_t end) {
+    Klines_t BackTest::get_historical_prices(time_t start,time_t end) {
         return pricesFromKlines(m_klines).time_interval(start, end);
     }
 
-    Klines_t BackTestExchange::get_all_historical() {
+    Klines_t BackTest::get_all_historical() {
         return pricesFromKlines(m_klines);
     }
 }
