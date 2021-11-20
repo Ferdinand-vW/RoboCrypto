@@ -19,15 +19,15 @@ namespace bypto::indicator {
     };
 
     template <typename I>
-    class TrendIndicator : I {
+    class TrendIndicator {
         public:
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {
-                return I::calculate(tp);
+                return static_cast<I*>(this)->calculate(tp);
             }
     };
 
-    class MovingAverage {
+    class SimpleMA : public TrendIndicator<SimpleMA> {
         public:
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {
@@ -39,7 +39,7 @@ namespace bypto::indicator {
             }
     };
 
-    class ExponentialMA {
+    class ExponentialMA : public TrendIndicator<ExponentialMA> {
         //Closing price x multiplier + EMA (previous day) x (1-multiplier)
 
         long double m_previous = -1;

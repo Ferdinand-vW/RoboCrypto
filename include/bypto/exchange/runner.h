@@ -13,8 +13,8 @@ namespace bypto::exchange::runner {
             Runner(Exchange<T,P> &e) 
                     : m_exchange(e) {}
 
-            template<template <typename> typename I,typename Ind,template<PriceSource,typename> typename S,template<PriceSource> typename C>
-            Error<bool> run(Symbol sym, strategy::Strategy<P,I,Ind,S,C> strat) {
+            template<typename S>
+            Error<bool> run(Symbol sym, strategy::Strategy<S,P> &strat) {
                 bool cont = true;
                 //starting time point of historical data
                 time_t hp_time = m_exchange.get_current_time();

@@ -71,18 +71,18 @@ namespace bypto::strategy {
     };
 
     // 4 Moving Averages shortold short new long old long new by time and price
-    template<data::price::PriceSource P,typename Ind>
-    class Crossover {
+    template<typename Ind,data::price::PriceSource P>
+    class Crossover : public Strategy<Crossover<Ind,P>,P> {
 
         private:
             CollectCrossover<P> &m_collector;
-            TrendIndicator<Ind> m_indicator;
+            TrendIndicator<Ind> &m_indicator;
 
             long double m_slow = -1;
             long double m_fast = -1;
 
         public:
-            Crossover(TrendIndicator<Ind> indicator,CollectCrossover<P> &collector) : m_indicator(indicator),m_collector(collector) {};
+            Crossover(TrendIndicator<Ind> &indicator,CollectCrossover<P> &collector) : m_indicator(indicator),m_collector(collector) {};
 
             Error<std::optional<Order<Market>>> 
             make_decision(time_t now

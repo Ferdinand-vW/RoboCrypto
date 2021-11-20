@@ -10,24 +10,20 @@ namespace bypto::strategy {
 
     using namespace data::price;
 
-    template <PriceSource P,template<typename> typename Indicator,typename Ind
-             ,template<PriceSource,typename> typename S
-             ,template<PriceSource> typename C>
-    class Strategy : S<P,Ind> {
+    template <typename S,PriceSource P>
+    class Strategy {
 
         public:
-            Strategy(Indicator<Ind> ind,C<P> &c) : S<P,Ind>(ind,c){}; 
-
             common::types::Error<std::optional<order::Order<order::Market>>>
             make_decision(time_t now
                              ,long double spendable_qty
                              ,long double spendable_quote_qty
                              ,data::prices::Prices<P> prices) {
-                return S<P,Ind>::make_decision(now,spendable_qty,spendable_quote_qty,prices);
+                return static_cast<S*>(this)->make_decision(now,spendable_qty,spendable_quote_qty,prices);
             }
 
             bool has_enough_data(data::prices::Prices<P> prices) {
-                return S<P,Ind>::has_enough_data(prices);
+                return static_cast<S*>(this)->has_enough_data(prices);
             }
     };
 
