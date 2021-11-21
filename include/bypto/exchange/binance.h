@@ -1,10 +1,11 @@
 #pragma once
 
-#include "binapi/api.hpp"
 #include "bypto/data/price.h"
 #include "bypto/order/order.h"
 #include "bypto/order/generic.h"
 #include "bypto/exchange.h"
+
+#include <binapi/api.hpp>
 
 namespace bypto::exchange {
     using namespace data::prices;

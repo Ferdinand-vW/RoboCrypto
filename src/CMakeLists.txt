@@ -55,6 +55,7 @@ set(SOURCES bypto/account.cpp
             bypto/common/utils.cpp
             bypto/common/types.cpp
             bypto/data/kline.cpp
+            bypto/data/spot.cpp
             bypto/data/binance.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})

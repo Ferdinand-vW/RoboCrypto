@@ -3,6 +3,7 @@
 #include "bypto/common/types.h"
 #include "bypto/common/either.h"
 #include "bypto/data/kline.h"
+#include "bypto/data/spot.h"
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
 #include "bypto/order/order.h"
