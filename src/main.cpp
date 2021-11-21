@@ -6,14 +6,17 @@
 #include "bypto/data/binance.h"
 #include "bypto/data/price.h"
 #include "bypto/common/csv.h"
+#include "bypto/common/either.h"
 #include "bypto/exchange/back_testing.h"
 #include "bypto/order/order.h"
-#include "bypto/common/either.h"
 #include "bypto/strategy.h"
 #include "bypto/exchange/runner.h"
 #include "bypto/strategy/crossover.h"
+#include "exchange.h"
+#include "command.h"
 
 #include <array>
+#include <boost/program_options.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/stacktrace.hpp>
 #include <execinfo.h>
@@ -27,10 +30,15 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <string>
 
-using namespace bypto::common::either;
-
+using namespace bypto::account;
+using namespace bypto::exchange;
+// using namespace bypto::data;
+using namespace bypto::strategy;
+using namespace bypto::indicator;
+namespace po = boost::program_options;
 
 void my_segfault_handler(int sig) {
     void *array[10];
@@ -45,65 +53,85 @@ void my_segfault_handler(int sig) {
     exit(1);
 }
 
+template<typename E,PriceSource P>
+Error<bool> run_with_exchange(CommandOptions &opts,Runner<E,P> &runner) {
+    auto strat_tag = opts.m_strategy;
+    auto ind_tag = opts.m_indicator;
+    
+    if(ind_tag == TagIndicator::ExponentialMA && strat_tag == TagStrategy::Crossover) {
+        auto strat = Crossover<ExponentialMA,P>(ExponentialMA());
+        return runner.run(opts.m_sym,strat);
+    } else if (ind_tag == TagIndicator::SimpleMA && strat_tag == TagStrategy::Crossover) {
+        auto strat = Crossover<SimpleMA,P>(SimpleMA());
+        return runner.run(opts.m_sym,strat);
+    } else {
+        return std::string("could not match strategy/indicator pattern: "
+                          +opts.m_cf.m_strat_flag
+                          +"/"+opts.m_cf.m_ind_flag);
+    }
+}
+
+Error<bool> run(CommandOptions opts) {
+
+    auto exch_tag = opts.m_exchange;
+
+    if(exch_tag == TagExchange::BackTest) {
+        Runner<BackTest,PriceSource::Kline> runner;
+        runner.assign(backtest(opts));
+        return run_with_exchange(opts,runner);
+    } else if(exch_tag == TagExchange::Binance) {
+        Runner<Binance,PriceSource::Spot> runner;
+        runner.assign(binance(opts));
+        return run_with_exchange(opts,runner);
+    } else if(exch_tag == TagExchange::BinanceTest) {
+        Runner<Binance,PriceSource::Spot> runner;
+        runner.assign(binance_test(opts));
+        return run_with_exchange(opts,runner);
+    } else {
+        return std::string("could not match exchange pattern: "+opts.m_cf.m_exch_flag);
+    }
+}
+
+
+
 int main() {
     // set up exceptions handlers
     signal(SIGSEGV,my_segfault_handler);
 
-    //parse binance klines historical data
-    std::fstream fs("/home/ferdinand/dev/bypto/historical/binance/kline/BTCUSDT-15m-2021-07.csv");
     bypto::common::types::Symbol sym("BTC","USDT");
-    auto klines = bypto::data::binance::parseCSV(sym,fs);
 
-    auto conn = tao::pq::connection::create("dbname=historical");
+    CommandFlags cf = {"BTCUSDT","backtest","crossover","ema"};
+
+    auto e_opts = parse_commands(cf);
+    if(e_opts.isLeft()) {
+        std::cout << e_opts.left() << std::endl;
+    } else {
+        auto res = run(e_opts.right());
+        if(res.isLeft()) {
+            std::cout << res.left() << std::endl;
+        }
+    }
     
-    //store historical data in database
-    using namespace bypto::data;
-    binance::prepareTable(conn);
-    binance::storeKlines(conn,klines);
+    // std::cout << res << std::endl;
 
-    using namespace bypto::common;
-    auto t = utils::create_time(2021, 07, 01);
-    auto open_time = utils::create_time(2021,07,06);
-    auto close_time = utils::create_time(2021,07,20);
+    // auto pm = bte.get_price_map().right();
+    // auto updated_account = bte.get_account_info().right();
 
-    using namespace bypto::exchange;
-    auto start_time = klines.front().m_close_time;
-    std::cout << "start time " << start_time << std::endl;
-    utils::time_unit fifteen_minutes = {0,0,15,0};
-
-    std::cout << fifteen_minutes << std::endl;
-    std::cout << utils::add_time(start_time,fifteen_minutes) << std::endl;
-    BackTestParams btp{sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
-    BackTest bte(std::move(btp));
-    auto initial_account = bte.get_account_info().right();
-    runner::Runner<BackTest,PriceSource::Kline> bt_runner(bte);
-
-    using namespace bypto::strategy;
-    using namespace bypto::indicator;
-    CollectCrossover<PriceSource::Kline> collector;
-    ExponentialMA ind_ma;
-    Crossover strat_ma(ind_ma,collector);
-    auto res = bt_runner.run(sym, strat_ma);
-    std::cout << res << std::endl;
-
-    auto pm = bte.get_price_map().right();
-    auto updated_account = bte.get_account_info().right();
-
-    std::cout << "Using price map for valuation: " << pm << std::endl;
-    auto in_val = initial_account.value("USDT", pm);
-    std::cout << "Initial account: " << initial_account << std::endl;
-    std::cout << "Value without strategy: " << in_val.right().ppValue() << std::endl;
-    auto upd_val = updated_account.value("USDT", pm);
-    std::cout << "Updated account: " << updated_account << std::endl;
-    std::cout << "Value with strategy: " << upd_val.right().ppValue() << std::endl;
+    // std::cout << "Using price map for valuation: " << pm << std::endl;
+    // auto in_val = initial_account.value("USDT", pm);
+    // std::cout << "Initial account: " << initial_account << std::endl;
+    // std::cout << "Value without strategy: " << in_val.right().ppValue() << std::endl;
+    // auto upd_val = updated_account.value("USDT", pm);
+    // std::cout << "Updated account: " << updated_account << std::endl;
+    // std::cout << "Value with strategy: " << upd_val.right().ppValue() << std::endl;
 
 
-    std::ofstream csv("ma.csv");
+    // std::ofstream csv("ma.csv");
 
-    auto csvHeader = collector.csv_header();
-    auto csvData = collector.csv_data();
+    // auto csvHeader = collector.csv_header();
+    // auto csvData = collector.csv_data();
     
-    csv::write(csvHeader, csvData, csv);
+    // csv::write(csvHeader, csvData, csv);
 
     // auto open_time = t
     // const auto pk = std::getenv("BINANCE_TEST_PUBLIC_KEY");

@@ -3,6 +3,7 @@
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
 #include "bypto/common/math.h"
+#include "bypto/common/types.h"
 
 #include <bits/types/time_t.h>
 #include <numeric>
@@ -11,6 +12,9 @@
 namespace bypto::indicator {
     using namespace data::prices;
     using namespace data::price;
+    using namespace common::types;
+
+    enum class TagIndicator { SimpleMA, ExponentialMA };
 
     template<PriceSource P>
     struct TrendParams {
@@ -29,11 +33,13 @@ namespace bypto::indicator {
 
     class SimpleMA : public TrendIndicator<SimpleMA> {
         public:
+            static const struct SimpleMA_Tag : public Tag {} tag;
+
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {
                 auto prices_in_period = tp.m_prices.most_recent(tp.m_begin);
 
-                auto avg = common::math::average(prices_in_period,[](Price<P> &p) { return p.get_price(); });
+                auto avg = common::math::average(prices_in_period,[](data::price::Price<P> &p) { return p.get_price(); });
 
                 return avg;
             }
@@ -48,6 +54,8 @@ namespace bypto::indicator {
                             //more influence on EMA
 
         public:
+            static const struct ExponentialMA_Tag : public Tag {} tag;
+
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {
                 auto prices_in_period = tp.m_prices.most_recent(tp.m_begin);

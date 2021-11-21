@@ -9,6 +9,7 @@
 namespace bypto::strategy {
 
     using namespace data::price;
+    enum class TagStrategy { Crossover };
 
     template <typename S,PriceSource P>
     class Strategy {

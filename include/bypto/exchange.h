@@ -12,7 +12,7 @@ namespace bypto::exchange {
     using namespace data::price;
     using namespace common::types;
 
-    enum class ExchangeType { BackTest, Binance };
+    enum class TagExchange { BackTest, Binance, BinanceTest };
 
     template<typename E,PriceSource P>
     class Exchange {

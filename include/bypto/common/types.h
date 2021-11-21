@@ -15,6 +15,8 @@ namespace bypto::common::types {
     template <typename R>
     using Error = either::Either<std::string,R>;
 
+    struct Tag{};
+
     class Symbol {
         std::string m_base;
         std::string m_quote;

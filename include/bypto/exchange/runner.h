@@ -5,23 +5,38 @@
 #include "bypto/account.h"
 #include "bypto/strategy.h"
 
-namespace bypto::exchange::runner {
+namespace bypto::exchange {
 
     template<typename T,PriceSource P>
     class Runner {
         public:
-            Runner(Exchange<T,P> &e) 
+            Runner(){};
+            Runner(std::unique_ptr<Exchange<T,P>> e) 
                     : m_exchange(e) {}
+
+            void assign(Exchange<T,P> &&e) {
+                m_exchange.release();
+                m_exchange = std::make_unique(e);
+            }
+
+            void assign(std::unique_ptr<Exchange<T,P>> &&e) {
+                m_exchange.release();
+                m_exchange = std::move(e);
+            }
+
+            std::unique_ptr<Exchange<T,P>> get_exchange() {
+                return m_exchange->release();
+            }
 
             template<typename S>
             Error<bool> run(Symbol sym, strategy::Strategy<S,P> &strat) {
                 bool cont = true;
                 //starting time point of historical data
-                time_t hp_time = m_exchange.get_current_time();
+                time_t hp_time = m_exchange->get_current_time();
                 while (cont) {
                     //we require account info to know about current
                     //funds of assets that we own
-                    auto eacc = m_exchange.get_account_info();
+                    auto eacc = m_exchange->get_account_info();
                     if(eacc.isLeft()) { return eacc.left(); }
                     auto acc = eacc.right();
 
@@ -32,9 +47,9 @@ namespace bypto::exchange::runner {
                     auto spendable_base = total_base_qty / 100; //1%
                     auto spendable_quote = total_quote_qty / 100; // 1%
 
-                    auto now = m_exchange.get_current_time();
+                    auto now = m_exchange->get_current_time();
                     //get set of prices between "now" and starting point. TODO: Starting point should probably be max(hp_time,now-4h)
-                    auto prices = m_exchange.get_historical_prices(hp_time,now);
+                    auto prices = m_exchange->get_historical_prices(hp_time,now);
 
                     //only if enough data is present can we attempt to apply a strategy
                     if(strat.has_enough_data(prices)) {
@@ -46,14 +61,14 @@ namespace bypto::exchange::runner {
                         else if (emorder.right()) {
                             auto order = emorder.right().value();
                             std::cout << "New order " << order << std::endl;
-                            m_exchange.execute_order(order); //is only executed at tick
+                            m_exchange->execute_order(order); //is only executed at tick
                         }
                     } else {
                         std::cout << "not enough data" << std::endl;
                     }
 
                     //collect data, execute outstanding orders
-                    auto esucc = m_exchange.tick_once();
+                    auto esucc = m_exchange->tick_once();
                     if(esucc.isLeft()) { return esucc; }
                     else { cont = esucc.right(); }
                 }
@@ -61,6 +76,6 @@ namespace bypto::exchange::runner {
             }
 
         private:
-            Exchange<T,P> &m_exchange;
+            std::unique_ptr<Exchange<T,P>> m_exchange;
     };
 }
