@@ -7,12 +7,18 @@
 #include <map>
 #include <optional>
 #include <functional>
+#include <stdexcept>
 
 namespace bypto::common::utils {
 
     template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
     template<class... Ts> overload(Ts...) -> overload<Ts...>;
 
+
+    class NotImplemented : public std::logic_error {
+        public:
+            NotImplemented() : std::logic_error("Not implemented") {};
+    };
 
     template <typename Iter>
     std::string intercalate(std::string del,Iter &&begin,Iter &&end) {

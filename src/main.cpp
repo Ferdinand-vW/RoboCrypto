@@ -81,11 +81,19 @@ Error<bool> run(CommandOptions opts) {
         return run_with_exchange(opts,runner);
     } else if(exch_tag == TagExchange::Binance) {
         Runner<Binance,PriceSource::Spot> runner;
-        runner.assign(binance(opts));
+
+        const auto pk = std::getenv("BINANCE_PUBLIC_KEY");
+        const auto sk = std::getenv("BINANCE_SECRET_KEY");
+        boost::asio::io_context io;
+        auto api = connect_prod_network(io);
+
+        runner.assign(binance(opts,api));
         return run_with_exchange(opts,runner);
     } else if(exch_tag == TagExchange::BinanceTest) {
         Runner<Binance,PriceSource::Spot> runner;
-        runner.assign(binance_test(opts));
+        boost::asio::io_context io;
+        auto api = connect_test_network(io);
+        runner.assign(binance_test(opts,api));
         return run_with_exchange(opts,runner);
     } else {
         return std::string("could not match exchange pattern: "+opts.m_cf.m_exch_flag);
@@ -111,7 +119,8 @@ int main() {
             std::cout << res.left() << std::endl;
         }
     }
-    
+
+
     // std::cout << res << std::endl;
 
     // auto pm = bte.get_price_map().right();

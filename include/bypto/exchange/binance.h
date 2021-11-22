@@ -11,8 +11,8 @@ namespace bypto::exchange {
     using namespace data::prices;
     class Binance;
 
-    binapi::rest::api& connect_prod_network(boost::asio::io_context &io);
-    binapi::rest::api& connect_test_network(boost::asio::io_context &io);
+    binapi::rest::api connect_prod_network(boost::asio::io_context &io);
+    binapi::rest::api connect_test_network(boost::asio::io_context &io);
 
     class Binance : public Exchange<Binance,PriceSource::Spot> {
         binapi::rest::api &m_api;

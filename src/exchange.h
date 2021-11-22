@@ -34,10 +34,10 @@ BackTestPtr backtest(const CommandOptions &opts) {
 }
 
 typedef std::unique_ptr<Exchange<Binance,PriceSource::Spot>> BinancePtr;
-BinancePtr binance(const CommandOptions &opts) {
-
+BinancePtr binance(const CommandOptions &opts,binapi::rest::api &api) {
+    return std::make_unique<Exchange<Binance,PriceSource::Spot>>(Binance(api));
 }
 
-BinancePtr binance_test(const CommandOptions &opts) {
-
+BinancePtr binance_test(const CommandOptions &opts,binapi::rest::api &api) {
+    return std::make_unique<Exchange<Binance,PriceSource::Spot>>(Binance(api));
 }
