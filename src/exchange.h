@@ -15,7 +15,7 @@ using namespace bypto::indicator;
 using namespace bypto::strategy;
 using namespace bypto::exchange;
 
-typedef std::unique_ptr<Exchange<BackTest,PriceSource::Kline>> BackTestPtr;
+typedef std::unique_ptr<BackTest> BackTestPtr;
 
 BackTestPtr backtest(const CommandOptions &opts) {
     //parse binance klines historical data
@@ -28,16 +28,16 @@ BackTestPtr backtest(const CommandOptions &opts) {
 
     //Start with 1 BTC and 1000 USDT
     BackTestParams btp{opts.m_sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
-    BackTest bte(std::move(btp));
-
-    return std::make_unique<Exchange<BackTest,PriceSource::Kline>>(bte);
+    // BackTest bte(std::move(btp));
+    
+    return std::unique_ptr<BackTest>(new BackTest(std::move(btp)));
 }
 
-typedef std::unique_ptr<Exchange<Binance,PriceSource::Spot>> BinancePtr;
+typedef std::unique_ptr<Binance> BinancePtr;
 BinancePtr binance(const CommandOptions &opts,binapi::rest::api &api) {
-    return std::make_unique<Exchange<Binance,PriceSource::Spot>>(Binance(api));
+    return std::make_unique<Binance>(Binance(api));
 }
 
 BinancePtr binance_test(const CommandOptions &opts,binapi::rest::api &api) {
-    return std::make_unique<Exchange<Binance,PriceSource::Spot>>(Binance(api));
+    return std::make_unique<Binance>(Binance(api));
 }

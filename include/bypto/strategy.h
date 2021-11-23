@@ -15,6 +15,8 @@ namespace bypto::strategy {
     class Strategy {
 
         public:
+            virtual ~Strategy(){};
+
             common::types::Error<std::optional<order::Order<order::Market>>>
             make_decision(time_t now
                              ,long double spendable_qty

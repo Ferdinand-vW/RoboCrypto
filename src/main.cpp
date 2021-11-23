@@ -59,10 +59,12 @@ Error<bool> run_with_exchange(CommandOptions &opts,Runner<E,P> &runner) {
     auto ind_tag = opts.m_indicator;
     
     if(ind_tag == TagIndicator::ExponentialMA && strat_tag == TagStrategy::Crossover) {
-        auto strat = Crossover<ExponentialMA,P>(ExponentialMA());
+        ExponentialMA ma;
+        Crossover<ExponentialMA,P> strat(ma);
         return runner.run(opts.m_sym,strat);
     } else if (ind_tag == TagIndicator::SimpleMA && strat_tag == TagStrategy::Crossover) {
-        auto strat = Crossover<SimpleMA,P>(SimpleMA());
+        SimpleMA sma;
+        Crossover<SimpleMA,P> strat(sma);
         return runner.run(opts.m_sym,strat);
     } else {
         return std::string("could not match strategy/indicator pattern: "
@@ -76,24 +78,26 @@ Error<bool> run(CommandOptions opts) {
     auto exch_tag = opts.m_exchange;
 
     if(exch_tag == TagExchange::BackTest) {
-        Runner<BackTest,PriceSource::Kline> runner;
-        runner.assign(backtest(opts));
+        auto ptr = backtest(opts);
+        Runner<BackTest,PriceSource::Kline> runner(std::move(ptr));
+        // runner.assign(std::move(backtest(opts)));
         return run_with_exchange(opts,runner);
     } else if(exch_tag == TagExchange::Binance) {
-        Runner<Binance,PriceSource::Spot> runner;
+        
 
         const auto pk = std::getenv("BINANCE_PUBLIC_KEY");
         const auto sk = std::getenv("BINANCE_SECRET_KEY");
         boost::asio::io_context io;
         auto api = connect_prod_network(io);
-
-        runner.assign(binance(opts,api));
+        Runner<Binance,PriceSource::Spot> runner(binance(opts,api));
         return run_with_exchange(opts,runner);
     } else if(exch_tag == TagExchange::BinanceTest) {
-        Runner<Binance,PriceSource::Spot> runner;
+        
         boost::asio::io_context io;
         auto api = connect_test_network(io);
-        runner.assign(binance_test(opts,api));
+        Runner<Binance,PriceSource::Spot> runner(binance_test(opts,api));
+        
+        
         return run_with_exchange(opts,runner);
     } else {
         return std::string("could not match exchange pattern: "+opts.m_cf.m_exch_flag);
@@ -110,6 +114,7 @@ int main() {
 
     CommandFlags cf = {"BTCUSDT","backtest","crossover","ema"};
 
+    populate_commands();
     auto e_opts = parse_commands(cf);
     if(e_opts.isLeft()) {
         std::cout << e_opts.left() << std::endl;

@@ -10,22 +10,9 @@ namespace bypto::exchange {
     template<typename T,PriceSource P>
     class Runner {
         public:
-            Runner(){};
             Runner(std::unique_ptr<Exchange<T,P>> e) 
-                    : m_exchange(e) {}
+                    : m_exchange(std::move(e)) {
 
-            void assign(Exchange<T,P> &&e) {
-                m_exchange.release();
-                m_exchange = std::make_unique(e);
-            }
-
-            void assign(std::unique_ptr<Exchange<T,P>> &&e) {
-                m_exchange.release();
-                m_exchange = std::move(e);
-            }
-
-            std::unique_ptr<Exchange<T,P>> get_exchange() {
-                return m_exchange->release();
             }
 
             template<typename S>

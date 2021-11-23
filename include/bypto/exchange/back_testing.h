@@ -54,6 +54,9 @@ namespace bypto::exchange {
 
         public:
             BackTest(BackTestParams &&prms);
+            BackTest(const BackTest &) = delete;
+            BackTest& operator=(const BackTest &) = delete;
+            ~BackTest(){};
 
             template<typename T>
             Error<int> execute_order(order::Order<T> go) {

@@ -19,6 +19,7 @@ namespace bypto::exchange {
 
         public:
             Binance(binapi::rest::api &api);
+            ~Binance(){};
 
             Error<int> execute_order(order::GenericOrder go);
             Error<account::Account> get_account_info();

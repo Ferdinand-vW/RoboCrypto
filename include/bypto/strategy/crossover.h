@@ -77,15 +77,14 @@ namespace bypto::strategy {
 
         private:
             CollectCrossover<P> m_collector;
-            TrendIndicator<Ind> m_indicator;
+            TrendIndicator<Ind> &m_indicator;
 
             long double m_slow = -1;
             long double m_fast = -1;
 
         public:
-            static const struct Crossover_Tag : public Tag {} tag;
-
-            Crossover(TrendIndicator<Ind> &&indicator) : m_indicator(std::move(indicator)),m_collector(CollectCrossover<P>()) {};
+            Crossover(TrendIndicator<Ind> &indicator) : m_indicator(indicator),m_collector(CollectCrossover<P>()) {};
+            ~Crossover(){};
 
             Error<std::optional<Order<Market>>> 
             make_decision(time_t now

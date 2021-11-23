@@ -25,6 +25,8 @@ namespace bypto::indicator {
     template <typename I>
     class TrendIndicator {
         public:
+            virtual ~TrendIndicator(){};
+
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {
                 return static_cast<I*>(this)->calculate(tp);
@@ -33,7 +35,7 @@ namespace bypto::indicator {
 
     class SimpleMA : public TrendIndicator<SimpleMA> {
         public:
-            static const struct SimpleMA_Tag : public Tag {} tag;
+            ~SimpleMA(){};
 
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {
@@ -54,7 +56,7 @@ namespace bypto::indicator {
                             //more influence on EMA
 
         public:
-            static const struct ExponentialMA_Tag : public Tag {} tag;
+            ~ExponentialMA(){};
 
             template<PriceSource P>
             long double calculate(const TrendParams<P> &tp) {

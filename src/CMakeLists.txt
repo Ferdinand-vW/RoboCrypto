@@ -39,7 +39,7 @@ ExternalProject_Add(
     STEP_TARGETS build
     EXCLUDE_FROM_ALL TRUE
     BUILD_BYPRODUCTS ${binapi_LIB}
-    CMAKE_ARGS -DCMAKE_CXX_STANDARD=20
+    CMAKE_ARGS "-DCMAKE_CXX_STANDARD=20"
     CONFIGURE_HANDLED_BY_BUILD ON
     UPDATE_COMMAND ""
 )
@@ -88,6 +88,7 @@ target_link_libraries(bypto z)
 target_link_libraries(bypto crypto)
 target_link_libraries(bypto ${taocpp_LIB})
 target_link_libraries(bypto ${binapi_LIB})
+target_compile_options(bypto PRIVATE -fno-sanitize=all)
 
 set_property(TARGET byptoLib PROPERTY CXX_STANDARD 20)
 set_property(TARGET byptoLib PROPERTY CXX_STANDARD_REQUIRED ON)
