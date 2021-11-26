@@ -56,7 +56,8 @@ set(SOURCES bypto/account.cpp
             bypto/common/types.cpp
             bypto/data/kline.cpp
             bypto/data/spot.cpp
-            bypto/data/binance.cpp)
+            bypto/data/binance.cpp
+            output.cpp)
 
 include_directories(${SOURCE_INCLUDE_DIR})
 include_directories(${PostgreSQL_INCLUDE_DIRS})

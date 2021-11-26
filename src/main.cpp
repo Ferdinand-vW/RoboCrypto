@@ -14,6 +14,7 @@
 #include "bypto/strategy/crossover.h"
 #include "exchange.h"
 #include "command.h"
+#include "output.h"
 
 #include <array>
 #include <boost/program_options.hpp>
@@ -54,18 +55,22 @@ void my_segfault_handler(int sig) {
 }
 
 template<typename E,PriceSource P>
-Error<bool> run_with_exchange(CommandOptions &opts,Runner<E,P> &runner) {
+Error<bool> run_with_exchange(CommandOptions &opts,OutputWriter &ow,Runner<E,P> &runner) {
     auto strat_tag = opts.m_strategy;
     auto ind_tag = opts.m_indicator;
     
     if(ind_tag == TagIndicator::ExponentialMA && strat_tag == TagStrategy::Crossover) {
         ExponentialMA ma;
         Crossover<ExponentialMA,P> strat(ma);
-        return runner.run(opts.m_sym,strat);
+        auto res = runner.run(opts.m_sym,strat);
+        ow.write_indicators(strat.get_indicator_data());
+
     } else if (ind_tag == TagIndicator::SimpleMA && strat_tag == TagStrategy::Crossover) {
         SimpleMA sma;
         Crossover<SimpleMA,P> strat(sma);
-        return runner.run(opts.m_sym,strat);
+        auto res = runner.run(opts.m_sym,strat);
+        ow.write_indicators(strat.get_indicator_data());
+        return res;
     } else {
         return std::string("could not match strategy/indicator pattern: "
                           +opts.m_cf.m_strat_flag
@@ -73,33 +78,30 @@ Error<bool> run_with_exchange(CommandOptions &opts,Runner<E,P> &runner) {
     }
 }
 
-Error<bool> run(CommandOptions opts) {
+Error<bool> run(CommandOptions opts,OutputWriter &ow) {
 
     auto exch_tag = opts.m_exchange;
 
+    boost::asio::io_context io;
     if(exch_tag == TagExchange::BackTest) {
         auto ptr = backtest(opts);
         Runner<BackTest,PriceSource::Kline> runner(std::move(ptr));
-        // runner.assign(std::move(backtest(opts)));
-        return run_with_exchange(opts,runner);
-    } else if(exch_tag == TagExchange::Binance) {
-        
-
-        const auto pk = std::getenv("BINANCE_PUBLIC_KEY");
-        const auto sk = std::getenv("BINANCE_SECRET_KEY");
-        boost::asio::io_context io;
+        return run_with_exchange(opts,ow,runner);
+    } 
+    
+    else if(exch_tag == TagExchange::Binance) {
         auto api = connect_prod_network(io);
         Runner<Binance,PriceSource::Spot> runner(binance(opts,api));
-        return run_with_exchange(opts,runner);
-    } else if(exch_tag == TagExchange::BinanceTest) {
-        
-        boost::asio::io_context io;
+        return run_with_exchange(opts,ow,runner);
+    } 
+    
+    else if(exch_tag == TagExchange::BinanceTest) {    
         auto api = connect_test_network(io);
         Runner<Binance,PriceSource::Spot> runner(binance_test(opts,api));
-        
-        
-        return run_with_exchange(opts,runner);
-    } else {
+        return run_with_exchange(opts,ow,runner);
+    } 
+    
+    else {
         return std::string("could not match exchange pattern: "+opts.m_cf.m_exch_flag);
     }
 }
@@ -117,12 +119,14 @@ int main() {
     populate_commands();
     auto e_opts = parse_commands(cf);
     if(e_opts.isLeft()) {
-        std::cout << e_opts.left() << std::endl;
-    } else {
-        auto res = run(e_opts.right());
-        if(res.isLeft()) {
-            std::cout << res.left() << std::endl;
-        }
+        std::cout << "parse error: " << e_opts.left() << std::endl;
+        return 1;
+    } 
+    
+    OutputWriter ow;
+    auto res = run(e_opts.right(),ow);
+    if(res.isLeft()) {
+        std::cout << res.left() << std::endl;
     }
 
 

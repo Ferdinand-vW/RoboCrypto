@@ -47,11 +47,8 @@ namespace bypto::exchange {
                         }
                         else if (emorder.right()) {
                             auto order = emorder.right().value();
-                            std::cout << "New order " << order << std::endl;
                             m_exchange->execute_order(order); //is only executed at tick
                         }
-                    } else {
-                        std::cout << "not enough data" << std::endl;
                     }
 
                     //collect data, execute outstanding orders

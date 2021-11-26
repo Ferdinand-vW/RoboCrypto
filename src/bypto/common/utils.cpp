@@ -7,6 +7,23 @@
 
 namespace bypto::common::utils {
     
+    std::vector<std::string> split(std::string s,char delim) {
+        std::vector<std::string> vec;
+        std::string res;
+        for(const auto &c : s) {
+            if(c == delim && res.size() > 0) {
+                vec.push_back(res);
+                res = "";
+            }
+
+            if(c != delim)
+                res.push_back(c);
+
+        }
+
+        return vec;
+    }
+
     std::string intercalate(std::vector<std::string > &v) {
         return intercalate("",v);
     }

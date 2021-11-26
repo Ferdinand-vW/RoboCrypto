@@ -108,10 +108,8 @@ namespace bypto::exchange {
 
     Error<bool> BackTest::tick_once() {
         auto prices = pricesFromKlines(m_klines);
-        if (m_klines.size() <= 0) { return err_his_data(); }
+        if (m_klines.size() <= 0) { return false; }
         if(m_kline_index >= m_klines.size()) { return false; } // we ran out of data so signal to stop
-
-        std::cout << "Time: " << pp_time(m_curr_time) << std::endl;
 
         auto kline = prices[m_kline_index];
         //if we're past the time of the current kline
@@ -120,28 +118,29 @@ namespace bypto::exchange {
             m_kline_index++;
             auto m_next = prices.index_opt(m_kline_index);
             //if current kline was last then return
-            if(!m_next.has_value()) { return err_his_data(); }
+            if(!m_next.has_value()) { return false; }
             else { kline = m_next.value(); }
         }
 
         long double curr_price = kline.m_close;
-        std::cout << "price: " << curr_price << std::endl;
-        //TODO: logic to see if any outstanding orders can be filled
-        for(auto o = m_outstanding.begin(); o != m_outstanding.end() ; ) {
-            auto opt_fr = o->second.m_generic_fill(curr_price);
-            if(opt_fr) { // could fill 
+
+        // 1) loop over each outstanding order
+        // 2) if order cannot be filled go to next, otherwise continue to (3)
+        // 3a) if order spawned a new order, then replace current with new
+        // 3b) otherwise execute order and update account
+        // 4) delete the executed order
+        for(auto o = m_outstanding.begin(); o != m_outstanding.end() ; ) { //(1)
+            auto opt_fr = o->second.m_generic_fill(curr_price); //(2)
+            if(opt_fr) { // (2)
+               
                 auto fr = opt_fr.value();
-                if(fr.m_new_order) { //order triggered a new order
-                    o->second = fr.m_new_order.value();
+                if(fr.m_new_order) { // (3)
+                    o->second = fr.m_new_order.value(); //(3.a)
                 } else { // store result
-                    update_account(fr.m_partial);
-                    std::cout << m_account;
-                    auto pm = singleton(kline.m_symbol,kline.m_close);
-                    auto eval = m_account.value("USDT", pm);
-                    std::cout << " valued at " << eval.right().ppValue()  << std::endl;
+                    update_account(fr.m_partial); //(3.b)
                 }
 
-                o = m_outstanding.erase(o);
+                o = m_outstanding.erase(o); // (4)
             } else {
                 ++o;
             }

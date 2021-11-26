@@ -36,6 +36,8 @@ namespace bypto::common::utils {
         return str;
     }
 
+    std::vector<std::string> split(std::string s,char delim);
+
     std::string intercalate(std::vector<std::string> &v);
     std::string intercalate(std::deque<std::string> &v);
     std::string intercalate(std::string del,std::vector<std::string> &v);

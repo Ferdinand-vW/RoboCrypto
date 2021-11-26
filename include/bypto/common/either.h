@@ -49,11 +49,11 @@ namespace bypto::common::either {
             Either(Either<L,R> &&e) {
                 if(e.isLeft()) {
                     m_l = std::make_unique<L>(std::move(e.left()));
-                    e.reset();
+                    // e.reset();
                     m_is_left = true;
                 } else {
                     m_r = std::make_unique<R>(std::move(e.right()));
-                    e.reset();
+                    // e.reset();
                 }
             }
 
@@ -66,10 +66,6 @@ namespace bypto::common::either {
                     m_r = std::make_unique<R>(e.right());
                 }
             }
-
-            ~Either() {
-                reset();
-            };
 
             bool operator==(Either<L,R> &e) {
                 if(m_is_left && e.m_is_left) {

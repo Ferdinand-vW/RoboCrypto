@@ -17,11 +17,11 @@ namespace bypto::data::price {
     template<> 
     class Price<PriceSource::Kline> {
         public:
-            long double get_price() { return m_close; }
-            long double get_quote_price() { return 1 / m_close; }
-            time_t get_time() { return m_close_time; }
-            common::types::Symbol get_symbol() { return m_symbol; }
-            std::tuple<common::types::Symbol,time_t,long double> as_tuple() {
+            long double get_price() const { return m_close; }
+            long double get_quote_price() const { return 1 / m_close; }
+            time_t get_time() const { return m_close_time; }
+            common::types::Symbol get_symbol() const { return m_symbol; }
+            std::tuple<common::types::Symbol,time_t,long double> as_tuple() const {
                 return {get_symbol(),get_time(),get_price()};
             }
 

@@ -2,6 +2,7 @@
 
 #include "bypto/common/types.h"
 #include "bypto/common/either.h"
+#include "bypto/common/csv.h"
 #include "bypto/data/kline.h"
 #include "bypto/data/spot.h"
 #include "bypto/data/price.h"
@@ -18,13 +19,14 @@
 
 namespace bypto::strategy {
 
+    using namespace common;
     using namespace common::types;
     using namespace data::prices;
     using namespace order;
     using namespace indicator;
 
     template<data::price::PriceSource P>
-    class CollectCrossover {
+    class CrossoverData : public csv::CsvConvert<CrossoverData<P>> {
         std::vector<time_t> m_times;
         std::vector<data::prices::Price<P>> m_prices;
         std::vector<long double> m_fast;
@@ -44,7 +46,7 @@ namespace bypto::strategy {
                 m_crossovers.insert(time);
             }
 
-            auto get() {
+            auto get() const {
                 std::vector<std::tuple<time_t,data::prices::Price<P>,long double, long double>> res;
                 for(int i = 0; i < m_times.size(); i++) {
                     res.push_back(std::make_tuple(m_times[i],m_prices[i],m_fast[i],m_slow[i]));
@@ -52,7 +54,7 @@ namespace bypto::strategy {
                 return res;
             }
 
-            auto csv_data() {
+            auto csv_data() const {
                 std::vector<std::tuple<std::string,long double,long double, long double,std::string>> res;
                 for(int i = 0; i < m_times.size(); i++) {
                     auto pp_co = m_crossovers.contains(m_times[i]) 
@@ -66,8 +68,21 @@ namespace bypto::strategy {
                 return res;
             }
 
-            std::array<std::string,5> csv_header() {
+            std::array<std::string,5> csv_header() const {
                 return {"TIME","PRICE","SLOW","FAST","CROSS OVER"};
+            }
+
+            std::stringstream to_csv() const override {
+                auto header = csv_header();
+                auto data = csv_data();
+
+                std::stringstream ss;
+                csv::write(header,data,ss);
+                return ss;
+            }
+
+            std::unique_ptr<CrossoverData> from_csv(std::stringstream &ss) const override {
+                throw std::invalid_argument("Not yet implemented");
             }
     };
 
@@ -76,14 +91,14 @@ namespace bypto::strategy {
     class Crossover : public Strategy<Crossover<Ind,P>,P> {
 
         private:
-            CollectCrossover<P> m_collector;
+            CrossoverData<P> m_collector;
             TrendIndicator<Ind> &m_indicator;
 
             long double m_slow = -1;
             long double m_fast = -1;
 
         public:
-            Crossover(TrendIndicator<Ind> &indicator) : m_indicator(indicator),m_collector(CollectCrossover<P>()) {};
+            Crossover(TrendIndicator<Ind> &indicator) : m_indicator(indicator),m_collector(CrossoverData<P>()) {};
             ~Crossover(){};
 
             Error<std::optional<Order<Market>>> 
@@ -145,6 +160,10 @@ namespace bypto::strategy {
                 // E.g. 15 min interval then 4 hour MA against 1 hour MA
                 // 4h/15min = 16. We probably want this to be configurable at call site.
                 return prices.size() >= 16;
+            }
+
+            std::stringstream get_indicator_data() {
+                return m_collector.to_csv();
             }
     };
 

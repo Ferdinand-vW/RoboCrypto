@@ -6,9 +6,18 @@
 #include <sstream>
 #include <tuple>
 #include <vector>
+#include <memory>
 
 #include "utils.h"
 namespace bypto::common::csv {
+
+    template <typename T>
+    class CsvConvert {
+        public:
+            virtual ~CsvConvert() {};
+            virtual std::stringstream to_csv() const = 0;
+            virtual std::unique_ptr<T> from_csv(std::stringstream &ss) const = 0;
+    };
 
     // Separates the input string by comma
     std::deque<std::string> tokenize(const std::string &s);

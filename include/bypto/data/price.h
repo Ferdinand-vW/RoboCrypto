@@ -12,11 +12,11 @@ namespace bypto::data::price {
     class Price {
 
         public:
-            long double get_price();
-            time_t get_time();
-            common::types::Symbol get_symbol();
+            long double get_price() const;
+            time_t get_time() const ;
+            common::types::Symbol get_symbol() const;
 
-            std::tuple<common::types::Symbol,time_t,long double> as_tuple();
+            std::tuple<common::types::Symbol,time_t,long double> as_tuple() const;
 
     };
 

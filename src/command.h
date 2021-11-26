@@ -4,8 +4,11 @@
 #include "bypto/exchange.h"
 #include "bypto/strategy.h"
 #include "bypto/indicator/trend.h"
+#include "output.h"
 
 #include <map>
+#include <string>
+#include <ranges>
 
 using namespace bypto::account;
 using namespace bypto::exchange;
@@ -17,6 +20,7 @@ struct CommandFlags {
     std::string m_exch_flag;
     std::string m_strat_flag;
     std::string m_ind_flag;
+    std::string m_write_flag;
 };
 
 struct CommandOptions {
@@ -24,6 +28,7 @@ struct CommandOptions {
     TagExchange m_exchange;
     TagStrategy m_strategy;
     TagIndicator m_indicator;
+    std::vector<OutputType> m_writers;
     CommandFlags m_cf;
 };
 
@@ -59,6 +64,16 @@ Error<CommandOptions> parse_commands(const CommandFlags &cf) {
     auto strat = cf.m_strat_flag == "" ? TagStrategy::Crossover : strat_it->second;
     auto ind   = cf.m_ind_flag   == "" ? TagIndicator::SimpleMA  : ind_it->second; 
 
-    return CommandOptions {Symbol("BTC","USDT"),exch,strat,ind,cf};
+    char delim(',');
+    std::vector<OutputType> outs;
+    for(auto &word : utils::split(cf.m_write_flag,delim)) {
+        if(word == "funds") { outs.push_back(OutputType::Fund); }
+        if(word == "indicators") { outs.push_back(OutputType::Indicator); }
+        if(word == "pnls") { outs.push_back(OutputType::PNL); }
+        if(word == "orders") { outs.push_back(OutputType::Order); }
+        if(word == "prices") { outs.push_back(OutputType::Price); }
+    }
+
+    return CommandOptions {Symbol("BTC","USDT"),exch,strat,ind,outs,cf};
 
 }

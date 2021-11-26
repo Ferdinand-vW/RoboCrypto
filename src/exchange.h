@@ -28,16 +28,15 @@ BackTestPtr backtest(const CommandOptions &opts) {
 
     //Start with 1 BTC and 1000 USDT
     BackTestParams btp{opts.m_sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
-    // BackTest bte(std::move(btp));
     
-    return std::unique_ptr<BackTest>(new BackTest(std::move(btp)));
+    return std::make_unique<BackTest>(std::move(btp));
 }
 
 typedef std::unique_ptr<Binance> BinancePtr;
 BinancePtr binance(const CommandOptions &opts,binapi::rest::api &api) {
-    return std::make_unique<Binance>(Binance(api));
+    return std::make_unique<Binance>(api);
 }
 
 BinancePtr binance_test(const CommandOptions &opts,binapi::rest::api &api) {
-    return std::make_unique<Binance>(Binance(api));
+    return std::make_unique<Binance>(api);
 }
