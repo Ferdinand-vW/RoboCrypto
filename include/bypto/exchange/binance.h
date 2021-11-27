@@ -7,6 +7,8 @@
 
 #include <binapi/api.hpp>
 
+#include <sstream>
+
 namespace bypto::exchange {
     using namespace data::prices;
     class Binance;
@@ -33,6 +35,11 @@ namespace bypto::exchange {
             Error<std::map<Symbol,long double>> get_price_map(time_t t = 0);
 
             bool is_connected();
+
+            std::stringstream get_funds_csv() const;
+            std::stringstream get_pnls_csv() const;
+            std::stringstream get_orders_csv() const;
+            std::stringstream get_prices_csv() const;
     };
 
 }

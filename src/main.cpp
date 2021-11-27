@@ -7,7 +7,7 @@
 #include "bypto/data/price.h"
 #include "bypto/common/csv.h"
 #include "bypto/common/either.h"
-#include "bypto/exchange/back_testing.h"
+#include "bypto/exchange/backtest.h"
 #include "bypto/order/order.h"
 #include "bypto/strategy.h"
 #include "bypto/exchange/runner.h"
@@ -78,27 +78,49 @@ Error<bool> run_with_exchange(CommandOptions &opts,OutputWriter &ow,Runner<E,P> 
     }
 }
 
+template<typename T,PriceSource P>
+void write_out_data(const Exchange<T,P> &e,OutputWriter &ow) {
+    ow.write_funds(e.get_funds_csv());
+    ow.write_pnls(e.get_pnls_csv());
+    ow.write_orders(e.get_orders_csv());
+    ow.write_prices(e.get_prices_csv());
+}
+
 Error<bool> run(CommandOptions opts,OutputWriter &ow) {
 
     auto exch_tag = opts.m_exchange;
 
     boost::asio::io_context io;
     if(exch_tag == TagExchange::BackTest) {
-        auto ptr = backtest(opts);
-        Runner<BackTest,PriceSource::Kline> runner(std::move(ptr));
-        return run_with_exchange(opts,ow,runner);
+        auto bt = backtest(opts);
+        Runner<BackTest,PriceSource::Kline> runner(bt);
+        
+        auto res = run_with_exchange(opts,ow,runner);
+
+        write_out_data(bt,ow);
+        return res;
     } 
     
     else if(exch_tag == TagExchange::Binance) {
         auto api = connect_prod_network(io);
-        Runner<Binance,PriceSource::Spot> runner(binance(opts,api));
-        return run_with_exchange(opts,ow,runner);
+        auto bin = binance(opts,api);
+        Runner<Binance,PriceSource::Spot> runner(bin);
+
+        auto res = run_with_exchange(opts,ow,runner);
+
+        write_out_data(bin,ow);
+        return res;
     } 
     
     else if(exch_tag == TagExchange::BinanceTest) {    
-        auto api = connect_test_network(io);
-        Runner<Binance,PriceSource::Spot> runner(binance_test(opts,api));
-        return run_with_exchange(opts,ow,runner);
+         auto api = connect_test_network(io);
+        auto bin = binance(opts,api);
+        Runner<Binance,PriceSource::Spot> runner(bin);
+
+        auto res = run_with_exchange(opts,ow,runner);
+
+        write_out_data(bin,ow);
+        return res;
     } 
     
     else {
@@ -120,7 +142,7 @@ int main() {
     auto e_opts = parse_commands(cf);
     if(e_opts.isLeft()) {
         std::cout << "parse error: " << e_opts.left() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     } 
     
     OutputWriter ow;

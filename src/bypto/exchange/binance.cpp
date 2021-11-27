@@ -74,4 +74,20 @@ namespace bypto::exchange {
 
     }
 
+    std::stringstream Binance::get_funds_csv() const {
+
+    }
+
+    std::stringstream Binance::get_pnls_csv() const {
+
+    }
+
+    std::stringstream Binance::get_orders_csv() const {
+
+    }
+
+    std::stringstream Binance::get_prices_csv() const {
+
+    }
+
 }

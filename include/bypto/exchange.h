@@ -7,6 +7,8 @@
 #include "bypto/common/types.h"
 
 #include <span>
+#include <string>
+#include <sstream>
 
 namespace bypto::exchange {
     using namespace data::price;
@@ -54,6 +56,19 @@ namespace bypto::exchange {
 
             Error<std::map<Symbol,long double>> get_price_map(time_t t = 0) {
                 return static_cast<E*>(this)->get_price_map(t);
+            }
+
+            std::stringstream get_funds_csv() const {
+                return static_cast<const E*>(this)->get_funds_csv();
+            }
+            std::stringstream get_pnls_csv() const {
+                return static_cast<const E*>(this)->get_pnls_csv();
+            }
+            std::stringstream get_orders_csv() const {
+                return static_cast<const E*>(this)->get_orders_csv();
+            }
+            std::stringstream get_prices_csv() const {
+                return static_cast<const E*>(this)->get_prices_csv();
             }
     };
 

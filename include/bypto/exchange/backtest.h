@@ -75,5 +75,10 @@ namespace bypto::exchange {
             time_t get_current_time();
             Klines_t get_historical_prices(time_t start,time_t end);
             Klines_t get_all_historical();
+
+            std::stringstream get_funds_csv() const;
+            std::stringstream get_pnls_csv() const;
+            std::stringstream get_orders_csv() const;
+            std::stringstream get_prices_csv() const;
     };
 }

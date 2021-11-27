@@ -1,4 +1,4 @@
-#include "bypto/exchange/back_testing.h"
+#include "bypto/exchange/backtest.h"
 #include "bypto/account.h"
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
@@ -158,5 +158,21 @@ namespace bypto::exchange {
 
     Klines_t BackTest::get_all_historical() {
         return pricesFromKlines(m_klines);
+    }
+
+    std::stringstream BackTest::get_funds_csv() const {
+
+    }
+
+    std::stringstream BackTest::get_pnls_csv() const {
+
+    }
+
+    std::stringstream BackTest::get_orders_csv() const {
+
+    }
+
+    std::stringstream BackTest::get_prices_csv() const {
+
     }
 }
