@@ -36,7 +36,6 @@
 
 using namespace bypto::account;
 using namespace bypto::exchange;
-// using namespace bypto::data;
 using namespace bypto::strategy;
 using namespace bypto::indicator;
 namespace po = boost::program_options;

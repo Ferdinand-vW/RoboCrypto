@@ -29,6 +29,8 @@ namespace bypto::order {
             }
 
         public:
+            std::string m_type;
+
             Symbol m_sym;
             Quantity m_qty;
             Position m_pos;

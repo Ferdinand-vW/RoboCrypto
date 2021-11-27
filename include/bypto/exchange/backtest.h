@@ -40,9 +40,12 @@ namespace bypto::exchange {
         std::vector<Kline_t> m_klines;
         int m_kline_index = 0;
 
-        
-        std::map<int,order::GenericOrder> m_filled;
-        std::map<int,order::GenericOrder> m_outstanding;
+
+        std::vector<std::tuple<time_t,long double>> m_price_history;
+        std::vector<std::tuple<time_t,order::Partial>> m_order_history;
+        std::map<int,order::GenericOrder> m_orders;
+
+        std::vector<std::tuple<time_t,account::Account>> m_account_history;
         account::Account m_account;
 
         int m_counter = 0;
@@ -50,17 +53,17 @@ namespace bypto::exchange {
         time_unit m_tick_rate;
         time_t m_curr_time;
 
-        void update_account(order::Partial p);
+        void update_account(time_t curr,order::Partial p);
 
         public:
-            BackTest(BackTestParams &&prms);
+            explicit BackTest(BackTestParams &&prms);
             BackTest(const BackTest &) = delete;
             BackTest& operator=(const BackTest &) = delete;
-            ~BackTest(){};
+            ~BackTest() override = default;
 
             template<typename T>
             Error<int> execute_order(order::Order<T> go) {
-                m_outstanding.insert({m_counter,order::GenericOrder(go)});
+                m_orders.insert({m_counter,order::GenericOrder(go)});
                 m_counter++;
                 return m_counter - 1;
             }

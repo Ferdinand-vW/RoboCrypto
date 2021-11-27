@@ -27,13 +27,13 @@ BackTest backtest(const CommandOptions &opts) {
     //Start with 1 BTC and 1000 USDT
     BackTestParams btp{opts.m_sym,1,1000,std::nullopt,std::nullopt,std::move(klines)};
     
-    return btp;
+    return BackTest(std::move(btp));
 }
 
 Binance binance(const CommandOptions &opts,binapi::rest::api &api) {
-    return api;
+    return Binance(api);
 }
 
 Binance binance_test(const CommandOptions &opts,binapi::rest::api &api) {
-    return api;
+    return Binance(api);
 }

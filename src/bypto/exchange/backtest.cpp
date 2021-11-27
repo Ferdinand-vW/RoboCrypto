@@ -2,6 +2,7 @@
 #include "bypto/account.h"
 #include "bypto/common/math.h"
 #include "bypto/common/utils.h"
+#include "bypto/common/csv.h"
 #include "bypto/data/binance.h"
 #include "bypto/data/kline.h"
 #include "bypto/data/price.h"
@@ -39,7 +40,7 @@ namespace bypto::exchange {
     }
 
     //We always buy/sell from the perspective of the base currency
-    void BackTest::update_account(order::Partial p) {
+    void BackTest::update_account(time_t curr,order::Partial p) {
         switch(p.m_pos) {
             case order::Position::Buy:
                 //sym=BTCUSDT
@@ -55,6 +56,8 @@ namespace bypto::exchange {
                 m_account.add_fund(p.m_sym.quote(), p.m_qty * p.m_price);
             break;
         }
+
+        m_account_history.push_back(std::make_tuple(curr,m_account));
     }
 
     Error<std::map<Symbol,long double>> BackTest::get_price_map(time_t t) {
@@ -97,7 +100,7 @@ namespace bypto::exchange {
     }
 
     Error<bool> BackTest::cancel_order(int o_id) {
-        m_outstanding.erase(o_id);
+        m_orders.erase(o_id);
 
         return true;
     }
@@ -129,7 +132,7 @@ namespace bypto::exchange {
         // 3a) if order spawned a new order, then replace current with new
         // 3b) otherwise execute order and update account
         // 4) delete the executed order
-        for(auto o = m_outstanding.begin(); o != m_outstanding.end() ; ) { //(1)
+        for(auto o = m_orders.begin(); o != m_orders.end() ; ) { //(1)
             auto opt_fr = o->second.m_generic_fill(curr_price); //(2)
             if(opt_fr) { // (2)
                
@@ -137,10 +140,10 @@ namespace bypto::exchange {
                 if(fr.m_new_order) { // (3)
                     o->second = fr.m_new_order.value(); //(3.a)
                 } else { // store result
-                    update_account(fr.m_partial); //(3.b)
+                    update_account(m_curr_time,fr.m_partial); //(3.b)
                 }
 
-                o = m_outstanding.erase(o); // (4)
+                o = m_orders.erase(o); // (4)
             } else {
                 ++o;
             }
@@ -161,7 +164,20 @@ namespace bypto::exchange {
     }
 
     std::stringstream BackTest::get_funds_csv() const {
+        std::array<std::string,3> header = {"TIME","CURRENCY","VALUE"};
 
+        std::vector<std::tuple<time_t,std::string,long double>> body;
+
+        for(const auto &acc : m_account_history) {
+            auto funds = std::get<1>(acc).get_funds();
+            for(const auto &f : funds) {
+                auto tpl = std::make_tuple(std::get<0>(acc),f.first,f.second);
+                body.push_back(tpl);
+            }
+        }
+        std::stringstream ss;
+        common::csv::write(header,body,ss);
+        return ss;
     }
 
     std::stringstream BackTest::get_pnls_csv() const {
@@ -169,7 +185,28 @@ namespace bypto::exchange {
     }
 
     std::stringstream BackTest::get_orders_csv() const {
+        std::array<std::string,6> header = {"TIME","ORDER","SYMBOL","POSITION","QUANTITY","PRICE",};
 
+        std::vector<
+            std::tuple<time_t,std::string
+                      ,Symbol,order::Position
+                      ,long double,long double
+                      >
+                    > body;
+
+        for(const auto &time_prtl : m_order_history) {
+            auto time = std::get<0>(time_prtl);
+            auto prtl = std::get<1>(time_prtl);
+
+            auto tpl = std::make_tuple(time,prtl.m_order_type
+                                      ,prtl.m_sym,prtl.m_pos
+                                      ,prtl.m_qty,prtl.m_price);
+
+            body.push_back(tpl);
+        }
+        std::stringstream ss;
+        common::csv::write(header,body,ss);
+        return ss;
     }
 
     std::stringstream BackTest::get_prices_csv() const {

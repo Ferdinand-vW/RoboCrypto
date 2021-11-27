@@ -13,49 +13,70 @@ namespace bypto::order {
 
 
 /*********************Concrete Order Types**********************/
-    struct Market {
-        BaseOrQuote m_boq;
+    class Market {
+        public:
+            BaseOrQuote m_boq;
+
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const Market &m);
 
-    struct Limit {
-        TimeInForce m_time_in_force;
-        Price m_limit;
+    class Limit {
+        public:
+            TimeInForce m_time_in_force;
+            Price m_limit;
+
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const Limit &l);
 
-    struct StopLoss {
-        Price m_stop;
+    class StopLoss {
+        public:
+            Price m_stop;
+
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const StopLoss &sl);
 
-    struct StopLossLimit {
-        TimeInForce m_time_in_force;
-        Price m_limit;
-        Price m_stop;
+    class StopLossLimit {
+        public:
+            TimeInForce m_time_in_force;
+            Price m_limit;
+            Price m_stop;
+
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const StopLossLimit &sll);
 
-    struct TakeProfit {
-        Price m_take;
+    class TakeProfit {
+        public:
+            Price m_take;
+            
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const TakeProfit &tp);
 
     struct TakeProfitLimit {
-        TimeInForce m_time_in_force;
-        Price m_limit;
-        Price m_take;
+        public:
+            TimeInForce m_time_in_force;
+            Price m_limit;
+            Price m_take;
+
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const TakeProfitLimit &tpl);
 
-    struct LimitMaker {
-        Price m_limit;
+    class LimitMaker {
+        public:
+            Price m_limit;
+
+            std::string get_name() const;
     };
 
     std::ostream& operator<<(std::ostream &os,const LimitMaker &lm);
