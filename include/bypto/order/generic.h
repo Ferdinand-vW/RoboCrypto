@@ -8,7 +8,7 @@
 namespace bypto::order {
         struct GenericOrder {
         private:
-            template<typename T>
+            template<OType T>
             auto map_generic(Order<T> o) {
                 auto f = [o](auto p) -> std::optional<FillResult<GenericOrder>> {
                     auto fr_opt = fill(o,p); //
@@ -41,14 +41,14 @@ namespace bypto::order {
 
             std::function<std::optional<FillResult<GenericOrder>>(Price)> m_generic_fill;
 
-        GenericOrder(Order<Unit> o);
-        GenericOrder(Order<Market> m);
-        GenericOrder(Order<Limit> l);
-        GenericOrder(Order<StopLoss> sl);
-        GenericOrder(Order<StopLossLimit> sll);
-        GenericOrder(Order<TakeProfit> tp);
-        GenericOrder(Order<TakeProfitLimit> tpl);
-        GenericOrder(Order<LimitMaker> lm);
+        GenericOrder(Order<OType::Unit> o);
+        GenericOrder(Order<OType::Market> m);
+        GenericOrder(Order<OType::Limit> l);
+        GenericOrder(Order<OType::StopLoss> sl);
+        GenericOrder(Order<OType::StopLossLimit> sll);
+        GenericOrder(Order<OType::TakeProfit> tp);
+        GenericOrder(Order<OType::TakeProfitLimit> tpl);
+        GenericOrder(Order<OType::LimitMaker> lm);
         
     };
 }

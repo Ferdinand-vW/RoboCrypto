@@ -14,17 +14,17 @@ namespace bypto::order {
 
     using namespace bypto::common::types;
     
-    template <typename OrderType>
+    template <OType OT>
     class Order {
         public:
-            Order(Symbol sym,Quantity qty,Position pos,OrderType ot) 
+            Order(Symbol sym,Quantity qty,Position pos,OrdSpec<OT> ot) 
                  : m_sym(sym)
                  , m_qty(qty)
                  , m_pos(pos)
                  , m_ot(ot){};
 
-            template<typename T>
-            Order(Order<T> o,OrderType ot)
+            template<OType T>
+            Order(Order<T> o,OrdSpec<OT> ot)
                  : m_sym(o.m_sym)
                  , m_qty(o.m_qty)
                  , m_pos(o.m_pos)
@@ -33,10 +33,10 @@ namespace bypto::order {
         Symbol m_sym;
         Quantity m_qty;
         Position m_pos;
-        OrderType m_ot;    
+        OrdSpec<OT> m_ot;    
     };
 
-    template<typename OrderType>
+    template<OType OrderType>
     std::ostream& operator<<(std::ostream &os,const Order<OrderType> &o) {
         os << "Order {";
         os << "m_sym=" << o.m_sym << ", ";

@@ -6,18 +6,18 @@
 
 namespace bypto::order {
     
-    std::string Market::get_name() const { return "Market"; }
+    std::string OrdSpec<OType::Market>::get_name() const { return "Market"; }
 
-    std::ostream& operator<<(std::ostream &os,const Market &m) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::Market> &m) {
         os << "Market {";
         os << "m_boq=" << m.m_boq      << "}";
 
         return os;
     }
 
-    std::string Limit::get_name() const { return "Limit"; }
+    std::string OrdSpec<OType::Limit>::get_name() const { return "Limit"; }
 
-    std::ostream& operator<<(std::ostream &os,const Limit &l) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::Limit> &l) {
         os << "Limit {";
         os << "m_time_in_force=" << l.m_time_in_force << ",";
         os << "m_limit="         << l.m_limit         << "}";
@@ -25,18 +25,18 @@ namespace bypto::order {
         return os;
     }
 
-    std::string StopLoss::get_name() const { return "StopLoss"; }
+    std::string OrdSpec<OType::StopLoss>::get_name() const { return "StopLoss"; }
 
-    std::ostream& operator<<(std::ostream &os,const StopLoss &sl) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::StopLoss> &sl) {
         os << "StopLoss {";
         os << "m_stop=" << sl.m_stop << "}";
 
         return os;
     }
 
-    std::string StopLossLimit::get_name() const { return "StopLossLimit"; }
+    std::string OrdSpec<OType::StopLossLimit>::get_name() const { return "StopLossLimit"; }
 
-    std::ostream& operator<<(std::ostream &os,const StopLossLimit &sll) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::StopLossLimit> &sll) {
         os << "StopLossLimit {";
         os << "m_time_in_force=" << sll.m_time_in_force << ",";
         os << "m_limit="         << sll.m_limit         << ",";
@@ -45,18 +45,18 @@ namespace bypto::order {
         return os;
     }
 
-    std::string TakeProfit::get_name() const { return "TakeProfit"; }
+    std::string OrdSpec<OType::TakeProfit>::get_name() const { return "TakeProfit"; }
 
-    std::ostream& operator<<(std::ostream &os,const TakeProfit &tp) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::TakeProfit> &tp) {
         os << "TakeProfit {";
         os << "m_take=" <<tp.m_take << "}";
 
         return os;
     }
 
-    std::string TakeProfitLimit::get_name() const { return "TakeProfitLimit"; }
+    std::string OrdSpec<OType::TakeProfitLimit>::get_name() const { return "TakeProfitLimit"; }
 
-    std::ostream& operator<<(std::ostream &os,const TakeProfitLimit &tpl) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::TakeProfitLimit> &tpl) {
         os << "TakeProfitLimit {";
         os << "m_time_in_force=" << tpl.m_time_in_force << ",";
         os << "m_limit="         << tpl.m_limit         << ",";
@@ -65,9 +65,9 @@ namespace bypto::order {
         return os;
     }
 
-    std::string LimitMaker::get_name() const { return "LimitMaker"; }
+    std::string OrdSpec<OType::LimitMaker>::get_name() const { return "LimitMaker"; }
 
-    std::ostream& operator<<(std::ostream &os,const LimitMaker &lm) {
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::LimitMaker> &lm) {
         os << "LimitMaker {";
         os << "m_limit="    << lm.m_limit << "}";
 

@@ -8,13 +8,13 @@
 
 namespace bypto::order {
 
-    GenericOrder::GenericOrder(Order<Unit> o)
+    GenericOrder::GenericOrder(Order<OType::Unit> o)
                               : m_sym(o.m_sym)
                               , m_qty(o.m_qty)
                               , m_pos(o.m_pos)
                               , m_type("Unit") {};
 
-    GenericOrder::GenericOrder(Order<Market> m)
+    GenericOrder::GenericOrder(Order<OType::Market> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)
@@ -22,7 +22,7 @@ namespace bypto::order {
                               , m_generic_fill(map_generic(m))
                               , m_type("Market") {};
 
-    GenericOrder::GenericOrder(Order<Limit> m)
+    GenericOrder::GenericOrder(Order<OType::Limit> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)
@@ -30,7 +30,7 @@ namespace bypto::order {
                               , m_generic_fill(map_generic(m))
                               , m_type("Limit") {};
 
-    GenericOrder::GenericOrder(Order<StopLoss> m)
+    GenericOrder::GenericOrder(Order<OType::StopLoss> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)
@@ -38,7 +38,7 @@ namespace bypto::order {
                               , m_generic_fill(map_generic(m))
                               , m_type("StopLoss") {};
 
-    GenericOrder::GenericOrder(Order<StopLossLimit> m)
+    GenericOrder::GenericOrder(Order<OType::StopLossLimit> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)
@@ -47,7 +47,7 @@ namespace bypto::order {
                               , m_generic_fill(map_generic(m))
                               , m_type("StopLossLimit") {};
 
-    GenericOrder::GenericOrder(Order<TakeProfit> m)
+    GenericOrder::GenericOrder(Order<OType::TakeProfit> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)
@@ -55,7 +55,7 @@ namespace bypto::order {
                               , m_generic_fill(map_generic(m))
                               , m_type("TakeProfit") {};
 
-    GenericOrder::GenericOrder(Order<TakeProfitLimit> m)
+    GenericOrder::GenericOrder(Order<OType::TakeProfitLimit> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)
@@ -64,7 +64,7 @@ namespace bypto::order {
                               , m_generic_fill(map_generic(m))
                               , m_type("TakeProfitLimit") {};
 
-    GenericOrder::GenericOrder(Order<LimitMaker> m)
+    GenericOrder::GenericOrder(Order<OType::LimitMaker> m)
                               : m_sym(m.m_sym)
                               , m_qty(m.m_qty)
                               , m_pos(m.m_pos)

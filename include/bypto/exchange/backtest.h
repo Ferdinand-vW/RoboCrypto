@@ -60,7 +60,7 @@ namespace bypto::exchange {
             BackTest& operator=(const BackTest &) = delete;
             ~BackTest() override = default;
 
-            template<typename T>
+            template<order::OType T>
             Error<int> execute_order(order::Order<T> go) {
                 m_orders.insert({m_counter,order::GenericOrder(go)});
                 m_counter++;

@@ -35,7 +35,9 @@ namespace bypto::exchange {
     Binance::Binance(binapi::rest::api &api) : m_api(api) {};
 
     Error<int> Binance::execute_order(order::GenericOrder go) {
-
+        // auto resp = m_api.new_order(go.m_sym.to_string()
+        //                            ,go.m_pos
+        //                            ,go.m_type)
     }
 
     Error<account::Account> Binance::get_account_info() {

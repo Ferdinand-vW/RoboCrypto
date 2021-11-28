@@ -7,7 +7,6 @@
 #include <optional>
 
 namespace bypto::order {
-    struct Unit {};
 
     struct Partial {
         std::string m_order_type;
@@ -23,7 +22,7 @@ namespace bypto::order {
         std::optional<T> m_new_order;
     };
 
-    template<typename T1,typename T2 = Unit>
+    template<OType T1,OType T2 = OType::Unit>
     FillResult<Order<T2>> orderToFill(Price p,Order<T1> o,std::optional<Order<T2>> m_new_order = std::nullopt) {
         return FillResult<Order<T2>>{o.m_ot.get_name(),p,o.m_sym,o.m_qty,o.m_pos,m_new_order};
     }
@@ -39,11 +38,11 @@ namespace bypto::order {
         return os;
     }
 
-    std::optional<FillResult<Order<Unit>>> fill(Order<Market> m,Price p);
-    std::optional<FillResult<Order<Unit>>> fill(Order<Limit> m,Price p);
-    std::optional<FillResult<Order<Market>>> fill(Order<StopLoss> m,Price p);
-    std::optional<FillResult<Order<Limit>>> fill(Order<StopLossLimit> m,Price p);
-    std::optional<FillResult<Order<Market>>> fill(Order<TakeProfit> m,Price p);
-    std::optional<FillResult<Order<Limit>>> fill(Order<TakeProfitLimit> m,Price p);
-    std::optional<FillResult<Order<Unit>>> fill(Order<LimitMaker> m,Price p);
+    std::optional<FillResult<Order<OType::Unit>>> fill(Order<OType::Market> m,Price p);
+    std::optional<FillResult<Order<OType::Unit>>> fill(Order<OType::Limit> m,Price p);
+    std::optional<FillResult<Order<OType::Market>>> fill(Order<OType::StopLoss> m,Price p);
+    std::optional<FillResult<Order<OType::Limit>>> fill(Order<OType::StopLossLimit> m,Price p);
+    std::optional<FillResult<Order<OType::Market>>> fill(Order<OType::TakeProfit> m,Price p);
+    std::optional<FillResult<Order<OType::Limit>>> fill(Order<OType::TakeProfitLimit> m,Price p);
+    std::optional<FillResult<Order<OType::Unit>>> fill(Order<OType::LimitMaker> m,Price p);
 }

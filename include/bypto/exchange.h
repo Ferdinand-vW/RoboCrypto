@@ -21,7 +21,7 @@ namespace bypto::exchange {
         public:
             virtual ~Exchange(){};
 
-            template<typename OT>
+            template<order::OType OT>
             Error<int> execute_order(order::Order<OT> order) {
                 return static_cast<E*>(this)->execute_order(order);
             }

@@ -14,7 +14,7 @@ namespace bypto::order {
         return os;
     }
 
-    std::optional<FillResult<Order<Unit>>> fill(Order<Market> m,Price price) {
+    std::optional<FillResult<Order<OType::Unit>>> fill(Order<OType::Market> m,Price price) {
         Price actual = price;
         if(m.m_ot.m_boq == BaseOrQuote::Quote) {
             actual = 1/price;
@@ -26,7 +26,7 @@ namespace bypto::order {
         return orderToFill(actual,m);
     }
 
-    std::optional<FillResult<Order<Unit>>> fill(Order<Limit> l,Price price) {
+    std::optional<FillResult<Order<OType::Unit>>> fill(Order<OType::Limit> l,Price price) {
         if(l.m_pos == Position::Buy && price <= l.m_ot.m_limit) {
             //If price equals or is lower than LIMIT then buy
             return orderToFill(price,l);
@@ -42,11 +42,11 @@ namespace bypto::order {
     }
 
     
-    std::optional<FillResult<Order<Market>>> fill(Order<StopLoss> sl,Price price) {
+    std::optional<FillResult<Order<OType::Market>>> fill(Order<OType::StopLoss> sl,Price price) {
         if(sl.m_ot.m_stop >= price) {
         //If price falls and reaches stop price then trigger market order
-            Order m(sl,Market{BaseOrQuote::Base});
-            return orderToFill<StopLoss,Market>(price,sl,m);
+            Order m(sl,OrdSpec<OType::Market>{BaseOrQuote::Base});
+            return orderToFill<OType::StopLoss,OType::Market>(price,sl,m);
         
         } else {
          
@@ -54,21 +54,21 @@ namespace bypto::order {
         }   
     }
 
-    std::optional<FillResult<Order<Limit>>> fill(Order<StopLossLimit> sll,Price price) {
+    std::optional<FillResult<Order<OType::Limit>>> fill(Order<OType::StopLossLimit> sll,Price price) {
         if (sll.m_ot.m_stop >= price) { 
-            Order l(sll,Limit{sll.m_ot.m_time_in_force,sll.m_ot.m_limit});
-            return orderToFill<StopLossLimit,Limit>(price,sll,l);
+            Order l(sll,OrdSpec<OType::Limit>{sll.m_ot.m_time_in_force,sll.m_ot.m_limit});
+            return orderToFill<OType::StopLossLimit,OType::Limit>(price,sll,l);
         
         } else {
             return std::nullopt;
         }
     }
 
-    std::optional<FillResult<Order<Market>>> fill(Order<TakeProfit> sl,Price price) {
+    std::optional<FillResult<Order<OType::Market>>> fill(Order<OType::TakeProfit> sl,Price price) {
         if(sl.m_ot.m_take <= price) {
         //If price falls and reaches stop price then trigger market order
-            Order m(sl,Market{BaseOrQuote::Base});
-            return orderToFill<TakeProfit,Market>(price,sl,m);
+            Order m(sl,OrdSpec<OType::Market>{BaseOrQuote::Base});
+            return orderToFill<OType::TakeProfit,OType::Market>(price,sl,m);
         
         } else {
          
@@ -76,10 +76,10 @@ namespace bypto::order {
         }   
     }
 
-    std::optional<FillResult<Order<Limit>>> fill(Order<TakeProfitLimit> sll,Price price) {
+    std::optional<FillResult<Order<OType::Limit>>> fill(Order<OType::TakeProfitLimit> sll,Price price) {
         if (sll.m_ot.m_take <= price) { 
-            Order l(sll,Limit{sll.m_ot.m_time_in_force,sll.m_ot.m_limit});
-            return orderToFill<TakeProfitLimit,Limit>(price,sll,l);
+            Order l(sll,OrdSpec<OType::Limit>{sll.m_ot.m_time_in_force,sll.m_ot.m_limit});
+            return orderToFill<OType::TakeProfitLimit,OType::Limit>(price,sll,l);
         
         } else {
             return std::nullopt;
@@ -87,7 +87,7 @@ namespace bypto::order {
     }
 
     //TODO
-    std::optional<FillResult<Order<Unit>>> fill(LimitMaker lm,Price price) {
+    std::optional<FillResult<Order<OType::Unit>>> fill(OrdSpec<OType::LimitMaker> lm,Price price) {
         return std::nullopt;
     }
 

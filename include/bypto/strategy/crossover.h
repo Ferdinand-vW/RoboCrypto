@@ -101,7 +101,7 @@ namespace bypto::strategy {
             Crossover(TrendIndicator<Ind> &indicator) : m_indicator(indicator),m_collector(CrossoverData<P>()) {};
             ~Crossover(){};
 
-            Error<std::optional<Order<Market>>> 
+            Error<std::optional<Order<OType::Market>>> 
             make_decision(time_t now
                          ,long double spendable_qty
                          ,long double spendable_quote_qty
@@ -128,10 +128,10 @@ namespace bypto::strategy {
                 common::types::Symbol sym("BTC","USDT");
                 //short ma moves above long ma indicating rising trend
                 //which means we should buy base ccy
-                std::optional<Order<Market>> res;
+                std::optional<Order<OType::Market>> res;
                 if(fast_moving > slow_moving && m_fast < m_slow) {
                     //buy base ccy, pay quote ccy
-                    Market mkt{BaseOrQuote::Quote};
+                    OrdSpec<OType::Market> mkt{BaseOrQuote::Quote};
                     Order ord(sym,spendable_quote_qty,Position::Sell,mkt);
                     res = ord;
                     m_collector.put_crossover(now);
@@ -139,7 +139,7 @@ namespace bypto::strategy {
                     //which means we should sell base ccy
                 } else if (fast_moving < slow_moving && m_fast > m_slow) {
                     //sell base ccy, receive quote ccy
-                    Market mkt{BaseOrQuote::Base};
+                    OrdSpec<OType::Market> mkt{BaseOrQuote::Base};
                     order::Order ord(sym,spendable_qty,Position::Sell,mkt);
                     res = ord;
                     m_collector.put_crossover(now);

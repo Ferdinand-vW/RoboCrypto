@@ -11,18 +11,24 @@ namespace bypto::order {
 
 /****************************Order contract******************************/
 
+enum class OType { Unit, Market, Limit, StopLoss, StopLossLimit, TakeProfit, TakeProfitLimit, LimitMaker };
+
+template <OType OT>
+class OrdSpec {};
 
 /*********************Concrete Order Types**********************/
-    class Market {
+    template<>
+    class OrdSpec<OType::Market> {
         public:
             BaseOrQuote m_boq;
 
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const Market &m);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::Market> &m);
 
-    class Limit {
+    template<>
+    class OrdSpec<OType::Limit> {
         public:
             TimeInForce m_time_in_force;
             Price m_limit;
@@ -30,18 +36,20 @@ namespace bypto::order {
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const Limit &l);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::Limit> &l);
 
-    class StopLoss {
+    template<>
+    class OrdSpec<OType::StopLoss> {
         public:
             Price m_stop;
 
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const StopLoss &sl);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::StopLoss> &sl);
 
-    class StopLossLimit {
+    template<>
+    class OrdSpec<OType::StopLossLimit> {
         public:
             TimeInForce m_time_in_force;
             Price m_limit;
@@ -50,18 +58,20 @@ namespace bypto::order {
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const StopLossLimit &sll);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::StopLossLimit> &sll);
 
-    class TakeProfit {
+    template<>
+    class OrdSpec<OType::TakeProfit> {
         public:
             Price m_take;
             
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const TakeProfit &tp);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::TakeProfit> &tp);
 
-    struct TakeProfitLimit {
+    template<>
+    class OrdSpec<OType::TakeProfitLimit> {
         public:
             TimeInForce m_time_in_force;
             Price m_limit;
@@ -70,15 +80,16 @@ namespace bypto::order {
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const TakeProfitLimit &tpl);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::TakeProfitLimit> &tpl);
 
-    class LimitMaker {
+    template<>
+    class OrdSpec<OType::LimitMaker> {
         public:
             Price m_limit;
 
             std::string get_name() const;
     };
 
-    std::ostream& operator<<(std::ostream &os,const LimitMaker &lm);
+    std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::LimitMaker> &lm);
 }
 
