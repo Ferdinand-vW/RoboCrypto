@@ -57,7 +57,7 @@ namespace bypto::exchange {
             break;
         }
 
-        m_account_history.push_back(std::make_tuple(curr,m_account));
+        m_account_history.insert({curr,m_account});
     }
 
     Error<std::map<Symbol,long double>> BackTest::get_price_map(time_t t) {
@@ -126,6 +126,7 @@ namespace bypto::exchange {
         }
 
         long double curr_price = kline.m_close;
+        m_price_history.insert({m_curr_time,std::make_tuple(m_symbol,curr_price)});
 
         // 1) loop over each outstanding order
         // 2) if order cannot be filled go to next, otherwise continue to (3)
@@ -143,6 +144,7 @@ namespace bypto::exchange {
                     update_account(m_curr_time,fr.m_partial); //(3.b)
                 }
 
+                m_order_history.insert({m_curr_time,fr.m_partial});
                 o = m_orders.erase(o); // (4)
             } else {
                 ++o;
@@ -181,7 +183,43 @@ namespace bypto::exchange {
     }
 
     std::stringstream BackTest::get_pnls_csv() const {
+        std::array<std::string,3> header = {"TIME","CURRENCY","PNL"};
 
+        std::vector<std::tuple<time_t,std::string,long double>> body;
+        long double prev_value = 0;
+
+
+        std::stringstream ss;
+        for(auto &p : m_price_history) {
+            auto time = p.first;
+            auto sym = std::get<0>(p.second);
+            auto price = std::get<1>(p.second);
+            
+            auto acc_it = m_account_history.find(time);
+            if(acc_it == m_account_history.end()) { 
+                ss << "ERROR: could not find account at time "+std::to_string(time) << std::endl;
+                continue;
+            }
+            auto acc = *acc_it;
+
+            std::map<Symbol,long double> pm;
+            pm.insert({sym,price});
+
+            auto evalue = acc.second.value(sym.quote(), pm);
+            if(evalue.isLeft()) {
+                ss << "ERROR: "+evalue.left() << std::endl;
+                continue;
+            }
+
+            auto new_value = evalue.right().m_quantity;
+            auto pnl = new_value - prev_value;
+            prev_value = new_value;
+            auto tpl = std::make_tuple(p.first,sym.quote(),pnl);
+            body.push_back(tpl);
+        }
+
+        common::csv::write(header,body,ss);
+        return ss;
     }
 
     std::stringstream BackTest::get_orders_csv() const {
@@ -210,6 +248,15 @@ namespace bypto::exchange {
     }
 
     std::stringstream BackTest::get_prices_csv() const {
+        std::array<std::string,3> header = {"TIME","SYMBOL","PRICE"};
 
+        std::stringstream ss;
+        std::vector<std::tuple<time_t,Symbol,long double>> body;
+        std::transform(m_price_history.begin(),m_price_history.end(),std::back_inserter(body),
+            [](auto &p) { return std::make_tuple(p.first
+                                                ,std::get<0>(p.second)
+                                                ,std::get<1>(p.second)); });
+        common::csv::write(header,body,ss);
+        return ss;
     }
 }

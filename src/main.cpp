@@ -63,7 +63,7 @@ Error<bool> run_with_exchange(CommandOptions &opts,OutputWriter &ow,Runner<E,P> 
         Crossover<ExponentialMA,P> strat(ma);
         auto res = runner.run(opts.m_sym,strat);
         ow.write_indicators(strat.get_indicator_data());
-
+        return res;
     } else if (ind_tag == TagIndicator::SimpleMA && strat_tag == TagStrategy::Crossover) {
         SimpleMA sma;
         Crossover<SimpleMA,P> strat(sma);
@@ -145,6 +145,11 @@ int main() {
     } 
     
     OutputWriter ow;
+    ow.set(OutputType::Fund);
+    ow.set(OutputType::Indicator);
+    ow.set(OutputType::Order);
+    ow.set(OutputType::PNL);
+    ow.set(OutputType::Price);
     auto res = run(e_opts.right(),ow);
     if(res.isLeft()) {
         std::cout << res.left() << std::endl;

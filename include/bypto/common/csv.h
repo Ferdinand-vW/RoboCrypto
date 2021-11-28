@@ -64,7 +64,7 @@ namespace bypto::common::csv {
     }
 
     template<typename ...Ts>
-    std::ostream& writeHeader(std::array<std::string,sizeof...(Ts)> header,std::ostream &os) {
+    std::ostream& writeHeader(const std::array<std::string,sizeof...(Ts)> &header,std::ostream &os) {
         bool first = true;
         for(auto h : header) {
             if(first) {
@@ -80,7 +80,7 @@ namespace bypto::common::csv {
     }
 
         template<typename ...Ts>
-    std::ostream& writeRow(std::tuple<Ts...> &data,std::ostream &os) {
+    std::ostream& writeRow(const std::tuple<Ts...> &data,std::ostream &os) {
         bool first = true;
         
         auto f = [&os,&first](auto t) {
@@ -96,7 +96,9 @@ namespace bypto::common::csv {
     }
 
     template<typename ...Ts>
-    std::ostream & write(std::array<std::string,sizeof...(Ts)> header,std::vector<std::tuple<Ts...>> &data,std::ostream & os) {
+    std::ostream & write(const std::array<std::string,sizeof...(Ts)> &header
+                        ,const std::vector<std::tuple<Ts...>> &data
+                        ,std::ostream & os) {
         writeHeader<Ts...>(header,os) << "\n";
         for(auto &t : data) {
             writeRow(t,os) << "\n";

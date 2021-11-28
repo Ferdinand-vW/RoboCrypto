@@ -40,12 +40,11 @@ namespace bypto::exchange {
         std::vector<Kline_t> m_klines;
         int m_kline_index = 0;
 
+        std::map<time_t,account::Account> m_account_history;
+        std::map<time_t,std::tuple<Symbol,long double>> m_price_history;
+        std::map<time_t,order::Partial> m_order_history;
 
-        std::vector<std::tuple<time_t,long double>> m_price_history;
-        std::vector<std::tuple<time_t,order::Partial>> m_order_history;
         std::map<int,order::GenericOrder> m_orders;
-
-        std::vector<std::tuple<time_t,account::Account>> m_account_history;
         account::Account m_account;
 
         int m_counter = 0;
