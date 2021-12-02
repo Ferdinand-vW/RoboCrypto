@@ -5,11 +5,10 @@
 
 namespace bypto::order {
     
-    std::ostream& operator<<(std::ostream &os,const Partial &fr) {
+    std::ostream& operator<<(std::ostream &os,const Partial &pr) {
         os << "Partial {";
-        os << "m_price=" << fr.m_price << ",";
-        os << "m_qty=" << fr.m_qty << ",";
-        os << "m_pos=" << fr.m_pos << ",";
+        os << "m_price=" << pr.m_price << ",";
+        os << "m_order=" << pr.m_order << ",";
         os << "}";
         return os;
     }

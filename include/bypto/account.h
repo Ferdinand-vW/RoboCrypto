@@ -13,6 +13,8 @@ namespace bypto::account {
             // std::map<int,bypto::order::Order> m_outstanding_orders;
 
         public:
+            Account() = default;
+            Account(std::map<std::string,long double> funds);
             std::map<std::string,long double> get_funds() const;
             //ideally we would convert all currencies in @m_funds to a single currency,
             //but we cannot guarantee that the given price_map has enough data to perform such conversion

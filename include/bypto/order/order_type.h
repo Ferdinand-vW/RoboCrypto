@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bypto/common/types.h"
+#include "bypto/common/std.h"
 #include "bypto/order/types.h"
 
 #include <ostream>
@@ -12,6 +13,10 @@ namespace bypto::order {
 /****************************Order contract******************************/
 
 enum class OType { Unit, Market, Limit, StopLoss, StopLossLimit, TakeProfit, TakeProfitLimit, LimitMaker };
+
+std::ostream& operator<< (std::ostream &os,const OType &ot);
+
+std::optional<OType> otype_from_string(std::string s);
 
 template <OType OT>
 class OrdSpec {};

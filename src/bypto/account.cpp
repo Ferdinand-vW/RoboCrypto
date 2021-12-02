@@ -2,6 +2,8 @@
 
 namespace bypto::account {
     
+    Account::Account(std::map<std::string,long double> funds) : m_funds(funds) {};
+
     std::map<std::string,long double> Account::get_funds() const {
         return m_funds;
     }

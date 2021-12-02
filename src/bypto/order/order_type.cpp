@@ -1,11 +1,57 @@
 #include "bypto/order/order_type.h"
 #include "bypto/common/types.h"
 #include "bypto/common/utils.h"
+#include "bypto/common/std.h"
 
 #include <ostream>
 
 namespace bypto::order {
     
+    std::optional<OType> otype_from_string(std::string s) {
+        if(s == "Unit") {
+            return OType::Unit;
+        }
+        else if(s=="Market") {
+            return OType::Market;
+        }
+        else if(s=="Limit") {
+            return OType::Limit;
+        }
+        else if(s=="StopLoss") {
+            return OType::StopLoss;
+        }
+        else if(s=="StopLossLimit") {
+            return OType::StopLossLimit;
+        }
+        else if(s=="TakeProfit") {
+            return OType::TakeProfit;
+        }
+        else if(s=="TakeProfitLimit") {
+            return OType::TakeProfitLimit;
+        }
+        else if(s=="LimitMaker") {
+            return OType::LimitMaker;
+        }
+        else {
+            return std::nullopt;
+        }
+    }
+
+    std::ostream& operator<< (std::ostream &os,const OType &ot) {
+        switch(ot) {
+            case OType::Unit:            os << "Unit"; break;
+            case OType::Market:          os << "Market"; break;
+            case OType::Limit:           os << "Limit"; break;
+            case OType::StopLoss:        os << "StopLoss"; break;
+            case OType::StopLossLimit:   os << "StopLossLimit"; break;
+            case OType::TakeProfit:      os << "TakeProfit"; break;
+            case OType::TakeProfitLimit: os << "TakeProfitLimit"; break;
+            case OType::LimitMaker:      os << "LimitMaker"; break;
+        }
+
+        return os;
+    }
+
     std::string OrdSpec<OType::Market>::get_name() const { return "Market"; }
 
     std::ostream& operator<<(std::ostream &os,const OrdSpec<OType::Market> &m) {

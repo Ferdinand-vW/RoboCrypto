@@ -2,34 +2,16 @@
 
 #include "bypto/order/order.h"
 #include "bypto/order/order_type.h"
-#include "bypto/order/fill.h"
 #include <optional>
 
 namespace bypto::order {
-        struct GenericOrder {
-        private:
-            template<OType T>
-            auto map_generic(Order<T> o) {
-                auto f = [o](auto p) -> std::optional<FillResult<GenericOrder>> {
-                    auto fr_opt = fill(o,p); //
-                    if(fr_opt) {
-                        auto fr = fr_opt.value();
-                        auto new_order_opt = fr.m_new_order;
-                        if(new_order_opt) {
-                            GenericOrder go(new_order_opt.value());
-                            return FillResult<GenericOrder>{fr.m_partial,go};
-                        } else {
-                            return FillResult<GenericOrder>{fr.m_partial,std::nullopt};
-                        }
-                    }
-                    return std::nullopt;
-                };
+    template<typename T>
+    struct FillResult;
 
-                return f;
-            }
+    class GenericOrder {
 
         public:
-            std::string m_type;
+            OType m_type;
 
             Symbol m_sym;
             Quantity m_qty;
@@ -38,9 +20,14 @@ namespace bypto::order {
             std::optional<Price> m_limit;
             std::optional<Price> m_stoptake;
             std::optional<BaseOrQuote> m_base_or_quote;
+            void set_base_or_quote(std::optional<BaseOrQuote> boq);
+            void set_time_in_force(std::optional<TimeInForce> tif);
+            void set_stoptake(std::optional<Price> stop);
+            void set_limit(std::optional<Price> limit);
 
             std::function<std::optional<FillResult<GenericOrder>>(Price)> m_generic_fill;
 
+        GenericOrder(OType type,Symbol sym,Quantity qty,Position pos);
         GenericOrder(Order<OType::Unit> o);
         GenericOrder(Order<OType::Market> m);
         GenericOrder(Order<OType::Limit> l);
@@ -51,4 +38,6 @@ namespace bypto::order {
         GenericOrder(Order<OType::LimitMaker> lm);
         
     };
+
+    std::ostream& operator<<(std::ostream&os,const GenericOrder& go);
 }

@@ -4,14 +4,16 @@
 #include "bypto/order/order.h"
 #include "bypto/order/generic.h"
 #include "bypto/exchange.h"
+#include "bypto/order/order_type.h"
+#include "bypto/order/fill.h"
 
 #include <binapi/api.hpp>
+#include <tao/pq.hpp>
 
 #include <sstream>
 
 namespace bypto::exchange {
     using namespace data::prices;
-    class Binance;
 
     binapi::rest::api connect_prod_network(boost::asio::io_context &io);
     binapi::rest::api connect_test_network(boost::asio::io_context &io);
@@ -19,9 +21,29 @@ namespace bypto::exchange {
     class Binance : public Exchange<Binance,PriceSource::Spot> {
         binapi::rest::api &m_api;
 
+        private:
+            binapi::e_type convert_order_type(order::OType ot) const;
+            binapi::e_time convert_time_in_force(order::TimeInForce tif) const;
+            binapi::e_side convert_position(order::Position p) const;
+
+            pgconn_t m_database;
+
+            void prepare_tables();
+            void sync_price_history(time_t t);
+            void sync_order_history(time_t t);
+            void sync_account_history(time_t t);
+
+            void write_price_history(time_t t);
+            void write_order_history(time_t t);
+            void write_account_history(time_t t);
+
+            std::map<time_t,account::Account> m_account_history;
+            std::map<time_t,std::tuple<Symbol,long double>> m_price_history;
+            std::map<time_t,order::Partial> m_order_history;
+
         public:
             Binance(binapi::rest::api &api);
-            ~Binance(){};
+            ~Binance() override {};
 
             Error<int> execute_order(order::GenericOrder go);
             Error<account::Account> get_account_info();

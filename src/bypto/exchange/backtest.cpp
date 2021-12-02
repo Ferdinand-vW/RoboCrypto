@@ -9,6 +9,7 @@
 #include "bypto/exchange.h"
 #include "bypto/order/order.h"
 #include "bypto/order/order_type.h"
+#include "bypto/order/types.h"
 #include <stdexcept>
 #include <string>
 
@@ -41,19 +42,20 @@ namespace bypto::exchange {
 
     //We always buy/sell from the perspective of the base currency
     void BackTest::update_account(time_t curr,order::Partial p) {
-        switch(p.m_pos) {
+        auto ord = p.m_order;
+        switch(ord.m_pos) {
             case order::Position::Buy:
                 //sym=BTCUSDT
                 //price = 1 / actual
                 //BTC_qty:qty
                 //USDT_qty:qty/price
-                m_account.add_fund(p.m_sym.base(), p.m_qty);
-                m_account.add_fund(p.m_sym.quote(), -p.m_qty / p.m_price);
+                m_account.add_fund(ord.m_sym.base(), ord.m_qty);
+                m_account.add_fund(ord.m_sym.quote(), -ord.m_qty / p.m_price);
             break;
             case order::Position::Sell:
-                std::cout << p.m_sym << " " << p.m_qty << " " << p.m_price << std::endl;
-                m_account.add_fund(p.m_sym.base(), -p.m_qty);
-                m_account.add_fund(p.m_sym.quote(), p.m_qty * p.m_price);
+                std::cout << ord.m_sym << " " << ord.m_qty << " " << p.m_price << std::endl;
+                m_account.add_fund(ord.m_sym.base(), -ord.m_qty);
+                m_account.add_fund(ord.m_sym.quote(), ord.m_qty * p.m_price);
             break;
         }
 
@@ -223,22 +225,28 @@ namespace bypto::exchange {
     }
 
     std::stringstream BackTest::get_orders_csv() const {
-        std::array<std::string,6> header = {"TIME","ORDER","SYMBOL","POSITION","QUANTITY","PRICE",};
+        std::array<std::string,10> header = {"TIME","ORDER","SYMBOL","POSITION","QUANTITY","PRICE"
+                                           ,"TIME_IN_FORCE","BASE_OR_QUOTE","LIMIT","STOP"};
 
         std::vector<
-            std::tuple<time_t,std::string
+            std::tuple<time_t,order::OType
                       ,Symbol,order::Position
                       ,long double,long double
+                      ,std::optional<order::TimeInForce>,std::optional<order::BaseOrQuote>
+                      ,std::optional<long double>,std::optional<long double>
                       >
                     > body;
 
         for(const auto &time_prtl : m_order_history) {
             auto time = std::get<0>(time_prtl);
             auto prtl = std::get<1>(time_prtl);
+            auto ord = prtl.m_order;
 
-            auto tpl = std::make_tuple(time,prtl.m_order_type
-                                      ,prtl.m_sym,prtl.m_pos
-                                      ,prtl.m_qty,prtl.m_price);
+            auto tpl = std::make_tuple(time,ord.m_type
+                                      ,ord.m_sym,ord.m_pos
+                                      ,ord.m_qty,prtl.m_price
+                                      ,ord.m_time_in_force,ord.m_base_or_quote
+                                      ,ord.m_limit,ord.m_stoptake);
 
             body.push_back(tpl);
         }

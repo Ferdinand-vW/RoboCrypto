@@ -1,4 +1,5 @@
 #include "bypto/order/types.h"
+#include "bypto/common/std.h"
 
 namespace bypto::order {
 
@@ -6,6 +7,45 @@ namespace bypto::order {
         switch(p) {
             case Position::Sell: return Position::Buy; break;
             case Position::Buy: return Position::Sell; break;
+        }
+    }
+
+    std::optional<Position> pos_from_string(std::string s) {
+        if(s == "Buy") {
+            return Position::Buy;
+        } 
+        else if (s== "Sell") {
+            return Position::Sell;
+        } 
+        else {
+            return std::nullopt;
+        }
+    }
+
+    std::optional<TimeInForce> tif_from_string(std::string s) {
+        if(s == "GTC") {
+            return TimeInForce::GTC;
+        } 
+        else if (s== "IOC") {
+            return TimeInForce::IOC;
+        }
+        else if (s=="FOK") {
+            return TimeInForce::FOK;
+        }
+        else {
+            return std::nullopt;
+        }
+    }
+
+    std::optional<BaseOrQuote> boq_from_string(std::string s) {
+        if(s == "Base") {
+            return BaseOrQuote::Base;
+        } 
+        else if (s== "Quote") {
+            return BaseOrQuote::Quote;
+        } 
+        else {
+            return std::nullopt;
         }
     }
 
