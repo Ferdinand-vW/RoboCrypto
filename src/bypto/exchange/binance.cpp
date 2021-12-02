@@ -173,14 +173,21 @@ namespace bypto::exchange {
 
         auto select_query = common::utils::intercalate(" ",lines);
 
-        const auto prices = m_database->execute(select_query,oldest);
+        const auto funds = m_database->execute(select_query,oldest);
 
-        m_price_history.clear();
-        for(const auto &row : prices) {
-            auto tpl = std::make_tuple(Symbol::from_string(row["symbol"].as<std::string>())
-                                       ,row["price"].as<long double>());
-            auto pair = std::make_pair(row["time"].as<time_t>(),tpl);
-            m_price_history.insert(pair);
+        m_account_history.clear();
+        for(const auto &row : funds) {
+            auto ccy = row["currency"].as<std::string>();
+            auto val = row["value"].as<long double>();
+            auto time = row["time"].as<time_t>();
+    
+            if(m_account_history.contains(time)) {
+                m_account_history[time].add_fund(ccy,val);
+            } else {
+                account::Account acc;
+                acc.add_fund(ccy,val);
+                m_account_history.insert({time,acc});
+            }
         }
     }
 
