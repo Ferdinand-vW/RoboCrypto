@@ -41,8 +41,14 @@ namespace bypto::exchange {
             std::map<time_t,std::tuple<Symbol,long double>> m_price_history;
             std::map<time_t,order::Partial> m_order_history;
 
+            std::map<int,order::GenericOrder> m_orders;
+            int m_tick_rate_s;
+            int m_total_run_time_s = 0;
+            int m_max_run_time_s;
+
+
         public:
-            Binance(binapi::rest::api &api);
+            Binance(binapi::rest::api &api,int tick_rate_s, int max_run_time_s);
             ~Binance() override {};
 
             Error<int> execute_order(order::GenericOrder go);

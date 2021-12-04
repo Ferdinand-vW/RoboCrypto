@@ -31,9 +31,9 @@ BackTest backtest(const CommandOptions &opts) {
 }
 
 Binance binance(const CommandOptions &opts,binapi::rest::api &api) {
-    return Binance(api);
+    return Binance(api,opts.m_tick_rate_s,opts.m_max_run_time_s);
 }
 
 Binance binance_test(const CommandOptions &opts,binapi::rest::api &api) {
-    return Binance(api);
+    return Binance(api,opts.m_tick_rate_s,opts.m_max_run_time_s);
 }

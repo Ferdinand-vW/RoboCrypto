@@ -21,6 +21,8 @@ struct CommandFlags {
     std::string m_strat_flag;
     std::string m_ind_flag;
     std::string m_write_flag;
+    std::string m_tick_rate_flag;
+    std::string m_max_run_time_flag;
 };
 
 struct CommandOptions {
@@ -28,6 +30,8 @@ struct CommandOptions {
     TagExchange m_exchange;
     TagStrategy m_strategy;
     TagIndicator m_indicator;
+    int m_tick_rate_s;
+    int m_max_run_time_s;
     std::vector<OutputType> m_writers;
     CommandFlags m_cf;
 };
@@ -64,6 +68,22 @@ Error<CommandOptions> parse_commands(const CommandFlags &cf) {
     auto strat = cf.m_strat_flag == "" ? TagStrategy::Crossover : strat_it->second;
     auto ind   = cf.m_ind_flag   == "" ? TagIndicator::SimpleMA  : ind_it->second; 
 
+    auto tr = cf.m_tick_rate_flag;
+    int tick_rate;
+    auto [tr_ptr,ec] = std::from_chars(tr.data(),tr.data() + tr.size(),tick_rate);
+    if(ec != std::errc()) {
+        tick_rate = 60 * 15; //15minutes
+        std::cout << "Defaulting to tick rate of 15 minutes" << std::endl;
+    }
+
+    auto rt = cf.m_max_run_time_flag;
+    int run_time;
+    auto [rt_ptr,ec2] = std::from_chars(rt.data(),rt.data() + rt.size(),run_time);
+    if (ec2 != std::errc()) {
+        run_time = 60 * 60 * 4; //4 hours
+        std::cout << "Defaulting max running time to 4 hours" << std::endl;
+    }
+
     char delim(',');
     std::vector<OutputType> outs;
     for(auto &word : utils::split(cf.m_write_flag,delim)) {
@@ -74,6 +94,6 @@ Error<CommandOptions> parse_commands(const CommandFlags &cf) {
         if(word == "prices") { outs.push_back(OutputType::Price); }
     }
 
-    return CommandOptions {Symbol("BTC","USDT"),exch,strat,ind,outs,cf};
+    return CommandOptions {Symbol("BTC","USDT"),exch,strat,ind,tick_rate,run_time,outs,cf};
 
 }

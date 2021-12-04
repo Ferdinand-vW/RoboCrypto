@@ -3,6 +3,8 @@
 #include "bypto/order/types.h"
 #include "bypto/common/std.h"
 
+#include <thread>
+
 namespace bypto::exchange {
 
     binapi::rest::api connect_prod_network(boost::asio::io_context& io) {
@@ -35,7 +37,10 @@ namespace bypto::exchange {
         };
     }
 
-    Binance::Binance(binapi::rest::api &api) : m_api(api) {};
+    Binance::Binance(binapi::rest::api &api,int tick_rate_s,int max_run_time_s) 
+                    : m_api(api)
+                    ,m_tick_rate_s(tick_rate_s)
+                    ,m_max_run_time_s(max_run_time_s) {};
 
     binapi::e_type Binance::convert_order_type(order::OType ot) const {
         using namespace order;
@@ -236,19 +241,29 @@ namespace bypto::exchange {
     }
 
     Error<long double> Binance::fetch_price(Symbol symbol) {
+        auto res = m_api.price(symbol.to_string());
 
+        if(!res) {
+            return res.errmsg;
+        }
+
+        return res.v.price.convert_to<long double>();
     }
 
     Error<bool> Binance::cancel_order(int o_id) {
-
+        return std::string("not yet implemented");
     }
 
     time_t Binance::get_current_time() {
-
+       time_t t;
+       time(&t);
+       return t;
     }
 
     bool Binance::tick_once() {
+        std::this_thread::sleep_for(std::chrono::seconds(m_tick_rate_s));
 
+        return true;
     }
 
     Prices<PriceSource::Spot> Binance::get_historical_prices(time_t start,time_t end) {
