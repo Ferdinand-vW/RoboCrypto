@@ -10,29 +10,27 @@
 
 namespace bypto::data::price {
 
-    typedef Price<PriceSource::Spot> Spot_t;
-    typedef prices::Prices<PriceSource::Spot> Spots_t;
-    
-    // Candle data
-    template<> 
-    class Price<PriceSource::Spot> {
-        public:
-            long double get_price() const { return m_price; }
-            long double get_quote_price() const { return 1 / m_price; }
-            time_t get_time() const { return m_time; }
-            common::types::Symbol get_symbol() const { return m_symbol; }
-            std::tuple<common::types::Symbol,time_t,long double> as_tuple() const {
-                return {get_symbol(),get_time(),get_price()};
-            }
+typedef Price<PriceSource::Spot> Spot_t;
+typedef prices::Prices<PriceSource::Spot> Spots_t;
 
-            common::types::Symbol m_symbol;
-            time_t m_time; //price taken at time
-            long double m_price; //price value
-            
-            std::string to_string() const;
-    };
+// Candle data
+template <> class Price<PriceSource::Spot> {
+  public:
+    long double get_price() const { return m_price; }
+    long double get_quote_price() const { return 1 / m_price; }
+    time_t get_time() const { return m_time; }
+    common::types::Symbol get_symbol() const { return m_symbol; }
+    std::tuple<common::types::Symbol, time_t, long double> as_tuple() const {
+        return {get_symbol(), get_time(), get_price()};
+    }
 
-    std::ostream& operator<<(std::ostream&os,const price::Spot_t &kl);
+    common::types::Symbol m_symbol;
+    time_t m_time;       // price taken at time
+    long double m_price; // price value
 
+    std::string to_string() const;
+};
 
-}
+std::ostream &operator<<(std::ostream &os, const price::Spot_t &kl);
+
+} // namespace bypto::data::price

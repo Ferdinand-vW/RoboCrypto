@@ -1,129 +1,125 @@
 #pragma once
 
 #include <cmath>
-#include <string>
-#include <vector>
 #include <deque>
+#include <functional>
 #include <map>
 #include <optional>
-#include <functional>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace bypto::common::utils {
 
-    template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
-    template<class... Ts> overload(Ts...) -> overload<Ts...>;
+template <class... Ts> struct overload : Ts... { using Ts::operator()...; };
+template <class... Ts> overload(Ts...) -> overload<Ts...>;
 
+class NotImplemented : public std::logic_error {
+  public:
+    NotImplemented() : std::logic_error("Not implemented"){};
+};
 
-    class NotImplemented : public std::logic_error {
-        public:
-            NotImplemented() : std::logic_error("Not implemented") {};
-    };
+template <typename Iter> std::string intercalate(std::string del, Iter &&begin, Iter &&end) {
+    std::string str;
 
-    template <typename Iter>
-    std::string intercalate(std::string del,Iter &&begin,Iter &&end) {
-        std::string str;
-
-        if(begin != end) {
-            auto s = *begin;
-            str += s;
-            begin++;
-        }
-
-        for(;begin != end;begin++) {
-            str += del + *begin;
-        }
-        return str;
+    if (begin != end) {
+        auto s = *begin;
+        str += s;
+        begin++;
     }
 
-    std::vector<std::string> split(std::string s,char delim);
+    for (; begin != end; begin++) {
+        str += del + *begin;
+    }
+    return str;
+}
 
-    std::string intercalate(std::vector<std::string> &v);
-    std::string intercalate(std::deque<std::string> &v);
-    std::string intercalate(std::string del,std::vector<std::string> &v);
-    std::string intercalate(std::string del,std::deque<std::string> &v);
+std::vector<std::string> split(std::string s, char delim);
 
-    enum class Ord { LT, EQ, GT };
+std::string intercalate(std::vector<std::string> &v);
+std::string intercalate(std::deque<std::string> &v);
+std::string intercalate(std::string del, std::vector<std::string> &v);
+std::string intercalate(std::string del, std::deque<std::string> &v);
 
-    struct time_unit {
-        int m_days = 0;
-        int m_hours = 0;
-        int m_minutes = 0;
-        int m_seconds = 0;
-    };
-    
-    std::string to_string(const time_unit &tu);
-    bool operator==(const time_unit &tu1,const time_unit &tu2);
-    bool operator!=(const time_unit &tu1,const time_unit &tu2);
+enum class Ord { LT, EQ, GT };
 
-    std::ostream& operator<<(std::ostream &os,const time_unit& tu);
+struct time_unit {
+    int m_days = 0;
+    int m_hours = 0;
+    int m_minutes = 0;
+    int m_seconds = 0;
+};
 
-    time_t add_time(time_t t,time_unit tu);
-    time_unit diff_time(time_t t1,time_t t2);
-    time_t create_time(int y,int m,int d,int h=0,int min=0,int sec=0);
-    Ord compare_time(time_t t1,time_t t2);
-    std::string pp_time(time_t t);
+std::string to_string(const time_unit &tu);
+bool operator==(const time_unit &tu1, const time_unit &tu2);
+bool operator!=(const time_unit &tu1, const time_unit &tu2);
 
-    template <typename I>
-    concept Indexable = requires(I t) {
-        { t[0] };
-    };
+std::ostream &operator<<(std::ostream &os, const time_unit &tu);
 
-    //assumes vector is sorted
-    template <Indexable I,typename F>
-    size_t bin_search_index(const I &v,F pred) {
-        if(v.size() <= 0) { return -1; }
+time_t add_time(time_t t, time_unit tu);
+time_unit diff_time(time_t t1, time_t t2);
+time_t create_time(int y, int m, int d, int h = 0, int min = 0, int sec = 0);
+Ord compare_time(time_t t1, time_t t2);
+std::string pp_time(time_t t);
 
-        size_t lb = 0;
-        size_t ub = v.size() - 1;
+template <typename I>
+concept Indexable = requires(I t) {
+    {t[0]};
+};
 
-        while(lb < ub) {
-            double sum = lb + ub;
-            size_t mid = std::ceil(sum / 2);
-            auto ord = pred(v[mid]);
-
-            if(ord == Ord::GT) {
-                ub = mid - 1;
-            } else {
-                lb = mid;
-            }
-        }
-
-        return lb;
+// assumes vector is sorted
+template <Indexable I, typename F> size_t bin_search_index(const I &v, F pred) {
+    if (v.size() <= 0) {
+        return -1;
     }
 
-    template<Indexable I,typename F,typename A>
-    std::optional<A> bin_search(const I &v,F pred) {
-        size_t i = bin_search_index(v, pred);
-        if(i >= 0) {
-            return v[i];
+    size_t lb = 0;
+    size_t ub = v.size() - 1;
+
+    while (lb < ub) {
+        double sum = lb + ub;
+        size_t mid = std::ceil(sum / 2);
+        auto ord = pred(v[mid]);
+
+        if (ord == Ord::GT) {
+            ub = mid - 1;
         } else {
-            return std::nullopt;
+            lb = mid;
         }
     }
 
-    template<typename K,typename V>
-    std::map<K,V> singleton(K k,V v) {
-        std::map<K,V> m;
-        m.insert({k,v});
-        return m;
-    }
+    return lb;
+}
 
-    template<typename K,typename V>
-    std::ostream& operator<<(std::ostream& os,const std::map<K,V> &m) {
-        os << std::string("{");
-        bool first = true;
-        for(auto &kvp : m) {
-            if(first) {
-                os << std::string("(") << kvp.first << "," << kvp.second << ")";
-                first = false;
-            } else {
-                os << std::string(", (") << kvp.first << "," << kvp.second << ")";
-            }
-        }
-
-        os << std::string("}");
-
-        return os;
+template <Indexable I, typename F, typename A> std::optional<A> bin_search(const I &v, F pred) {
+    size_t i = bin_search_index(v, pred);
+    if (i >= 0) {
+        return v[i];
+    } else {
+        return std::nullopt;
     }
 }
+
+template <typename K, typename V> std::map<K, V> singleton(K k, V v) {
+    std::map<K, V> m;
+    m.insert({k, v});
+    return m;
+}
+
+template <typename K, typename V> std::ostream &operator<<(std::ostream &os, const std::map<K, V> &m) {
+    os << std::string("{");
+    bool first = true;
+    for (auto &kvp : m) {
+        if (first) {
+            os << std::string("(") << kvp.first << "," << kvp.second << ")";
+            first = false;
+        } else {
+            os << std::string(", (") << kvp.first << "," << kvp.second << ")";
+        }
+    }
+
+    os << std::string("}");
+
+    return os;
+}
+} // namespace bypto::common::utils

@@ -2,32 +2,27 @@
 
 #include "bypto/data/price.h"
 #include "bypto/data/prices.h"
+#include "bypto/indicator/trend.h"
 #include "bypto/order/order.h"
 #include "bypto/order/order_type.h"
-#include "bypto/indicator/trend.h"
 
 namespace bypto::strategy {
 
-    using namespace data::price;
-    enum class TagStrategy { Crossover };
+using namespace data::price;
+enum class TagStrategy { Crossover };
 
-    template <typename S,PriceSource P>
-    class Strategy {
+template <typename S, PriceSource P> class Strategy {
 
-        public:
-            virtual ~Strategy(){};
+  public:
+    virtual ~Strategy(){};
 
-            common::types::Error<std::optional<order::Order<order::OType::Market>>>
-            make_decision(time_t now
-                             ,long double spendable_qty
-                             ,long double spendable_quote_qty
-                             ,data::prices::Prices<P> prices) {
-                return static_cast<S*>(this)->make_decision(now,spendable_qty,spendable_quote_qty,prices);
-            }
+    common::types::Error<std::optional<order::Order<order::OType::Market>>>
+    make_decision(time_t now, long double spendable_qty, long double spendable_quote_qty,
+                  data::prices::Prices<P> prices) {
+        return static_cast<S *>(this)->make_decision(now, spendable_qty, spendable_quote_qty, prices);
+    }
 
-            bool has_enough_data(data::prices::Prices<P> prices) {
-                return static_cast<S*>(this)->has_enough_data(prices);
-            }
-    };
+    bool has_enough_data(data::prices::Prices<P> prices) { return static_cast<S *>(this)->has_enough_data(prices); }
+};
 
-}
+} // namespace bypto::strategy
