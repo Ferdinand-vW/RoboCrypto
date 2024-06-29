@@ -40,7 +40,8 @@ using namespace bypto::strategy;
 using namespace bypto::indicator;
 namespace po = boost::program_options;
 
-void my_segfault_handler(int sig) {
+void my_segfault_handler(int sig)
+{
     void *array[10];
     size_t size;
 
@@ -54,41 +55,49 @@ void my_segfault_handler(int sig) {
 }
 
 template <typename E, PriceSource P>
-Error<bool> run_with_exchange(CommandOptions &opts, OutputWriter &ow, Runner<E, P> &runner) {
+Error<bool> run_with_exchange(CommandOptions &opts, OutputWriter &ow, Runner<E, P> &runner)
+{
     auto strat_tag = opts.m_strategy;
     auto ind_tag = opts.m_indicator;
 
-    if (ind_tag == TagIndicator::ExponentialMA && strat_tag == TagStrategy::Crossover) {
+    if (ind_tag == TagIndicator::ExponentialMA && strat_tag == TagStrategy::Crossover)
+    {
         ExponentialMA ma;
         Crossover<ExponentialMA, P> strat(ma);
         auto res = runner.run(opts.m_sym, strat);
         ow.write_indicators(strat.get_indicator_data());
         return res;
-    } else if (ind_tag == TagIndicator::SimpleMA && strat_tag == TagStrategy::Crossover) {
+    }
+    else if (ind_tag == TagIndicator::SimpleMA && strat_tag == TagStrategy::Crossover)
+    {
         SimpleMA sma;
         Crossover<SimpleMA, P> strat(sma);
         auto res = runner.run(opts.m_sym, strat);
         ow.write_indicators(strat.get_indicator_data());
         return res;
-    } else {
-        return std::string("could not match strategy/indicator pattern: " + opts.m_cf.m_strat_flag + "/" +
-                           opts.m_cf.m_ind_flag);
+    }
+    else
+    {
+        return std::string("could not match strategy/indicator pattern: " + opts.m_cf.m_strat_flag +
+                           "/" + opts.m_cf.m_ind_flag);
     }
 }
 
-template <typename T, PriceSource P> void write_out_data(const Exchange<T, P> &e, OutputWriter &ow) {
+template <typename T, PriceSource P> void write_out_data(const Exchange<T, P> &e, OutputWriter &ow)
+{
     ow.write_funds(e.get_funds_csv());
     ow.write_pnls(e.get_pnls_csv());
     ow.write_orders(e.get_orders_csv());
     ow.write_prices(e.get_prices_csv());
 }
 
-Error<bool> run(CommandOptions opts, OutputWriter &ow) {
-
+Error<bool> run(CommandOptions opts, OutputWriter &ow)
+{
     auto exch_tag = opts.m_exchange;
 
     boost::asio::io_context io;
-    if (exch_tag == TagExchange::BackTest) {
+    if (exch_tag == TagExchange::BackTest)
+    {
         auto bt = backtest(opts);
         Runner<BackTest, PriceSource::Kline> runner(bt);
 
@@ -98,7 +107,8 @@ Error<bool> run(CommandOptions opts, OutputWriter &ow) {
         return res;
     }
 
-    else if (exch_tag == TagExchange::Binance) {
+    else if (exch_tag == TagExchange::Binance)
+    {
         auto api = connect_prod_network(io);
         auto bin = binance(opts, api);
         Runner<Binance, PriceSource::Spot> runner(bin);
@@ -109,7 +119,8 @@ Error<bool> run(CommandOptions opts, OutputWriter &ow) {
         return res;
     }
 
-    else if (exch_tag == TagExchange::BinanceTest) {
+    else if (exch_tag == TagExchange::BinanceTest)
+    {
         auto api = connect_test_network(io);
         auto bin = binance(opts, api);
         Runner<Binance, PriceSource::Spot> runner(bin);
@@ -120,12 +131,14 @@ Error<bool> run(CommandOptions opts, OutputWriter &ow) {
         return res;
     }
 
-    else {
+    else
+    {
         return std::string("could not match exchange pattern: " + opts.m_cf.m_exch_flag);
     }
 }
 
-int main() {
+int main()
+{
     // set up exceptions handlers
     signal(SIGSEGV, my_segfault_handler);
 
@@ -135,7 +148,8 @@ int main() {
 
     populate_commands();
     auto e_opts = parse_commands(cf);
-    if (e_opts.isLeft()) {
+    if (e_opts.isLeft())
+    {
         std::cout << "parse error: " << e_opts.left() << std::endl;
         return EXIT_FAILURE;
     }
@@ -147,7 +161,8 @@ int main() {
     ow.set(OutputType::PNL);
     ow.set(OutputType::Price);
     auto res = run(e_opts.right(), ow);
-    if (res.isLeft()) {
+    if (res.isLeft())
+    {
         std::cout << res.left() << std::endl;
     }
 
@@ -217,10 +232,11 @@ int main() {
     // for (auto &o : orders.v.orders) {
     //     std::cout << o.first << std::endl;
     //     for(auto &oi : o.second) {
-    //         std::cout << oi.clientOrderId << " " << oi.orderId << " " << oi.cummulativeQuoteQty << " " <<
-    //         oi.executedQty; std::cout << " " << oi.icebergQty << " " << oi.isWorking << " " << oi.origQty << " " <<
-    //         oi.price << " "; std::cout << oi.stopPrice << " " << oi.side << " " << oi.status << " " << oi.symbol << "
-    //         " << oi.time << " "; std::cout << oi.timeInForce << " " << oi.updateTime << " " << oi.type << std::endl;
+    //         std::cout << oi.clientOrderId << " " << oi.orderId << " " << oi.cummulativeQuoteQty
+    //         << " " << oi.executedQty; std::cout << " " << oi.icebergQty << " " << oi.isWorking <<
+    //         " " << oi.origQty << " " << oi.price << " "; std::cout << oi.stopPrice << " " <<
+    //         oi.side << " " << oi.status << " " << oi.symbol << " " << oi.time << " "; std::cout
+    //         << oi.timeInForce << " " << oi.updateTime << " " << oi.type << std::endl;
     //     }
     // }
 
